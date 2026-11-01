@@ -106,7 +106,10 @@ namespace RPFForge {
 
         public ForgeWindow(string appRoot, string initialFolder) {
             root = appRoot; BuildInterface();
-            browse.Click += delegate { using (var dialog = new FolderBrowserDialog { Description = "Selecione a pasta que contém os arquivos RPF", SelectedPath = Directory.Exists(folder.Text) ? folder.Text : "" }) { if (dialog.ShowDialog(this) == DialogResult.OK) folder.Text = dialog.SelectedPath; } };
+            browse.Click += delegate {
+                try { string selected = ForgeFolderPicker.Choose(Handle, folder.Text); if (selected != null) folder.Text = selected; }
+                catch (Exception error) { status.Text = "Não foi possível abrir a pasta. Você também pode digitar o caminho no campo de origem."; details.Text = error.Message; tabs.SelectedIndex = 2; }
+            };
             folder.TextChanged += delegate { if (!busy) ResetOrigin(); };
             vehicles.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
             destinations.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
@@ -268,6 +271,7 @@ namespace RPFForge {
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
         public void SelfTest() {
+            ForgeFolderPicker.SelfTest();
             if (convert.Enabled || open.Enabled) throw new Exception("Initial actions should be disabled.");
             if (tabs.TabPages.Count != 5 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");
             if (Font.FontFamily.Name != "Pixelify Sans" || convert.Font.FontFamily.Name != "Pixelify Sans") throw new Exception("Portfolio font was not loaded.");
