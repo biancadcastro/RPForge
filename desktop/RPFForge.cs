@@ -12,10 +12,27 @@ using System.Windows.Forms;
 
 namespace RPFForge {
     sealed class ForgeButton : Button {
+        bool hovered, pressed;
+        public bool Navigation { get; set; }
+        protected override void OnMouseDown(MouseEventArgs e) { pressed = true; Invalidate(); base.OnMouseDown(e); }
+        protected override void OnMouseUp(MouseEventArgs e) { pressed = false; Invalidate(); base.OnMouseUp(e); }
+        protected override void OnKeyDown(KeyEventArgs e) { if (e.KeyCode == Keys.Space) { pressed = true; Invalidate(); } base.OnKeyDown(e); }
+        protected override void OnKeyUp(KeyEventArgs e) { pressed = false; Invalidate(); base.OnKeyUp(e); }
+        protected override void OnMouseEnter(EventArgs e) { hovered = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { hovered = false; Invalidate(); base.OnMouseLeave(e); }
         protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.Clear(Enabled ? BackColor : Color.FromArgb(31, 34, 41));
-            using (var border = new Pen(Focused ? Color.FromArgb(220, 90, 108) : Color.FromArgb(65, 71, 83))) e.Graphics.DrawRectangle(border, 0, 0, Width - 1, Height - 1);
-            TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, Enabled ? ForeColor : Color.FromArgb(124, 134, 151), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+            e.Graphics.Clear(ForgeTheme.Background);
+            bool primary = BackColor == ForgeTheme.Orange, selected = Navigation && ForeColor == ForgeTheme.Orange;
+            Color fill = !Enabled ? ForgeTheme.Surface : primary ? (pressed ? Color.FromArgb(220, 92, 30) : hovered ? Color.FromArgb(255, 150, 83) : ForgeTheme.Orange) : selected ? Color.FromArgb(49, 34, 30) : hovered ? Color.FromArgb(49, 49, 64) : ForgeTheme.Surface;
+            int down = pressed ? 2 : 0;
+            var body = new Rectangle(0, down, Width - 1, Height - 4);
+            using (var brush = new SolidBrush(fill)) e.Graphics.FillRectangle(brush, body);
+            using (var border = new Pen(Focused || selected ? ForgeTheme.Orange : primary && Enabled ? Color.FromArgb(255, 175, 118) : ForgeTheme.Border)) e.Graphics.DrawRectangle(border, body);
+            if (!pressed && Enabled && !Navigation) using (var shadow = new SolidBrush(primary ? Color.FromArgb(155, 65, 24) : Color.FromArgb(16, 16, 22))) e.Graphics.FillRectangle(shadow, 2, Height - 3, Width - 3, 3);
+            if (selected) using (var marker = new SolidBrush(ForgeTheme.Orange)) e.Graphics.FillRectangle(marker, 0, 12, 4, Height - 28);
+            if (Focused) { using (var pen = new Pen(primary ? ForgeTheme.Background : ForgeTheme.Orange)) e.Graphics.DrawRectangle(pen, 4, 4 + down, Width - 9, Height - 12); }
+            var textBounds = new Rectangle(Navigation ? 14 : 6, down, Width - (Navigation ? 20 : 12), Height - 4);
+            TextRenderer.DrawText(e.Graphics, Text, Font, textBounds, Enabled ? ForeColor : Color.FromArgb(110, 108, 125), (Navigation ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter) | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
     }
     static class Program {
@@ -36,6 +53,10 @@ namespace RPFForge {
                 using (var form = new ForgeWindow(root, "")) { form.RenderBitmap(args[1]); }
                 return 0;
             }
+            if (args.Length == 2 && args[0] == "--render-suite") {
+                using (var form = new ForgeWindow(root, "")) { form.RenderSuite(args[1]); }
+                return 0;
+            }
             if (args.Length == 2 && args[0] == "--workflow-test") {
                 int code = 0;
                 using (var form = new ForgeWindow(root, "")) {
@@ -49,21 +70,25 @@ namespace RPFForge {
                 }
                 return code;
             }
-            Application.Run(new ForgeWindow(root, args.Length > 0 ? args[0] : "")); return 0;
+            var window = new ForgeWindow(root, args.Length > 0 && args[0] != "--preview" ? args[0] : "");
+            if (args.Contains("--preview")) window.Text = "RPForge — prévia de desenvolvimento";
+            Application.Run(window); return 0;
         }
     }
 
-    sealed class ForgeWindow : Form {
+    sealed partial class ForgeWindow : Form {
+        [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr handle, int attribute, ref int value, int size);
+        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); int dark = 1; try { DwmSetWindowAttribute(Handle, 20, ref dark, 4); } catch (DllNotFoundException) { } catch (EntryPointNotFoundException) { } }
         readonly string root;
         readonly TextBox folder = new TextBox();
         readonly Button browse = new ForgeButton(), analyze = new ForgeButton(), convert = new ForgeButton(), open = new ForgeButton();
         readonly Label summary = new Label(), status = new Label();
-        readonly ProgressBar progress = new ProgressBar();
+        readonly ForgeProgress progress = new ForgeProgress();
         readonly DataGridView vehicles = new DataGridView(), destinations = new DataGridView(), assets = new DataGridView();
         readonly TextBox details = new TextBox();
-        readonly TabControl tabs = new TabControl();
+        readonly ForgePages tabs = new ForgePages();
         readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 64 * 1024 * 1024 };
-        readonly Color background = Color.FromArgb(20, 22, 27), surface = Color.FromArgb(29, 32, 39), foreground = Color.FromArgb(232, 235, 241), muted = Color.FromArgb(160, 169, 184), red = Color.FromArgb(190, 44, 61);
+        readonly Color background = ForgeTheme.Background, surface = ForgeTheme.Surface, foreground = ForgeTheme.Text, muted = ForgeTheme.Muted, red = ForgeTheme.Orange;
         readonly Dictionary<string, Dictionary<string, object>> preview = new Dictionary<string, Dictionary<string, object>>(StringComparer.OrdinalIgnoreCase);
         bool busy, rendering, previewValid, renderOnly;
         protected override bool ShowWithoutActivation { get { return renderOnly; } }
@@ -76,83 +101,43 @@ namespace RPFForge {
         static bool Yes(object value) { return value is bool && (bool)value; }
         static double Number(object value) { return value == null ? 0 : Convert.ToDouble(value, System.Globalization.CultureInfo.InvariantCulture); }
         static string FormatSize(object value) { return (Number(value) / 1048576.0).ToString("N2") + " MiB"; }
+        static string CountLabel(int value, string singular, string plural) { return value + " " + (value == 1 ? singular : plural); }
         static string Quote(string value) { return "\"" + value.Replace("\"", "\\\"").TrimEnd('\\') + (value.EndsWith("\\") ? "\\\\" : "") + "\""; }
 
         public ForgeWindow(string appRoot, string initialFolder) {
-            root = appRoot; Text = "RPF Forge"; Size = new Size(1120, 790); MinimumSize = new Size(850, 620);
-            StartPosition = FormStartPosition.CenterScreen; BackColor = background; ForeColor = foreground;
-            Font = new Font("Segoe UI", 10); AutoScaleMode = AutoScaleMode.Dpi;
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 1, RowCount = 7 };
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 75)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 49));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 54)); layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 27)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 49));
-            var heading = new Panel { Dock = DockStyle.Fill };
-            heading.Controls.Add(new Label { Text = "RPF FORGE", Font = new Font("Segoe UI", 25, FontStyle.Bold), AutoSize = true, Location = new Point(0, 0), ForeColor = foreground });
-            heading.Controls.Add(new Label { Text = "Converta, revise e organize seus veículos para FiveM.", AutoSize = true, Location = new Point(2, 47), ForeColor = muted });
-            layout.Controls.Add(heading, 0, 0);
-            var pathRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
-            pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
-            folder.Dock = DockStyle.Fill; folder.Margin = new Padding(0, 7, 12, 0); folder.BackColor = surface; folder.ForeColor = foreground; folder.BorderStyle = BorderStyle.FixedSingle; folder.AccessibleName = "Pasta que contém os arquivos RPF";
-            ConfigureButton(browse, "Escolher pasta", false); browse.Dock = DockStyle.Fill;
-            pathRow.Controls.Add(folder, 0, 0); pathRow.Controls.Add(browse, 1, 0); layout.Controls.Add(pathRow, 0, 1);
-            summary.Text = "Escolha uma pasta com arquivos .rpf e clique em Analisar."; summary.Dock = DockStyle.Fill; summary.TextAlign = ContentAlignment.MiddleLeft; summary.ForeColor = muted;
-            layout.Controls.Add(summary, 0, 2);
-            tabs.Dock = DockStyle.Fill; tabs.Font = new Font("Segoe UI", 10);
-            tabs.DrawMode = TabDrawMode.OwnerDrawFixed; tabs.ItemSize = new Size(172, 34); tabs.SizeMode = TabSizeMode.Fixed;
-            tabs.DrawItem += delegate(object sender, DrawItemEventArgs e) {
-                using (var brush = new SolidBrush(surface)) e.Graphics.FillRectangle(brush, e.Bounds);
-                TextRenderer.DrawText(e.Graphics, tabs.TabPages[e.Index].Text, tabs.Font, e.Bounds, e.Index == tabs.SelectedIndex ? foreground : muted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                if (e.Index == tabs.SelectedIndex) using (var pen = new Pen(red, 3)) e.Graphics.DrawLine(pen, e.Bounds.Left + 12, e.Bounds.Bottom - 2, e.Bounds.Right - 12, e.Bounds.Bottom - 2);
-            };
-            SetupGrid(vehicles); SetupGrid(destinations); SetupGrid(assets);
-            AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 30); AddTextColumn(vehicles, "current", "Spawn atual", true, 30); AddTextColumn(vehicles, "target", "Novo spawn (vazio = manter)", false, 40);
-            destinations.Columns.Add(new DataGridViewCheckBoxColumn { Name = "selected", HeaderText = "Converter", Width = 75, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
-            AddTextColumn(destinations, "archive", "Arquivo RPF", true, 30); AddTextColumn(destinations, "output", "Nome da pasta de saída", false, 30); AddTextColumn(destinations, "exists", "Destino", true, 20);
-            var choice = new DataGridViewComboBoxColumn { Name = "policy", HeaderText = "Se a pasta já existir", FillWeight = 35, FlatStyle = FlatStyle.Flat };
-            choice.Items.AddRange("Cancelar", "Usar outro nome", "Backup e substituir"); destinations.Columns.Add(choice);
-            AddTextColumn(assets, "archive", "RPF", true, 24); AddTextColumn(assets, "file", "Arquivo", true, 52); AddTextColumn(assets, "kind", "Tipo", true, 12); AddTextColumn(assets, "size", "Tamanho em disco", true, 18);
-            assets.ReadOnly = true;
-            details.Multiline = true; details.ReadOnly = true; details.ScrollBars = ScrollBars.Both; details.WordWrap = false; details.Dock = DockStyle.Fill; details.BackColor = surface; details.ForeColor = foreground; details.BorderStyle = BorderStyle.None; details.Font = new Font("Consolas", 10);
-            details.Text = "A análise não altera os arquivos.\r\n\r\nVocê poderá revisar spawns, destinos, referências e peças de tuning antes de converter.\r\nO peso exibido é o tamanho em disco; não estima VRAM ou ganho de FPS.";
-            AddTab("Veículos", vehicles); AddTab("Destinos", destinations); AddTab("Prévia e validação", details); AddTab("Arquivos por peso", assets);
-            layout.Controls.Add(tabs, 0, 3);
-            status.Dock = DockStyle.Fill; status.ForeColor = muted; status.TextAlign = ContentAlignment.MiddleLeft; status.Text = "Tudo é processado localmente."; status.AutoEllipsis = true; layout.Controls.Add(status, 0, 4);
-            progress.Dock = DockStyle.Fill; progress.Margin = new Padding(0, 4, 0, 7); progress.Maximum = 100; layout.Controls.Add(progress, 0, 5);
-            var actions = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
-            ConfigureButton(convert, "Converter selecionados", true); convert.Width = 210; ConfigureButton(analyze, "Analisar / atualizar prévia", false); analyze.Width = 235; ConfigureButton(open, "Abrir resultado", false); open.Width = 160;
-            actions.Controls.Add(convert); actions.Controls.Add(analyze); actions.Controls.Add(open); layout.Controls.Add(actions, 0, 6);
-            Controls.Add(layout); convert.Enabled = false; open.Enabled = false;
+            root = appRoot; BuildInterface();
             browse.Click += delegate { using (var dialog = new FolderBrowserDialog { Description = "Selecione a pasta que contém os arquivos RPF", SelectedPath = Directory.Exists(folder.Text) ? folder.Text : "" }) { if (dialog.ShowDialog(this) == DialogResult.OK) folder.Text = dialog.SelectedPath; } };
-            folder.TextChanged += delegate { if (!busy) InvalidatePreview(); };
+            folder.TextChanged += delegate { if (!busy) ResetOrigin(); };
             vehicles.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
             destinations.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
             destinations.CurrentCellDirtyStateChanged += delegate { if (destinations.IsCurrentCellDirty) destinations.CommitEdit(DataGridViewDataErrorContexts.Commit); };
             destinations.DataError += delegate(object sender, DataGridViewDataErrorEventArgs e) { e.ThrowException = false; };
             analyze.Click += async delegate { await Analyze(); };
             convert.Click += async delegate { await ConvertSelection(); };
-            open.Click += delegate { if (Directory.Exists(lastOutput)) Process.Start("explorer.exe", Quote(lastOutput)); };
+            open.Click += delegate { if (!busy && Directory.Exists(lastOutput)) Process.Start("explorer.exe", Quote(lastOutput)); };
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; status.Text = "Aguarde a operação terminar antes de fechar, para preservar os arquivos."; } };
             folder.Text = initialFolder;
             Shown += async delegate { if (Directory.Exists(folder.Text)) await Analyze(); };
         }
 
         void ConfigureButton(Button button, string label, bool primary) {
-            button.Text = label; button.Height = 38; button.FlatStyle = FlatStyle.Flat; button.FlatAppearance.BorderColor = primary ? red : Color.FromArgb(65, 71, 83);
-            button.BackColor = primary ? red : surface; button.ForeColor = foreground; button.Margin = new Padding(10, 6, 0, 0); button.Cursor = Cursors.Hand;
+            button.Text = label; button.Height = 44; button.Font = ForgeFonts.Pixel(12); button.FlatStyle = FlatStyle.Flat; button.FlatAppearance.BorderColor = primary ? red : ForgeTheme.Border;
+            button.BackColor = primary ? red : surface; button.ForeColor = primary ? background : foreground; button.Margin = new Padding(8, 8, 0, 0); button.Cursor = Cursors.Hand;
         }
         void SetupGrid(DataGridView grid) {
             grid.Dock = DockStyle.Fill; grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; grid.AllowUserToAddRows = false; grid.AllowUserToDeleteRows = false; grid.AllowUserToResizeRows = false; grid.RowHeadersVisible = false;
             grid.BackgroundColor = surface; grid.BorderStyle = BorderStyle.None; grid.EnableHeadersVisualStyles = false; grid.ColumnHeadersHeight = 38; grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(39, 43, 52); grid.ColumnHeadersDefaultCellStyle.ForeColor = foreground; grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            grid.DefaultCellStyle.BackColor = surface; grid.DefaultCellStyle.ForeColor = foreground; grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(70, 42, 54); grid.DefaultCellStyle.SelectionForeColor = Color.White; grid.DefaultCellStyle.Padding = new Padding(8, 0, 4, 0); grid.RowTemplate.Height = 34;
-            grid.GridColor = Color.FromArgb(48, 53, 63); grid.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            grid.ColumnHeadersDefaultCellStyle.BackColor = ForgeTheme.Raised; grid.ColumnHeadersDefaultCellStyle.ForeColor = foreground; grid.ColumnHeadersDefaultCellStyle.Font = ForgeFonts.Pixel(12, FontStyle.Bold);
+            grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single; grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            grid.DefaultCellStyle.BackColor = surface; grid.DefaultCellStyle.ForeColor = foreground; grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(71, 45, 34); grid.DefaultCellStyle.SelectionForeColor = Color.White; grid.DefaultCellStyle.Padding = new Padding(8, 0, 4, 0); grid.RowTemplate.Height = 36; grid.DefaultCellStyle.Font = new Font("Consolas", 10); grid.StandardTab = true; grid.MultiSelect = false;
+            grid.GridColor = ForgeTheme.Border; grid.SelectionMode = DataGridViewSelectionMode.CellSelect;
         }
         void AddTextColumn(DataGridView grid, string name, string header, bool readOnly, float weight) { grid.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = header, ReadOnly = readOnly, FillWeight = weight, SortMode = DataGridViewColumnSortMode.NotSortable }); }
-        void AddTab(string label, Control content) { var tab = new TabPage(label) { BackColor = surface, Padding = new Padding(12) }; tab.Controls.Add(content); tabs.TabPages.Add(tab); }
-        void InvalidatePreview() { previewValid = false; convert.Enabled = false; if (preview.Count > 0) status.Text = "Alterações pendentes. Clique em Analisar / atualizar prévia antes de converter."; }
+        void AddTab(string label, Control content) { tabs.AddPage(label, content); }
+        void InvalidatePreview() { previewValid = false; convert.Enabled = false; stage.Text = "02 / PRÉVIA A ATUALIZAR"; if (preview.Count > 0) status.Text = "Alterações pendentes. Clique em Analisar / atualizar prévia antes de converter."; }
         void SetBusy(bool value, string message) {
-            busy = value; browse.Enabled = !value; analyze.Enabled = !value; folder.Enabled = !value; vehicles.Enabled = !value; destinations.Enabled = !value; convert.Enabled = !value && previewValid;
-            status.Text = message; progress.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous; if (!value) progress.Value = 0;
+            busy = value; open.Enabled = !value && Directory.Exists(lastOutput); browse.Enabled = !value; analyze.Enabled = !value; folder.Enabled = !value; vehicles.Enabled = !value; destinations.Enabled = !value; convert.Enabled = !value && previewValid;
+            status.Text = message; progress.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous; if (!value) progress.Value = 0; progress.AccessibleDescription = message;
         }
         Dictionary<string, object> Requests(bool includeHash) {
             var result = new Dictionary<string, object>();
@@ -201,17 +186,21 @@ namespace RPFForge {
             });
         }
         void ShowProgress(Dictionary<string, object> message) {
+            if (!busy) return;
             string phase = TextValue(Get(message, "phase"));
+            stage.Text = phase == "verify" || phase == "audit" ? "04 / VALIDAÇÃO" : phase == "write" || phase == "convert" ? "03 / CONVERSÃO" : "02 / ANÁLISE";
             string label = phase == "read" ? "Lendo RPF" : phase == "write" ? "Gravando addon" : phase == "verify" ? "Conferindo arquivos gravados" : phase == "audit" ? "Validando referências" : phase == "convert" ? "Convertendo" : "Preparando prévia";
-            status.Text = label + ": " + TextValue(Get(message, "label"));
+            status.Text = label + ": " + TextValue(Get(message, "label")); progress.AccessibleDescription = status.Text;
             double total = Number(Get(message, "total"));
+            if (total <= 0) progress.Style = ProgressBarStyle.Marquee;
             if (total > 0) { progress.Style = ProgressBarStyle.Continuous; progress.Value = Math.Max(0, Math.Min(100, (int)(100 * Number(Get(message, "current")) / total))); }
         }
         async Task Analyze() {
             if (busy) return; vehicles.EndEdit(); destinations.EndEdit();
+            lastOutput = ""; open.Enabled = false; stage.Text = "02 / ANÁLISE";
             var requests = Requests(false); SetBusy(true, "Preparando a prévia; os originais permanecem intactos.");
             try { RenderPreview(await Execute("preview", requests), requests); }
-            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; tabs.SelectedIndex = 2; summary.Text = "A análise não foi concluída."; }
+            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; tabs.SelectedIndex = 2; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
             finally { SetBusy(false, previewValid ? "Prévia pronta. Revise as abas e clique em Converter selecionados." : "Revise os avisos ou corrija a pasta e analise novamente."); }
         }
         void RenderPreview(object[] results, Dictionary<string, object> requests) {
@@ -228,6 +217,7 @@ namespace RPFForge {
                     var audit = Map(Get(result, "audit")); errors += (int)Number(Get(audit, "errors")); warnings += (int)Number(Get(audit, "warnings")); weight += Number(Get(audit, "diskBytes"));
                     var spawns = Map(Get(requested, "spawns"));
                     foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model); vehicles.Rows.Add(archive, name, TextValue(Get(spawns, name))); cars++; }
+                    foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model), target = TextValue(Get(spawns, name)); if (target.Length > 0 && target != name) text.AppendLine("Renomeação: " + name + " → " + target + " (arquivos e referências correspondentes nos metas)"); }
                     string policy = TextValue(Get(requested, "existing")); policy = policy == "backup" ? "Backup e substituir" : policy == "rename" ? "Usar outro nome" : "Cancelar";
                     int row = destinations.Rows.Add(selected, archive, TextValue(Get(result, "outputName")), Yes(Get(result, "exists")) ? "Já existe" : "Livre", policy); destinations.Rows[row].Tag = TextValue(Get(result, "defaultName"));
                     if (selected) { eligible = true; if (!Yes(Get(audit, "ok"))) selectedError = true; }
@@ -244,7 +234,9 @@ namespace RPFForge {
                 }
                 foreach (var file in weighted.OrderByDescending(p => Number(Get(p.Item2, "diskBytes"))).Take(200)) assets.Rows.Add(file.Item1, TextValue(Get(file.Item2, "path")), TextValue(Get(file.Item2, "kind")), FormatSize(Get(file.Item2, "diskBytes")));
                 text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS. A aba de peso apresenta até 200 arquivos, do maior para o menor.");
-                details.Text = text.ToString(); summary.Text = cars + " veículos  ·  " + results.Length + " RPFs  ·  " + FormatSize(weight) + " em streaming  ·  " + errors + " erros  ·  " + warnings + " avisos";
+                details.Text = text.ToString(); summary.Text = CountLabel(cars, "veículo", "veículos") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
+                UpdateCounts(cars, results.Length, warnings, errors, weight);
+                stage.Text = errors > 0 ? "REVISE OS ERROS" : results.Length == 0 ? "NENHUM RPF ENCONTRADO" : "02 / PRÉVIA PRONTA"; stage.ForeColor = errors > 0 ? ForgeTheme.Error : red;
                 previewValid = eligible && !selectedError; convert.Enabled = previewValid && !busy;
                 if (errors > 0) tabs.SelectedIndex = 2;
             } finally { rendering = false; }
@@ -252,27 +244,36 @@ namespace RPFForge {
         async Task ConvertSelection() {
             if (busy || !previewValid) return; vehicles.EndEdit(); destinations.EndEdit();
             if (!previewValid) return;
+            lastOutput = ""; open.Enabled = false; stage.Text = "03 / CONVERSÃO";
             var request = Requests(true); SetBusy(true, "Convertendo os veículos selecionados.");
             try { RenderResults(await Execute("convert", request)); }
-            catch (Exception error) { details.Text = error.Message; tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Seus dados anteriores foram preservados."; }
+            catch (Exception error) { details.Text = error.Message; tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
             finally { previewValid = false; SetBusy(false, "Confira o resultado na aba Prévia e validação. Para repetir, analise novamente."); }
         }
         void RenderResults(object[] results) {
-            var text = new StringBuilder(); int success = 0, cancelled = 0, failed = 0;
+            previewValid = false; convert.Enabled = false;
+            lastOutput = ""; var text = new StringBuilder(); int success = 0, cancelled = 0, failed = 0, warnings = 0;
             foreach (object item in results) {
                 var result = Map(item); text.AppendLine(TextValue(Get(result, "archive")));
                 if (Yes(Get(result, "ok"))) {
                     success++; lastOutput = TextValue(Get(result, "output")); text.AppendLine("CONCLUÍDO: " + lastOutput); text.AppendLine("server.cfg: ensure " + TextValue(Get(result, "resource")));
                     if (Get(result, "backup") != null) text.AppendLine("Backup preservado: " + TextValue(Get(result, "backup")));
-                    foreach (object problem in ArrayValue(Get(Map(Get(result, "audit")), "issues"))) text.AppendLine("AVISO: " + TextValue(Get(Map(problem), "message")));
+                    foreach (object problem in ArrayValue(Get(Map(Get(result, "audit")), "issues"))) { warnings++; text.AppendLine("AVISO: " + TextValue(Get(Map(problem), "message"))); }
                 } else { if (Yes(Get(result, "cancelled"))) cancelled++; else failed++; text.AppendLine(TextValue(Get(result, "error"))); }
                 text.AppendLine();
             }
-            details.Text = text.ToString(); summary.Text = success + " addons concluídos  ·  " + cancelled + " cancelados  ·  " + failed + " falhas. Valide os veículos no FiveM.";
-            tabs.SelectedIndex = 2; open.Enabled = Directory.Exists(lastOutput);
+            details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Valide os veículos no FiveM.";
+            stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "05 / CONCLUÍDO";
+            stage.ForeColor = failed > 0 ? ForgeTheme.Error : warnings > 0 || success == 0 ? ForgeTheme.Warning : ForgeTheme.Success;
+            tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
         public void SelfTest() {
             if (convert.Enabled || open.Enabled) throw new Exception("Initial actions should be disabled.");
+            if (tabs.TabPages.Count != 5 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");
+            if (Font.FontFamily.Name != "Pixelify Sans" || convert.Font.FontFamily.Name != "Pixelify Sans") throw new Exception("Portfolio font was not loaded.");
+            tabs.SelectedIndex = 4;
+            if (pageTitle.Text != "Ajuda") throw new Exception("Navigation did not update heading.");
+            tabs.SelectedIndex = 0;
             folder.Text = Path.GetTempPath();
             string sample = "[{\"archive\":\"dlc.rpf\",\"ok\":true,\"models\":[\"car\"],\"finalModels\":[\"car\"],\"defaultName\":\"car\",\"outputName\":\"car\",\"output\":\"car\",\"exists\":false,\"sourceHash\":\"abc\",\"sourceBytes\":10,\"audit\":{\"ok\":true,\"errors\":0,\"warnings\":0,\"diskBytes\":10,\"issues\":[],\"assets\":[]},\"removedTuning\":[],\"skipped\":[]}]";
             RenderPreview(ArrayValue(json.DeserializeObject(sample)), new Dictionary<string, object>());
@@ -283,6 +284,16 @@ namespace RPFForge {
             RenderPreview(ArrayValue(json.DeserializeObject(sample.Replace("\"errors\":0", "\"errors\":1").Replace("\"ok\":true,\"errors\"", "\"ok\":false,\"errors\""))), new Dictionary<string, object>());
             if (previewValid) throw new Exception("Audit error must block conversion.");
             RenderPreview(new object[0], new Dictionary<string, object>()); if (previewValid) throw new Exception("Empty preview must not convert.");
+            if (countCars.Text != "0" || countArchives.Text != "0") throw new Exception("Empty preview kept stale counters.");
+            lastOutput = Path.GetTempPath(); open.Enabled = true;
+            SetBusy(true, "test"); if (open.Enabled) throw new Exception("Opening old output must be blocked while busy."); SetBusy(false, "test");
+            RenderResults(new object[] { new Dictionary<string, object> { { "archive", "broken.rpf" }, { "ok", false }, { "error", "Synthetic failure" } } });
+            if (lastOutput.Length != 0 || open.Enabled || stage.Text != "CONCLUÍDO COM FALHAS") throw new Exception("Failed result kept a stale successful output.");
+            lastOutput = Path.GetTempPath(); open.Enabled = true;
+            folder.Text = Path.Combine(Path.GetTempPath(), "different-folder");
+            if (open.Enabled || lastOutput.Length != 0) throw new Exception("Changing origin must clear the previous result.");
+            ClientSize = new Size(1024, 700); PerformLayout();
+            if (convert.Width <= 0 || analyze.Width <= 0 || convert.Parent.Width < convert.Right) throw new Exception("Actions overflow compact layout.");
         }
         public void RenderBitmap(string destination) {
             renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000);

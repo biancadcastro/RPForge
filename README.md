@@ -1,4 +1,4 @@
-# RPF Forge
+# RPForge
 
 Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Windows.
 Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
@@ -14,6 +14,7 @@ e a assinatura esta desativada ate a aprovacao/configuracao explicita.
 Avisos de componentes externos: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
+Interface atual: [guia de uso](docs/INTERFACE.md), [identidade visual](docs/IDENTIDADE.md) e [desenvolvimento/testes](docs/DESENVOLVIMENTO_INTERFACE.md).
 As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0
 nao as contem. Nao gerar outro instalador sem pedido explicito.
 
