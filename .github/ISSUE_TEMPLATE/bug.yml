@@ -1,0 +1,48 @@
+name: 🐛 Relatar um problema
+description: Conte o que aconteceu ao usar o RPForge.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Não anexe conteúdo pago, arquivos do jogo, dados pessoais ou credenciais. Para segurança, consulte SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: Versão do RPForge
+      placeholder: "Ex.: 0.3.1"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Versão do Windows
+      placeholder: "Ex.: Windows 11"
+    validations:
+      required: true
+  - type: dropdown
+    id: operation
+    attributes:
+      label: Onde aconteceu?
+      options:
+        - Instalação ou atualização
+        - Menu do botão direito
+        - Análise ou configuração
+        - Conversão de RPF
+        - Geração de YTYP
+        - Resultado no FiveM
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Como reproduzir
+      description: Explique os passos, o resultado esperado e o que aconteceu.
+    validations:
+      required: true
+  - type: textarea
+    id: message
+    attributes:
+      label: Mensagem ou captura de tela
+      description: Remova informações pessoais antes de compartilhar.

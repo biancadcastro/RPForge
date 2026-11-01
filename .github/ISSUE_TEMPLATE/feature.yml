@@ -1,0 +1,17 @@
+name: 💡 Sugerir uma melhoria
+description: Explique o que ajudaria no seu uso do aplicativo.
+title: "[Sugestão] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: O que você precisa fazer?
+      description: Conte a situação e como o aplicativo poderia ajudar.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Como você faz hoje?
+      description: Opcional. Não compartilhe conteúdo de terceiros sem permissão.

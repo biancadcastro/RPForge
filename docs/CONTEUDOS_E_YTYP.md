@@ -37,4 +37,4 @@ Registros seguem a [documentação de data files](https://docs.fivem.net/docs/ga
 
 ## Organização local
 
-O projeto fica em `D:\RedHorn\Desenvolvimento\RPForge`. Código em `src`, interface em `desktop`, documentação em `docs`, materiais de marca em `design\identidade` e artefatos de desenvolvimento em `.tools`. O material completo de identidade é mantido localmente, fora do versionamento. A instalação do Windows permanece em seu caminho registrado para preservar a integração existente.
+Código em `src`, interface em `desktop`, documentação em `docs` e artefatos de desenvolvimento em `.tools`. As logos usadas pelo app e pelo manual estão versionadas; o acervo completo de trabalho da identidade visual permanece fora do repositório. A instalação do Windows fica em `Programs\RPForge` no usuário, salvo escolha de outro destino.

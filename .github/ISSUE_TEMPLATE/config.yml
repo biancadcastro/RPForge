@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📘 Manual do usuário
+    url: https://github.com/biancadcastro/RPForge/blob/main/docs/guia-usuario/Manual-RPForge-0.3.1.pdf
+    about: Consulte o passo a passo antes de abrir um relato.
+  - name: 🔒 Relatos de segurança
+    url: https://github.com/biancadcastro/RPForge/blob/main/SECURITY.md
+    about: Saiba como relatar problemas sensíveis sem expor dados em uma issue.

@@ -98,7 +98,9 @@ Consulte também a [política de privacidade](docs/PRIVACY.md) e a [Code signing
 <details>
 <summary>🧑‍💻 Contribuir com o projeto</summary>
 
-O desenvolvimento é separado do uso do aplicativo. Para trabalhar no código, consulte a [documentação da interface](docs/DESENVOLVIMENTO_INTERFACE.md), o [roteiro de assinatura](docs/SIGNPATH_PREPARATION.md) e as [verificações de build](docs/SIGNPATH_BUILD.md).
+Comece pelo [guia de contribuição](CONTRIBUTING.md). Para falhas sensíveis, siga a [política de segurança](SECURITY.md).
+
+O desenvolvimento é separado do uso do aplicativo. Para trabalhar no código, consulte a [documentação da interface](docs/DESENVOLVIMENTO_INTERFACE.md), o [roteiro de assinatura](docs/SIGNPATH_PREPARATION.md), as [verificações de build](docs/SIGNPATH_BUILD.md) e a [revisão pré-publicação](docs/PUBLICATION_READINESS.md).
 
 Os testes usam arquivos sintéticos. Instaladores e releases são gerados somente mediante solicitação; credenciais, backups pessoais e conteúdo do jogo ficam fora do repositório.
 

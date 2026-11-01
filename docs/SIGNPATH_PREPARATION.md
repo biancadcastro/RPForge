@@ -1,7 +1,7 @@
 # Preparacao para SignPath Foundation
 
 Decisao da mantenedora: seguir pela SignPath para o projeto de codigo aberto.
-Estado: preparacao local; sem candidatura enviada e sem garantia de aprovacao.
+Estado: codigo e documentacao sincronizados no repositorio privado; sem candidatura enviada e sem garantia de aprovacao.
 
 ## Ja disponivel
 
@@ -16,10 +16,10 @@ Estado: preparacao local; sem candidatura enviada e sem garantia de aprovacao.
 
 ## Antes da candidatura
 
-- Concluir e revisar a interface que esta sendo trabalhada separadamente.
+- Interface e manual de usuarios revisados. A revisao pre-publicacao esta registrada em [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md).
 - Confirmar os responsaveis pelos papeis de autoria, revisao e aprovacao.
-- Confirmar MFA nas contas envolvidas; nao registrar codigos ou segredos no repositorio.
-- Revalidar o inventario de licencas se a nova interface adicionar dependencias.
+- MFA do GitHub informado como habilitado pela mantenedora; confirmar o MFA na SignPath quando a conta for configurada. Nao registrar codigos ou segredos no repositorio.
+- Inventario da interface e do manual revisado, incluindo as fontes abertas Pixelify Sans e Atkinson Hyperlegible.
 - Executar o workflow preparado no GitHub apenas quando houver autorizacao para enviar o codigo;
   a verificacao local nao substitui a comprovacao de origem fornecida pelo GitHub/SignPath.
 - Preencher o Publisher exato depois da aprovacao e testar a migracao descrita em SIGNPATH_BUILD.md.

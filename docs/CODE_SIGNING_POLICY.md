@@ -11,8 +11,8 @@ assinaturas a SignPath antes de sua confirmacao.
 - Revisao de contribuicoes externas: biancadcastro; novos revisores precisam ser designados pela mantenedora.
 - Aprovacao de pedidos de assinatura e publicacao: biancadcastro, explicitamente, para cada versao.
 
-A configuracao efetiva de permissoes e de autenticacao multifator nas contas do GitHub e
-da SignPath ainda precisa ser confirmada pela mantenedora. A integracao esta preparada,
+A mantenedora informou que a autenticacao multifator do GitHub ja esta habilitada.
+Os papeis, as permissoes e o MFA na SignPath serao confirmados na candidatura. A integracao esta preparada,
 desativada por padrao, sem credencial da SignPath neste repositorio.
 
 ## Origem dos artefatos
