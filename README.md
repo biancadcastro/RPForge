@@ -9,9 +9,9 @@
 
 Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do Windows.
 
-**🪟 Windows 11 · 🚗 GTA V Legacy · 📦 Versão 0.3.1 · 📖 GPLv3**
+**🪟 Windows 11 · 🚗 GTA V Legacy · 📦 Versão 0.3.2 · 📜 Licença proprietária**
 
-[📘 Manual ilustrado](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) · [🧭 Começar a usar](#-comece-por-aqui) · [🛠️ Resolver problemas](#-precisa-de-ajuda)
+[🌐 Site oficial](https://rpforge.dev/) · [📥 Baixar RPForge](https://rpforge.dev/#download) · [📘 Manual online](https://rpforge.dev/docs/) · [🛠️ Suporte](https://github.com/biancadcastro/RPForge/issues)
 
 </div>
 
@@ -42,11 +42,11 @@ Os nomes ficam na mesma tela. Se a pasta de saída já existir, você escolhe co
 
 ![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/11-ytyp.png)
 
-As capturas são da versão 0.3.1 e usam exemplos fictícios. O [manual em PDF](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) acompanha cada etapa com imagens e instruções.
+As capturas são da versão 0.3.1 e usam exemplos fictícios. O [manual oficial no site](https://rpforge.dev/docs/) acompanha cada etapa. O [PDF histórico da 0.3.1](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) permanece como referência dessa edição.
 
 ## 🧭 Comece por aqui
 
-1. Instale o RPForge usando o arquivo fornecido pela equipe.
+1. Baixe e instale o RPForge pelo [site oficial](https://rpforge.dev/#download).
 2. Coloque o `.rpf` em uma pasta e clique com o botão direito nela.
 3. Escolha **Converter com RPForge**.
 4. Em **Configurar**, mantenha os nomes ou edite o spawn.
@@ -57,20 +57,20 @@ Para YTYP, reúna os `.ydr` em uma pasta e use **Gerar YTYP com RPForge**. A ger
 
 ### 📥 Instalação
 
-- Instalador atual: `RPForge-Setup-0.3.1-x64.exe`.
+- Instalador atual: [RPForge-Setup-0.3.2-x64.exe](https://github.com/biancadcastro/RPForge/releases/download/v0.3.2/RPForge-Setup-0.3.2-x64.exe).
 - Pasta padrão: `%LOCALAPPDATA%\Programs\RPForge`.
-- O pacote inclui o aplicativo, o runtime e o código-fonte correspondente.
+- A [release 0.3.2](https://github.com/biancadcastro/RPForge/releases/tag/v0.3.2) contém somente o instalador EXE como anexo. O ZIP de código-fonte não acompanha esta versão.
 
-**Distribuição em preparação:** ainda não há um instalador público disponível. A versão instalada nos testes da equipe usa um certificado de desenvolvimento e não deve ser distribuída como versão final. Consulte a [Code signing policy](docs/CODE_SIGNING_POLICY.md).
+**Versão de testes com certificado local:** a ativação do menu moderno pede consentimento para confiar no certificado em `TrustedPeople` para todos os usuários e confirmação de administrador. A confiança abrange outros arquivos assinados com a mesma chave. Nenhum certificado raiz é instalado. Sem autorização, o app e o menu clássico continuam disponíveis. A desinstalação não remove automaticamente essa confiança. Alertas do Windows podem continuar aparecendo; a primeira instalação em máquina limpa ainda não foi validada. Leia a [política de assinatura](https://rpforge.dev/docs/assinatura/).
 
 ## 📚 Documentação para usuários
 
 | Guia | O que você encontra |
 | --- | --- |
-| [📘 Manual oficial em PDF](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) | 18 páginas com instalação, capturas das telas, tutoriais e dúvidas frequentes. |
-| [🌐 Guia offline em HTML](docs/guia-usuario/index.html) | Navegação por assunto, busca e imagens ampliáveis. Abra o arquivo no navegador após baixar o projeto. |
-| [🪟 Fluxo da interface](docs/INTERFACE.md) | Configurar, revisar, converter e encontrar o resultado. |
-| [📦 Conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md) | Tipos aceitos e limites da conversão. |
+| [📘 Manual oficial](https://rpforge.dev/docs/) | Instalação, capturas das telas, tutoriais e dúvidas frequentes. |
+| [🪟 Instalação](https://rpforge.dev/docs/instalar/) | Requisitos, confiança local e primeiros passos. |
+| [📦 Conteúdos e YTYP](https://rpforge.dev/docs/conteudos/) | Tipos aceitos e limites da conversão. |
+| [🛡️ Assinatura local](https://rpforge.dev/docs/assinatura/) | O que o certificado autoriza e as limitações desta versão. |
 
 ## 💾 Seus arquivos continuam com você
 
@@ -91,20 +91,15 @@ Ao abrir um relato em [Issues](https://github.com/biancadcastro/RPForge/issues),
 
 ## 📜 Licença e privacidade
 
-O código próprio do RPForge usa **[GNU GPL versão 3](LICENSE)** (`GPL-3.0-only`). As dependências mantêm suas licenças: veja [avisos de terceiros](THIRD_PARTY_NOTICES.md) e [NOTICE](NOTICE).
+A partir da **0.3.2**, o código próprio do aplicativo usa [licença proprietária](https://rpforge.dev/docs/licenca/). Esta versão de testes é gratuita. As dependências mantêm suas próprias licenças.
 
-Consulte também a [política de privacidade](docs/PRIVACY.md) e a [Code signing policy](docs/CODE_SIGNING_POLICY.md). A licença do aplicativo não concede direitos sobre os mods processados.
+O código e as versões antigas já disponibilizados neste repositório continuam sob as licenças originais. O histórico público não corresponde ao código atual da versão proprietária e esta mudança não revoga os direitos já concedidos.
 
-<details>
-<summary>🧑‍💻 Contribuir com o projeto</summary>
+Consulte a [política de privacidade](https://rpforge.dev/docs/privacidade/) e os [termos de uso](https://rpforge.dev/docs/termos/). A licença do aplicativo não concede direitos sobre os mods processados.
 
-Comece pelo [guia de contribuição](CONTRIBUTING.md). Para falhas sensíveis, siga a [política de segurança](SECURITY.md).
+## 💬 Suporte e sugestões
 
-O desenvolvimento é separado do uso do aplicativo. Para trabalhar no código, consulte a [documentação da interface](docs/DESENVOLVIMENTO_INTERFACE.md), o [roteiro de assinatura](docs/SIGNPATH_PREPARATION.md), as [verificações de build](docs/SIGNPATH_BUILD.md) e a [revisão pré-publicação](docs/PUBLICATION_READINESS.md).
-
-Os testes usam arquivos sintéticos. Instaladores e releases são gerados somente mediante solicitação; credenciais, backups pessoais e conteúdo do jogo ficam fora do repositório.
-
-</details>
+Use as [Issues](https://github.com/biancadcastro/RPForge/issues) para relatar problemas e sugerir melhorias. Para falhas sensíveis, siga a [política de segurança](SECURITY.md). Não anexe dados pessoais, credenciais ou mods de terceiros sem autorização.
 
 ---
 
