@@ -3,8 +3,8 @@ import { XMLSerializer } from '@xmldom/xmldom';
 import { safeName } from './rpf.js';
 
 export function validateSpawn(value) {
-  if (typeof value !== 'string' || !/^[a-z][a-z0-9_]{0,62}$/.test(value)) {
-    throw new Error('Use um spawn com 1 a 63 caracteres: letras minúsculas, números e _, começando com uma letra.');
+  if (typeof value !== 'string' || !/^[a-z][a-z0-9_]{0,62}$/i.test(value)) {
+    throw new Error('Use um spawn com 1 a 63 caracteres: letras maiúsculas ou minúsculas, números e _, começando com uma letra.');
   }
   return safeName(value);
 }
@@ -24,7 +24,7 @@ export function renameSpawns(files, metas, models, requested = {}) {
     if (old !== next) renames.set(old, next);
   }
   const finalModels = [...models].map(m => renames.get(m) ?? m);
-  if (new Set(finalModels).size !== finalModels.length) throw new Error('Dois carros não podem usar o mesmo spawn.');
+  if (new Set(finalModels.map(name => name.toLowerCase())).size !== finalModels.length) throw new Error('Dois carros não podem usar o mesmo spawn.');
   if (!renames.size) return { files, models: finalModels.sort() };
 
   const records = metas.filter(m => m.basename === 'vehicles.meta').flatMap(m =>

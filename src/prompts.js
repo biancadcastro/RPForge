@@ -13,7 +13,7 @@ export function createPrompts(input = process.stdin, output = process.stdout) {
     async chooseSpawns({ archive, models }) {
       output.write(`\nArquivo: ${archive}\n`);
       const result = {};
-      const reserved = new Set(models);
+      const reserved = new Set(models.map(model => model.toLowerCase()));
       for (const model of models) {
         let answer;
         do {
@@ -26,9 +26,9 @@ export function createPrompts(input = process.stdin, output = process.stdout) {
           if (!next) break;
           try {
             validateSpawn(next);
-            if (next !== model && reserved.has(next)) throw new Error('Esse spawn já está sendo usado por outro carro.');
+            if (next.toLowerCase() !== model.toLowerCase() && reserved.has(next.toLowerCase())) throw new Error('Esse spawn já está sendo usado por outro carro.');
             result[model] = next;
-            reserved.delete(model); reserved.add(next);
+            reserved.delete(model.toLowerCase()); reserved.add(next.toLowerCase());
             break;
           } catch (error) { output.write(`${error.message}\n`); }
         }

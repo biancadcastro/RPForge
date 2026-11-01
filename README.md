@@ -60,8 +60,10 @@ Não é gerado relatório JSON. Arquivos auxiliares ignorados são informados no
 Ao escolher um novo spawn, a pasta recebe esse nome e os YFTs, YTDs e referências
 correspondentes nos metas são atualizados. Dicionários e handling compartilhados são
 preservados quando necessários a outro veículo. Valores de física, áudio, texturas
-internas e liveries permanecem intactos. Nomes novos usam letras minúsculas, números e `_`,
+internas e liveries permanecem intactos. Nomes novos aceitam letras maiúsculas e minúsculas, números e `_`,
 começam com letra e têm até 63 caracteres; nomes reservados do Windows são recusados.
+A capitalização digitada é preservada na pasta, arquivos e referências. Conflitos são
+verificados sem distinguir maiúsculas de minúsculas (`Carro` e `CARRO` conflitam).
 A ferramenta não altera a base de testes ou `server.cfg`.
 Valide o veículo no FiveM antes de colocar em produção.
 

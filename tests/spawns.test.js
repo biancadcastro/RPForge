@@ -71,10 +71,28 @@ test('keeps shared handling and dictionary valid when renaming just one vehicle'
 
 test('refuses invalid, duplicated and conflicting names before writing output', async t => {
   const root = await setup(t, archive({ second: true, collision: true }));
-  for (const spawns of [{ car: '../escape' }, { car: 'con' }, { car: 'taxi' }, { car: 'newcar' }, { unknown: 'newname' }]) {
+  for (const spawns of [{ car: '../escape' }, { car: 'con' }, { car: 'CON' }, { car: 'taxi' }, { car: 'TAXI' }, { car: 'Name', taxi: 'NAME' }, { car: 'newcar' }, { unknown: 'newname' }]) {
     const [result] = await convertFolder(root, { spawns });
     assert.equal(result.ok, false, JSON.stringify(spawns));
     assert.deepEqual(await readdir(root), ['dlc.rpf']);
+  }
+});
+
+test('preserves uppercase and mixed-case spawns in folder, streamed names and meta references', async t => {
+  for (const spawn of ['AITOM8', 'AitoM8', 'CAR']) {
+    const root = await setup(t, archive());
+    const [result] = await convertFolder(root, { spawns: { car: spawn } });
+    assert.equal(result.ok, true, result.error);
+    assert.equal(result.resource, spawn);
+    assert.deepEqual(result.models, [spawn]);
+    const stream = await readdir(path.join(result.output, 'stream'));
+    for (const name of [`${spawn}.yft`, `${spawn}_hi.yft`, `${spawn}.ytd`, `${spawn}_bumper.yft`]) assert.ok(stream.includes(name), name);
+    const vehicles = await meta(result.output, 'vehicles.meta');
+    assert.ok(vehicles.includes(`<modelName>${spawn}</modelName>`));
+    assert.ok(vehicles.includes(`<txdName>${spawn}</txdName>`));
+    assert.ok(vehicles.includes(`<handlingId>${spawn}</handlingId>`));
+    assert.ok((await meta(result.output, 'handling.meta')).includes(`<handlingName>${spawn}</handlingName>`));
+    assert.ok((await meta(result.output, 'carcols.meta')).includes(`123_${spawn}_modkit`));
   }
 });
 

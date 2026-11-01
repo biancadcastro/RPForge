@@ -23,10 +23,10 @@ test('interactive prompt accepts a new spawn and retries invalid names without l
   const root = await mkdtemp(path.join(os.tmpdir(), 'forge-cli-rename-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await writeFile(path.join(root, 'dlc.rpf'), vehicleArchive());
-  const result = spawnSync(process.execPath, [fileURLToPath(new URL('../src/cli.js', import.meta.url)), '--interactive', root], { encoding: 'utf8', input: 'talvez\ns\n../bad\nredhorncar\n\n' });
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL('../src/cli.js', import.meta.url)), '--interactive', root], { encoding: 'utf8', input: 'talvez\ns\n../bad\nAITOM8\n\n' });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Responda s ou n/);
   assert.match(result.stdout, /Use um spawn/);
-  assert.match(result.stdout, /ensure redhorncar/);
-  assert.match(await readFile(path.join(root, 'redhorncar/data/001/vehicles.meta'), 'utf8'), /<modelName>redhorncar<\/modelName>/);
+  assert.match(result.stdout, /ensure AITOM8/);
+  assert.match(await readFile(path.join(root, 'AITOM8/data/001/vehicles.meta'), 'utf8'), /<modelName>AITOM8<\/modelName>/);
 });
