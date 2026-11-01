@@ -1,6 +1,7 @@
 # Code signing policy
 
-Status: preparacao para candidatura; o RPForge ainda nao foi aprovado pela SignPath Foundation.
+Status: candidatura enviada em 1 de novembro de 2026; avaliacao pendente.
+O RPForge ainda nao foi aprovado pela SignPath Foundation.
 Os pacotes locais atuais usam certificado de desenvolvimento. Eles nao sao assinaturas
 de distribuicao da SignPath. O projeto nao deve apresentar selo de aprovacao ou atribuir
 assinaturas a SignPath antes de sua confirmacao.

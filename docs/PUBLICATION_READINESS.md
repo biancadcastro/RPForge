@@ -1,5 +1,12 @@
 # Revisão pré-publicação — 1 de novembro de 2026
 
+> Registro histórico da revisão anterior à abertura. Depois desta revisão, a
+> mantenedora autorizou manter o e-mail de autoria e tornar o repositório público.
+> A abertura e as configurações de segurança foram concluídas; a candidatura à
+> SignPath foi enviada e aguarda avaliação. Consulte o estado atual em
+> [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). O texto abaixo preserva as
+> evidências e as condições existentes no momento da revisão.
+
 Escopo: passo 1, preparar o repositório para a decisão de abertura. O repositório
 continua **privado**. Esta revisão não autoriza mudança de visibilidade, publicação
 de release, candidatura ou assinatura pela SignPath.

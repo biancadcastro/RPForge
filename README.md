@@ -61,7 +61,7 @@ Para YTYP, reúna os `.ydr` em uma pasta e use **Gerar YTYP com RPForge**. A ger
 - Pasta padrão: `%LOCALAPPDATA%\Programs\RPForge`.
 - O pacote inclui o aplicativo, o runtime e o código-fonte correspondente.
 
-**Distribuição em preparação:** esta é uma edição local de testes. Ainda não há uma release pública nem assinatura de distribuição pela SignPath. Use o instalador fornecido pela equipe; em outro computador, pode ser necessário reconhecer o certificado local de teste com orientação da equipe.
+**Distribuição em preparação:** ainda não há um instalador público disponível. A versão instalada nos testes da equipe usa um certificado de desenvolvimento e não deve ser distribuída como versão final. Consulte a [Code signing policy](docs/CODE_SIGNING_POLICY.md).
 
 ## 📚 Documentação para usuários
 
