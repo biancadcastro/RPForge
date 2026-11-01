@@ -1,5 +1,12 @@
-param([string]$CompilerPath)
+param([string]$CompilerPath, [string]$SignedBinaryDirectory, [string]$UnsignedBinaryDirectory, [switch]$ValidateSignedInputsOnly)
 $ErrorActionPreference = 'Stop'
+if ($SignedBinaryDirectory -or $UnsignedBinaryDirectory -or $ValidateSignedInputsOnly) {
+    if (!$SignedBinaryDirectory -or !$UnsignedBinaryDirectory) { throw 'Informe os diretorios assinado e original sem assinatura.' }
+    if (!$ValidateSignedInputsOnly) { throw 'Montagem publica bloqueada ate configurar a identidade MSIX de distribuicao. Use -ValidateSignedInputsOnly para preparar os binarios sem recompilar.' }
+    $prepared = Join-Path (Split-Path -Parent $PSScriptRoot) ('.tools\signed-payload\' + [guid]::NewGuid().ToString('N'))
+    & (Join-Path $PSScriptRoot 'Prepare-SignedBinaries.ps1') -SignedDirectory $SignedBinaryDirectory -UnsignedDirectory $UnsignedBinaryDirectory -Destination $prepared
+    return
+}
 function Get-Sha256([string]$FilePath) {
     $stream = [IO.File]::OpenRead($FilePath)
     $algorithm = [Security.Cryptography.SHA256]::Create()

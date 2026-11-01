@@ -32,8 +32,9 @@ de montagem de instalador público a partir dos artefatos assinados da SignPath.
 
 Antes da distribuição, implementar e validar:
 
-1. Entrada explícita dos binários assinados, conferindo origem, versão e assinatura,
-   sem recompilar os arquivos após a aprovação.
+1. Entrada explícita dos binários assinados implementada para preparação e validação,
+   sem recompilar os arquivos após a aprovação. Consulte [SIGNED_PACKAGING.md](SIGNED_PACKAGING.md).
+   A montagem pública permanece bloqueada até a identidade MSIX estar definida.
 2. Identidade/Publisher de distribuição e assinatura da identidade MSIX compatível.
    A assinatura dos EXE/DLL, isoladamente, não valida o MSIX do menu moderno.
 3. Assinatura e verificação do instalador final, com as licenças, avisos e código-fonte
