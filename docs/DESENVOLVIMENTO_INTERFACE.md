@@ -5,6 +5,7 @@
 | Arquivo | Responsabilidade |
 | --- | --- |
 | `desktop/RPFForge.cs` | Entrada, integração com o processo Node, prévia, pedidos, resultado e testes de estado. |
+| `desktop/ForgeFlow.cs` | Etapas Configurar/Revisar/Resultado, ações contextuais e exigência de revisão antes de converter. |
 | `desktop/ForgeTheme.cs` | Tokens, composição da janela, navegação, estado vazio e ajuda. |
 | `desktop/ForgeControls.cs` | Moldura dos campos e pintura das células editáveis/checkboxes/seletores. |
 | `desktop/ForgeFonts.cs` | Pixelify Sans embutida, registrada somente no processo. |
@@ -31,7 +32,10 @@ O build local gera apenas `.tools/desktop/RPFForge.exe`; não instala, não assi
 ## Contratos de estado
 
 - `busy` controla ações e alterações durante leitura/gravação.
-- `previewValid` só permite Converter depois de uma análise válida.
+- `previewValid` e `reviewed` só permitem Converter depois de uma análise válida e da etapa Revisar.
+- `hasResults` libera a etapa Resultado somente após a operação.
+- Conflitos de destino sem escolha explícita impedem avançar.
+- Erros de validação preservam os campos editáveis para correção.
 - `rendering` evita invalidar a prévia durante o preenchimento programático das tabelas.
 - `boundFolder` impede reutilizar pedidos de outra origem.
 - `expectedSource` vincula a conversão ao hash do RPF analisado.

@@ -18,10 +18,10 @@ namespace RPFForge {
                     { "assets", new object[] { new Dictionary<string, object> { { "path", "stream/sultanrs.ytd" }, { "kind", "texture" }, { "diskBytes", 10485760 } }, new Dictionary<string, object> { { "path", "stream/sultanrs.yft" }, { "kind", "model" }, { "diskBytes", 5242880 } } } } } },
                 { "removedTuning", new object[] { "sultanrs_bumper_missing" } }, { "skipped", new object[] { "shop_vehicle.meta" } }
             };
-            RenderPreview(new object[] { model }, new Dictionary<string, object>());
+            RenderPreview(new object[] { model }, new Dictionary<string, object> { { "esportivos.rpf", new Dictionary<string, object> { { "selected", true }, { "existing", "backup" }, { "reviewedExisting", true } } } });
             tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "02-veiculos.png"));
-            tabs.SelectedIndex = 1; RenderBitmap(Path.Combine(directory, "03-destinos.png"));
-            tabs.SelectedIndex = 2; RenderBitmap(Path.Combine(directory, "04-previa.png"));
+            tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "03-destinos.png"));
+            reviewed = previewValid; tabs.SelectedIndex = 1; stage.Text = "02 / REVISAR"; RenderBitmap(Path.Combine(directory, "04-previa.png"));
             tabs.SelectedIndex = 3; RenderBitmap(Path.Combine(directory, "05-espaco.png"));
             ClientSize = new Size(1024, 700); tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "06-compacto.png"));
             tabs.SelectedIndex = 4; RenderBitmap(Path.Combine(directory, "07-ajuda.png"));

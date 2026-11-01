@@ -117,7 +117,7 @@ namespace RPFForge {
             destinations.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
             destinations.CurrentCellDirtyStateChanged += delegate { if (destinations.IsCurrentCellDirty) destinations.CommitEdit(DataGridViewDataErrorContexts.Commit); };
             destinations.DataError += delegate(object sender, DataGridViewDataErrorEventArgs e) { e.ThrowException = false; };
-            analyze.Click += async delegate { await Analyze(); };
+            analyze.Click += async delegate { await PrimaryAction(); };
             convert.Click += async delegate { await ConvertSelection(); };
             open.Click += delegate { if (!busy && Directory.Exists(lastOutput)) Process.Start("explorer.exe", Quote(lastOutput)); };
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; status.Text = "Aguarde a operação terminar antes de fechar, para preservar os arquivos."; } };
@@ -146,10 +146,10 @@ namespace RPFForge {
         }
         void AddTextColumn(DataGridView grid, string name, string header, bool readOnly, float weight) { grid.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = header, ReadOnly = readOnly, FillWeight = weight, SortMode = DataGridViewColumnSortMode.NotSortable }); }
         void AddTab(string label, Control content) { tabs.AddPage(label, content); }
-        void InvalidatePreview() { previewValid = false; convert.Enabled = false; stage.Text = "02 / PRÉVIA A ATUALIZAR"; if (preview.Count > 0) status.Text = "Alterações pendentes. Clique em Analisar / atualizar prévia antes de converter."; }
+        void InvalidatePreview() { previewValid = false; reviewed = false; stage.Text = "01 / CONFIGURAR"; if (preview.Count > 0) status.Text = "Ao continuar, as alterações serão validadas automaticamente."; RefreshActions(); }
         void SetBusy(bool value, string message) {
             busy = value; open.Enabled = !value && Directory.Exists(lastOutput); browse.Enabled = !value; analyze.Enabled = !value; folder.Enabled = !value; vehicles.Enabled = !value; destinations.Enabled = !value; convert.Enabled = !value && previewValid;
-            status.Text = message; progress.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous; if (!value) progress.Value = 0; progress.AccessibleDescription = message;
+            status.Text = message; progress.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous; if (!value) progress.Value = 0; progress.AccessibleDescription = message; RefreshActions();
         }
         Dictionary<string, object> Requests(bool includeHash) {
             var result = new Dictionary<string, object>();
@@ -157,6 +157,8 @@ namespace RPFForge {
             foreach (DataGridViewRow row in destinations.Rows) {
                 string archive = TextValue(row.Cells["archive"].Value); var config = new Dictionary<string, object>();
                 config["selected"] = Yes(row.Cells["selected"].Value);
+                config["policyPending"] = TextValue(row.Cells["policy"].Value) == "Escolha uma ação";
+                config["reviewedExisting"] = TextValue(row.Cells["exists"].Value) == "Já existe";
                 config["existing"] = TextValue(row.Cells["policy"].Value) == "Backup e substituir" ? "backup" : TextValue(row.Cells["policy"].Value) == "Usar outro nome" ? "rename" : "cancel";
                 string name = TextValue(row.Cells["output"].Value).Trim();
                 if (name.Length > 0 && name != TextValue(row.Tag)) config["outputName"] = name;
@@ -200,7 +202,7 @@ namespace RPFForge {
         void ShowProgress(Dictionary<string, object> message) {
             if (!busy) return;
             string phase = TextValue(Get(message, "phase"));
-            stage.Text = phase == "verify" || phase == "audit" ? "04 / VALIDAÇÃO" : phase == "write" || phase == "convert" ? "03 / CONVERSÃO" : "02 / ANÁLISE";
+            stage.Text = phase == "verify" || phase == "audit" ? "VALIDANDO" : phase == "write" || phase == "convert" ? "CONVERTENDO" : "ANALISANDO";
             string label = phase == "read" ? "Lendo RPF" : phase == "write" ? "Gravando addon" : phase == "verify" ? "Conferindo arquivos gravados" : phase == "audit" ? "Validando referências" : phase == "convert" ? "Convertendo" : "Preparando prévia";
             status.Text = label + ": " + TextValue(Get(message, "label")); progress.AccessibleDescription = status.Text;
             double total = Number(Get(message, "total"));
@@ -209,15 +211,16 @@ namespace RPFForge {
         }
         async Task Analyze() {
             if (busy) return; vehicles.EndEdit(); destinations.EndEdit();
-            lastOutput = ""; open.Enabled = false; stage.Text = "02 / ANÁLISE";
+            reviewed = false; hasResults = false; lastOutput = ""; open.Enabled = false; stage.Text = "ANALISANDO PASTA";
             var requests = Requests(false); SetBusy(true, "Preparando a prévia; os originais permanecem intactos.");
             try { RenderPreview(await Execute("preview", requests), requests); }
-            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; tabs.SelectedIndex = 2; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
-            finally { SetBusy(false, previewValid ? "Prévia pronta. Revise as abas e clique em Converter selecionados." : "Revise os avisos ou corrija a pasta e analise novamente."); }
+            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; reviewDetails.Text = details.Text; tabs.SelectedIndex = 1; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
+            finally { SetBusy(false, previewValid ? "Configure os nomes e as pastas; depois clique em Revisar conversão." : "Revise o diagnóstico ou escolha outra pasta."); }
         }
         void RenderPreview(object[] results, Dictionary<string, object> requests) {
             rendering = true;
             try {
+                var previous = new Dictionary<string, Dictionary<string, object>>(preview, StringComparer.OrdinalIgnoreCase);
                 preview.Clear(); vehicles.Rows.Clear(); destinations.Rows.Clear(); assets.Rows.Clear(); boundFolder = folder.Text;
                 int cars = 0, errors = 0, warnings = 0; double weight = 0; var text = new StringBuilder();
                 var weighted = new List<Tuple<string, Dictionary<string, object>>>(); bool eligible = false, selectedError = false;
@@ -225,15 +228,30 @@ namespace RPFForge {
                     var result = Map(item); string archive = TextValue(Get(result, "archive")); preview[archive] = result;
                     var requested = Map(Get(requests, archive)); bool selected = !requested.ContainsKey("selected") || Yes(Get(requested, "selected"));
                     text.AppendLine(archive.ToUpperInvariant());
-                    if (!Yes(Get(result, "ok"))) { errors++; text.AppendLine("ERRO: " + TextValue(Get(result, "error"))); text.AppendLine(); destinations.Rows.Add(false, archive, "", "Falha na leitura", "Cancelar"); continue; }
+                    if (!Yes(Get(result, "ok"))) {
+                        errors++; text.AppendLine("ERRO: " + TextValue(Get(result, "error"))); text.AppendLine();
+                        Dictionary<string, object> prior;
+                        if (previous.TryGetValue(archive, out prior) && ArrayValue(Get(prior, "models")).Length > 0) {
+                            // Keep the editable form after validation fails; it is not a valid preview.
+                            preview[archive] = prior;
+                            var requestedSpawns = Map(Get(requested, "spawns"));
+                            foreach (object model in ArrayValue(Get(prior, "models"))) { string name = TextValue(model); vehicles.Rows.Add(archive, name, TextValue(Get(requestedSpawns, name))); cars++; }
+                            string requestedPolicy = TextValue(Get(requested, "existing")); string policyLabel = Yes(Get(requested, "policyPending")) ? "Escolha uma ação" : requestedPolicy == "backup" ? "Backup e substituir" : requestedPolicy == "rename" ? "Usar outro nome" : "Cancelar";
+                            int invalidRow = destinations.Rows.Add(selected, archive, requested.ContainsKey("outputName") ? TextValue(Get(requested, "outputName")) : TextValue(Get(prior, "outputName")), Yes(Get(prior, "exists")) ? "Já existe" : "Livre", policyLabel);
+                            destinations.Rows[invalidRow].Tag = TextValue(Get(prior, "defaultName"));
+                            if (selected) selectedError = true;
+                        } else destinations.Rows.Add(false, archive, "", "Falha na leitura", "Cancelar");
+                        continue;
+                    }
                     var audit = Map(Get(result, "audit")); errors += (int)Number(Get(audit, "errors")); warnings += (int)Number(Get(audit, "warnings")); weight += Number(Get(audit, "diskBytes"));
                     var spawns = Map(Get(requested, "spawns"));
                     foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model); vehicles.Rows.Add(archive, name, TextValue(Get(spawns, name))); cars++; }
                     foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model), target = TextValue(Get(spawns, name)); if (target.Length > 0 && target != name) text.AppendLine("Renomeação: " + name + " → " + target + " (arquivos e referências correspondentes nos metas)"); }
                     string policy = TextValue(Get(requested, "existing")); policy = policy == "backup" ? "Backup e substituir" : policy == "rename" ? "Usar outro nome" : "Cancelar";
+                    if (Yes(Get(result, "exists")) && (Yes(Get(requested, "policyPending")) || !requested.ContainsKey("existing") || (!Yes(Get(requested, "reviewedExisting")) && TextValue(Get(requested, "existing")) == "cancel"))) policy = "Escolha uma ação";
                     int row = destinations.Rows.Add(selected, archive, TextValue(Get(result, "outputName")), Yes(Get(result, "exists")) ? "Já existe" : "Livre", policy); destinations.Rows[row].Tag = TextValue(Get(result, "defaultName"));
                     if (selected) { eligible = true; if (!Yes(Get(audit, "ok"))) selectedError = true; }
-                    text.AppendLine("Saída: " + TextValue(Get(result, "output")) + (Yes(Get(result, "exists")) ? " [pasta existente: escolha o tratamento na aba Destinos]" : ""));
+                    text.AppendLine("Saída: " + TextValue(Get(result, "output")) + (Yes(Get(result, "exists")) ? " [pasta existente — ação: " + policy + "]" : ""));
                     text.AppendLine("Spawns finais: " + String.Join(", ", ArrayValue(Get(result, "finalModels")).Select(TextValue)));
                     text.AppendLine("Arquivos de streaming: " + FormatSize(Get(audit, "diskBytes")) + " em disco. RPF original: " + FormatSize(Get(result, "sourceBytes")) + ".");
                     if (Number(Get(result, "mergedSources")) > 0) text.AppendLine("Metas unificados: " + TextValue(Get(result, "mergedSources")) + " arquivos adicionais combinados.");
@@ -247,23 +265,25 @@ namespace RPFForge {
                 foreach (var file in weighted.OrderByDescending(p => Number(Get(p.Item2, "diskBytes"))).Take(200)) assets.Rows.Add(file.Item1, TextValue(Get(file.Item2, "path")), TextValue(Get(file.Item2, "kind")), FormatSize(Get(file.Item2, "diskBytes")));
                 text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS. A aba de peso apresenta até 200 arquivos, do maior para o menor.");
                 details.Text = text.ToString(); summary.Text = CountLabel(cars, "veículo", "veículos") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
+                reviewDetails.Text = details.Text;
                 UpdateCounts(cars, results.Length, warnings, errors, weight);
-                stage.Text = errors > 0 ? "REVISE OS ERROS" : results.Length == 0 ? "NENHUM RPF ENCONTRADO" : "02 / PRÉVIA PRONTA"; stage.ForeColor = errors > 0 ? ForgeTheme.Error : red;
+                stage.Text = errors > 0 ? "REVISE OS ERROS" : results.Length == 0 ? "NENHUM RPF ENCONTRADO" : "01 / CONFIGURAR"; stage.ForeColor = errors > 0 ? ForgeTheme.Error : red;
                 previewValid = eligible && !selectedError; convert.Enabled = previewValid && !busy;
-                if (errors > 0) tabs.SelectedIndex = 2;
+                if (errors > 0) tabs.SelectedIndex = 1;
+                RefreshActions();
             } finally { rendering = false; }
         }
         async Task ConvertSelection() {
-            if (busy || !previewValid) return; vehicles.EndEdit(); destinations.EndEdit();
-            if (!previewValid) return;
+            if (busy || !previewValid || !reviewed) return; vehicles.EndEdit(); destinations.EndEdit();
+            if (!previewValid || !reviewed) return;
             lastOutput = ""; open.Enabled = false; stage.Text = "03 / CONVERSÃO";
             var request = Requests(true); SetBusy(true, "Convertendo os veículos selecionados.");
             try { RenderResults(await Execute("convert", request)); }
-            catch (Exception error) { details.Text = error.Message; tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
-            finally { previewValid = false; SetBusy(false, "Confira o resultado na aba Prévia e validação. Para repetir, analise novamente."); }
+            catch (Exception error) { hasResults = true; reviewed = false; details.Text = error.Message; tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
+            finally { previewValid = false; SetBusy(false, "Confira o resultado. Use Nova conversão para começar outro pacote."); }
         }
         void RenderResults(object[] results) {
-            previewValid = false; convert.Enabled = false;
+            previewValid = false; reviewed = false; hasResults = true; convert.Enabled = false;
             lastOutput = ""; var text = new StringBuilder(); int success = 0, cancelled = 0, failed = 0, warnings = 0;
             foreach (object item in results) {
                 var result = Map(item); text.AppendLine(TextValue(Get(result, "archive")));
@@ -275,7 +295,7 @@ namespace RPFForge {
                 text.AppendLine();
             }
             details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Valide os veículos no FiveM.";
-            stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "05 / CONCLUÍDO";
+            stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "03 / CONCLUÍDO";
             stage.ForeColor = failed > 0 ? ForgeTheme.Error : warnings > 0 || success == 0 ? ForgeTheme.Warning : ForgeTheme.Success;
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
@@ -318,20 +338,29 @@ namespace RPFForge {
         public async Task WorkflowTest(string fixtureFolder) {
             await SelectOrigin(fixtureFolder);
             if (!previewValid || vehicles.Rows.Count != 1 || assets.Rows.Count == 0) throw new Exception("Initial GUI preview failed: " + details.Text);
+            await ConvertSelection();
+            if (Directory.Exists(Path.Combine(fixtureFolder, "car"))) throw new Exception("Conversion must not run before review.");
             string analyzedFolder = folder.Text;
             await SelectOrigin(null);
             if (!previewValid || folder.Text != analyzedFolder || vehicles.Rows.Count != 1) throw new Exception("Cancelling the picker must preserve the existing preview.");
             vehicles.Rows[0].Cells["target"].Value = "DESKTOPTEST";
             if (previewValid) throw new Exception("Edits must invalidate GUI preview.");
-            await SelectOrigin(fixtureFolder);
-            if (!previewValid || !details.Text.Contains("DESKTOPTEST")) throw new Exception("Renamed GUI preview failed: " + details.Text);
+            vehicles.Rows[0].Cells["target"].Value = "invalid name!";
+            await ReviewConfiguration();
+            if (previewValid || convert.Enabled || vehicles.Rows.Count != 1 || TextValue(vehicles.Rows[0].Cells["target"].Value) != "invalid name!") throw new Exception("Invalid spawn must remain editable without enabling conversion.");
+            tabs.SelectedIndex = 0; vehicles.Rows[0].Cells["target"].Value = "DESKTOPTEST";
+            await ReviewConfiguration();
+            if (!previewValid || !reviewDetails.Text.Contains("DESKTOPTEST")) throw new Exception("Review must automatically validate renamed spawns: " + details.Text);
+            if (!reviewed || tabs.SelectedIndex != 1 || !convert.Enabled) throw new Exception("Review step did not authorize conversion.");
             await ConvertSelection();
             string output = Path.Combine(fixtureFolder, "DESKTOPTEST");
             if (!File.Exists(Path.Combine(output, "fxmanifest.lua")) || !File.ReadAllText(Path.Combine(output, "data", "vehicles.meta")).Contains("<modelName>DESKTOPTEST</modelName>")) throw new Exception("GUI conversion failed: " + details.Text);
             if (File.Exists(Path.Combine(output, "conversion-report.json"))) throw new Exception("Unexpected report in addon.");
             File.WriteAllText(Path.Combine(output, "keep.txt"), "preserve old output");
+            await SelectOrigin(fixtureFolder); await ReviewConfiguration();
+            if (reviewed || tabs.SelectedIndex != 0 || convert.Enabled) throw new Exception("Existing destination must require an explicit choice.");
             destinations.Rows[0].Cells["policy"].Value = "Backup e substituir";
-            await Analyze(); if (!previewValid) throw new Exception("Backup preview failed: " + details.Text);
+            await ReviewConfiguration();
             await ConvertSelection();
             string[] backups = Directory.GetDirectories(fixtureFolder, "DESKTOPTEST.backup-*");
             if (backups.Length != 1 || File.ReadAllText(Path.Combine(backups[0], "keep.txt")) != "preserve old output") throw new Exception("GUI backup failed: " + details.Text);

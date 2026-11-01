@@ -45,10 +45,10 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 
 1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
 2. Selecione **Converter RPF para FiveM**, fornecido pela extensão nativa do RPF Forge para o menu moderno do Windows 11.
-3. A janela do RPF Forge analisa o pacote e mostra os veiculos. Preencha **Novo spawn** se quiser renomear; vazio mantem o atual.
-4. Na aba **Destinos**, selecione os RPFs e escolha outro nome, backup/substituicao ou cancelamento para pastas existentes.
-5. Clique em **Analisar / atualizar previa** depois de editar e revise **Previa e validacao** e **Arquivos por peso**.
-6. Clique em **Converter selecionados**. O botao **Abrir resultado** fica disponivel ao concluir.
+3. A análise começa automaticamente e abre **1. Configurar**. Revise os spawns e as pastas de saída na mesma tela.
+4. Para pastas existentes, escolha outro nome, backup/substituição ou cancelamento.
+5. Clique em **Revisar conversão**. O app valida automaticamente as edições e mostra o resumo.
+6. Clique em **Converter agora**. Ao terminar, **Resultado** permite abrir a pasta gerada ou iniciar uma **Nova conversão**.
 
 A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
 e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF.

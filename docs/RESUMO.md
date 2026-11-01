@@ -7,11 +7,11 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 
 - Comando **Converter RPF para FiveM** no menu principal do Windows 11.
 - Funciona sobre a pasta e no espaco vazio dentro dela; a extensao detecta a presenca de RPF.
-- Janela RPForge com navegação lateral **Veículos**, **Destinos**, **Prévia e resultado**, **Espaço em disco** e **Ajuda**.
+- Janela RPForge com fluxo guiado **Configurar → Revisar → Resultado**, com **Espaço em disco** e **Ajuda** como ferramentas auxiliares.
 - Identidade pixel art e fonte Pixelify Sans do portfólio, embutidas para uso offline.
 - Analise antes de converter; nenhuma extracao e gravada durante a previa.
 - Edicao de spawns por carro, com maiusculas e minusculas preservadas. Campo vazio mantem o nome atual.
-- Alterar nomes ou destinos exige atualizar a previa. O RPF tambem e conferido para detectar mudancas desde a analise.
+- Alterar nomes ou destinos é validado automaticamente ao avançar para Revisar. O RPF tambem e conferido para detectar mudancas desde a analise.
 - Progresso por etapa, bloqueio de operacoes duplicadas e resultado com acesso a pasta criada.
 
 ## Conversao e organizacao

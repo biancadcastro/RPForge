@@ -57,14 +57,15 @@ namespace RPFForge {
         readonly Panel empty = new Panel();
         TableLayoutPanel mainLayout;
         ForgeSurface workspacePanel;
+        TableLayoutPanel configurationLayout;
         readonly Label emptyTitle = new Label(), emptyHelp = new Label();
         readonly Button[] navigation = new Button[5];
         readonly ToolTip hints = new ToolTip();
-        readonly string[] titles = { "Veículos", "Destinos", "Prévia e resultado", "Espaço em disco", "Ajuda" };
+        readonly string[] titles = { "1. Configurar", "2. Revisar", "3. Resultado", "Espaço em disco", "Ajuda" };
         readonly string[] descriptions = {
-            "Revise os spawns. Deixe o novo nome vazio para manter o original; atualize a prévia depois de editar.",
-            "Selecione os RPFs e defina a pasta de saída. Se ela existir, escolha como tratar o conflito.",
-            "Confira renomeações, referências, tuning e avisos antes de converter. O resultado aparece aqui.",
+            "Escolha os nomes e as pastas abaixo. Depois clique em Revisar conversão para continuar.",
+            "Confira nomes, pastas, avisos e alterações. A conversão só começa em Converter agora.",
+            "Confira o resultado da operação e abra a pasta gerada.",
             "Arquivos de streaming do maior para o menor. Tamanho em disco não é uma estimativa de VRAM ou FPS.",
             "Guia rápido de conversão, segurança dos arquivos e limites de suporte."
         };
@@ -86,7 +87,7 @@ namespace RPFForge {
             for (int i = 0; i < navigation.Length; i++) {
                 int index = i; var button = new ForgeButton { Navigation = true, Text = titles[i], Dock = DockStyle.Fill, Margin = new Padding(0, 4, 0, 4), AccessibleName = titles[i], TabIndex = i };
                 ConfigureButton(button, button.Text, false); button.Dock = DockStyle.Fill; button.Margin = new Padding(0, 4, 0, 4);
-                button.Click += delegate { tabs.SelectedIndex = index; }; navigation[i] = button; side.Controls.Add(button, 0, i + 2);
+                button.Click += async delegate { if (index == 1) await ReviewConfiguration(); else if (index != 2 || hasResults) tabs.SelectedIndex = index; }; navigation[i] = button; side.Controls.Add(button, 0, i + 2);
             }
             side.Controls.Add(new Label { Text = "PROCESSAMENTO LOCAL\nSeus arquivos ficam no computador.\nOs RPFs originais são preservados.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Padding = new Padding(4, 12, 0, 0) }, 0, 8);
             shell.Controls.Add(side, 0, 0);
@@ -128,14 +129,23 @@ namespace RPFForge {
             vehicles.CellPainting += PaintEditableCell;
             destinations.Columns.Add(new DataGridViewCheckBoxColumn { Name = "selected", HeaderText = "Converter", Width = 78, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
             AddTextColumn(destinations, "archive", "Arquivo RPF", true, 28); AddTextColumn(destinations, "output", "Pasta de saída", false, 30); AddTextColumn(destinations, "exists", "Destino", true, 18);
-            var choice = new DataGridViewComboBoxColumn { Name = "policy", HeaderText = "Se a pasta existir", FillWeight = 34, FlatStyle = FlatStyle.Flat }; choice.Items.AddRange("Cancelar", "Usar outro nome", "Backup e substituir"); destinations.Columns.Add(choice);
+            var choice = new DataGridViewComboBoxColumn { Name = "policy", HeaderText = "Se a pasta existir", FillWeight = 34, FlatStyle = FlatStyle.Flat }; choice.Items.AddRange("Escolha uma ação", "Cancelar", "Usar outro nome", "Backup e substituir"); destinations.Columns.Add(choice);
             destinations.CellPainting += PaintEditableCell;
             destinations.EditingControlShowing += delegate(object sender, DataGridViewEditingControlShowingEventArgs e) { e.Control.BackColor = ForgeTheme.Raised; e.Control.ForeColor = foreground; var combo = e.Control as ComboBox; if (combo != null) combo.FlatStyle = FlatStyle.Flat; };
             AddTextColumn(assets, "archive", "RPF", true, 22); AddTextColumn(assets, "file", "Arquivo", true, 52); AddTextColumn(assets, "kind", "Tipo", true, 12); AddTextColumn(assets, "size", "Tamanho", true, 18); assets.ReadOnly = true;
             vehicles.AccessibleName = "Veículos e edição de spawns"; destinations.AccessibleName = "Destinos e tratamento de pastas existentes"; assets.AccessibleName = "Arquivos ordenados por tamanho em disco";
             details.Multiline = true; details.ReadOnly = true; details.ScrollBars = ScrollBars.Both; details.WordWrap = false; details.Dock = DockStyle.Fill; details.BackColor = surface; details.ForeColor = foreground; details.BorderStyle = BorderStyle.None; details.Font = new Font("Consolas", 10); details.AccessibleName = "Prévia, validação e resultado da conversão";
             details.Text = "A análise não altera os arquivos.\r\n\r\nSelecione a pasta de origem e clique em Analisar arquivos.\r\nAs alterações previstas e os avisos aparecerão aqui.";
-            AddTab(titles[0], vehicles); AddTab(titles[1], destinations); AddTab(titles[2], details); AddTab(titles[3], assets);
+            var configuration = new TableLayoutPanel { Dock = DockStyle.Top, Height = 344, ColumnCount = 1, RowCount = 4, Margin = Padding.Empty };
+            configurationLayout = configuration;
+            configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 160)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 32)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 128));
+            configuration.Controls.Add(new Label { Text = "NOMES DOS VEÍCULOS · deixe vazio para manter o original", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10) }, 0, 0);
+            configuration.Controls.Add(vehicles, 0, 1);
+            configuration.Controls.Add(new Label { Text = "PASTAS DE SAÍDA · escolha o tratamento se a pasta já existir", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10), Padding = new Padding(0, 8, 0, 0) }, 0, 2);
+            configuration.Controls.Add(destinations, 0, 3);
+            reviewDetails.Multiline = true; reviewDetails.ReadOnly = true; reviewDetails.ScrollBars = ScrollBars.Both; reviewDetails.WordWrap = false; reviewDetails.Dock = DockStyle.Fill; reviewDetails.BackColor = surface; reviewDetails.ForeColor = foreground; reviewDetails.BorderStyle = BorderStyle.None; reviewDetails.Font = new Font("Consolas", 10); reviewDetails.AccessibleName = "Resumo da conversão a confirmar";
+            var configurationScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true }; configurationScroll.Controls.Add(configuration);
+            AddTab(titles[0], configurationScroll); AddTab(titles[1], reviewDetails); AddTab(titles[2], details); AddTab(titles[3], assets);
             var help = new TextBox { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, ScrollBars = ScrollBars.Vertical, BorderStyle = BorderStyle.None, BackColor = surface, ForeColor = foreground, Font = ForgeFonts.Pixel(12), Text = HelpText + "\r\n\r\nTIPOGRAFIA — PIXELIFY SANS\r\n\r\n" + ForgeFonts.License, AccessibleName = "Guia rápido RPForge" }; AddTab(titles[4], help);
             BuildEmptyState(); tabs.TabPages[0].Controls.Add(empty); empty.BringToFront(); vehicles.Visible = false;
             tabs.SelectedIndexChanged += delegate { RefreshNavigation(); }; RefreshNavigation();
@@ -145,10 +155,11 @@ namespace RPFForge {
             var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty }; footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); footer.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 570));
             status.Dock = DockStyle.Fill; status.ForeColor = muted; status.TextAlign = ContentAlignment.MiddleLeft; status.Font = ForgeFonts.Pixel(11); status.Text = "Tudo é processado localmente."; status.AccessibleName = "Estado da operação";
             var actions = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false, Margin = Padding.Empty };
-            ConfigureButton(convert, "&Converter selecionados", true); convert.Width = 205; ConfigureButton(analyze, "&Analisar arquivos", false); analyze.Width = 170; ConfigureButton(open, "Abrir &resultado", false); open.Width = 165;
-            actions.Controls.Add(convert); actions.Controls.Add(analyze); actions.Controls.Add(open); footer.Controls.Add(status, 0, 0); footer.Controls.Add(actions, 1, 0); main.Controls.Add(footer, 0, 6);
+            ConfigureButton(convert, "&Converter selecionados", true); convert.Width = 205; ConfigureButton(analyze, "&Escolher pasta", true); analyze.Width = 250; ConfigureButton(open, "Abrir &resultado", false); open.Width = 165;
+            ConfigureButton(back, "← &Voltar", false); back.Width = 140; back.Click += delegate { tabs.SelectedIndex = 0; };
+            actions.Controls.Add(convert); actions.Controls.Add(analyze); actions.Controls.Add(open); actions.Controls.Add(back); footer.Controls.Add(status, 0, 0); footer.Controls.Add(actions, 1, 0); main.Controls.Add(footer, 0, 6);
             shell.Controls.Add(main, 1, 0); Controls.Add(shell); convert.Enabled = false; open.Enabled = false;
-            SetWorkspaceReady(false);
+            SetWorkspaceReady(false); RefreshActions();
             summary.Text = "Nenhum arquivo analisado.";
             AcceptButton = analyze; hints.SetToolTip(analyze, "Analisa os RPFs e atualiza a prévia sem gravar o addon."); hints.SetToolTip(convert, "Converte somente os RPFs selecionados na aba Destinos, usando a prévia atual."); hints.SetToolTip(open, "Abre a pasta do último addon concluído nesta operação.");
         }
@@ -161,7 +172,9 @@ namespace RPFForge {
             emptyHelp.Text = "Escolha uma pasta com arquivos .rpf. A análise começa automaticamente.\nVocê poderá revisar tudo antes de converter."; emptyHelp.Dock = DockStyle.Fill; emptyHelp.TextAlign = ContentAlignment.MiddleCenter; emptyHelp.ForeColor = muted; center.Controls.Add(emptyHelp, 0, 3); empty.Controls.Add(center);
         }
         void RefreshNavigation() {
+            RefreshActions();
             int index = Math.Max(0, tabs.SelectedIndex); pageTitle.Text = titles[index]; pageHelp.Text = descriptions[index];
+            if (!busy && index == 0 && preview.Count > 0) stage.Text = "01 / CONFIGURAR";
             bool header = index != 0 || vehicles.Rows.Count > 0;
             if (workspacePanel != null) { workspacePanel.RowStyles[0].Height = header ? 32 : 0; workspacePanel.RowStyles[1].Height = header ? 48 : 0; pageTitle.Visible = header; pageHelp.Visible = header; }
             for (int i = 0; i < navigation.Length; i++) { navigation[i].BackColor = i == index ? ForgeTheme.Raised : surface; navigation[i].ForeColor = i == index ? red : muted; navigation[i].AccessibleDescription = i == index ? "Página selecionada" : "Abrir página"; navigation[i].Invalidate(); }
@@ -174,18 +187,19 @@ namespace RPFForge {
         }
         void SetWorkspaceReady(bool ready) { if (mainLayout != null) { mainLayout.RowStyles[2].Height = ready ? 84 : 12; mainLayout.GetControlFromPosition(0, 2).Visible = ready; } }
         void ResetOrigin() {
+            reviewed = false; hasResults = false;
             lastOutput = ""; boundFolder = ""; open.Enabled = false; preview.Clear();
             rendering = true;
             try { vehicles.Rows.Clear(); destinations.Rows.Clear(); assets.Rows.Clear(); } finally { rendering = false; }
             InvalidatePreview(); stage.Text = "01 / ORIGEM"; stage.ForeColor = red;
             foreach (var label in new[] { countCars, countArchives, countWarnings, countWeight }) { label.Text = "—"; label.ForeColor = foreground; }
             vehicles.Visible = false; empty.Visible = true; emptyTitle.Text = "Analise a pasta de origem";
-            SetWorkspaceReady(false); RefreshNavigation();
+            SetWorkspaceReady(false); tabs.SelectedIndex = 0; RefreshNavigation();
             emptyHelp.Text = "Clique em Analisar arquivos para conferir os RPFs desta pasta.\nA análise não altera os arquivos originais.";
             summary.Text = "Pasta alterada. Analise os arquivos para preparar uma nova prévia.";
             details.Text = "Nenhuma prévia disponível para esta pasta.\r\nClique em Analisar arquivos para continuar.";
         }
         protected override void Dispose(bool disposing) { if (disposing) { hints.Dispose(); } base.Dispose(disposing); }
-        const string HelpText = "COMO CONVERTER\r\n\r\n1. Escolha a pasta que contém os RPFs abertos.\r\n2. A análise começa automaticamente. A prévia não grava o addon.\r\n3. Em Veículos, digite um novo spawn ou deixe vazio para manter.\r\n4. Em Destinos, selecione os RPFs e escolha o tratamento de conflitos.\r\n5. Atualize a análise após editar. Revise a prévia e os avisos.\r\n6. Converta e confira o resultado. Teste o veículo no FiveM.\r\n\r\nNOMES E DESTINOS\r\n\r\nSpawns aceitam letras maiúsculas e minúsculas, números e _. Comece com letra e use até 63 caracteres. Nomes reservados do Windows são recusados. Maiúsculas são preservadas, mas conflitos são comparados sem diferenciar maiúsculas e minúsculas.\r\n\r\nCancelar: preserva a pasta existente e não converte esse RPF.\r\nUsar outro nome: escolha outro nome de saída e atualize a prévia.\r\nBackup e substituir: guarda a pasta anterior como backup antes de entregar o novo addon.\r\n\r\nO QUE É PRESERVADO\r\n\r\nRPF original, peças disponíveis, melhorias de desempenho, liveries, áudio e texturas internas. Opções de tuning sem modelo são removidas; dlctext.meta, shopdata.meta e shop_vehicle.meta são descartados. Metas ficam em data e tuning em stream/mods.\r\n\r\nLIMITES\r\n\r\nVeículos GTA V Legacy; arquivos RPF7 OPEN/NONE de até 512 MiB por RPF externo. Sem descriptografia, GTA V Enhanced, mapas ou áudio customizado. RPFs aninhados são lidos, mas subpastas do Windows não são pesquisadas. A validação estrutural não substitui testes no FiveM.\r\n\r\nATALHOS\r\n\r\nAlt+P: escolher pasta. Alt+A: analisar. Alt+C: converter. Alt+R: abrir resultado. Tab/Shift+Tab: navegar pelos controles.\r\n\r\nTudo é processado localmente. A ferramenta não altera server.cfg nem copia arquivos para sua base de testes.";
+        const string HelpText = "COMO CONVERTER\r\n\r\n1. Escolha a pasta que contém os RPFs abertos.\r\n2. A análise começa automaticamente e abre Configurar.\r\n3. Revise os nomes e as pastas na mesma tela. Vazio mantém o spawn.\r\n4. Clique em Revisar conversão. As edições são validadas automaticamente.\r\n5. Confira o resumo e clique em Converter agora.\r\n6. Abra a pasta em Resultado ou inicie uma Nova conversão.\r\n\r\nNOMES E DESTINOS\r\n\r\nSpawns aceitam letras maiúsculas e minúsculas, números e _. Comece com letra e use até 63 caracteres. Nomes reservados do Windows são recusados. Maiúsculas são preservadas, mas conflitos são comparados sem diferenciar maiúsculas e minúsculas.\r\n\r\nCancelar: preserva a pasta existente e não converte esse RPF.\r\nUsar outro nome: escolha outro nome de saída e atualize a prévia.\r\nBackup e substituir: guarda a pasta anterior como backup antes de entregar o novo addon.\r\n\r\nO QUE É PRESERVADO\r\n\r\nRPF original, peças disponíveis, melhorias de desempenho, liveries, áudio e texturas internas. Opções de tuning sem modelo são removidas; dlctext.meta, shopdata.meta e shop_vehicle.meta são descartados. Metas ficam em data e tuning em stream/mods.\r\n\r\nLIMITES\r\n\r\nVeículos GTA V Legacy; arquivos RPF7 OPEN/NONE de até 512 MiB por RPF externo. Sem descriptografia, GTA V Enhanced, mapas ou áudio customizado. RPFs aninhados são lidos, mas subpastas do Windows não são pesquisadas. A validação estrutural não substitui testes no FiveM.\r\n\r\nATALHOS\r\n\r\nAlt+P: escolher pasta. Alt+A: continuar no fluxo. Alt+C: converter na etapa Revisar. Alt+R: abrir resultado. Tab/Shift+Tab: navegar pelos controles.\r\n\r\nTudo é processado localmente. A ferramenta não altera server.cfg nem copia arquivos para sua base de testes.";
     }
 }
