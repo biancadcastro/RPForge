@@ -1,9 +1,9 @@
 {
   "name": "rpf-to-fivem",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Windows context menu to convert open GTA V vehicle RPF archives into FiveM resources",
+  "description": "RPF Forge: convert open GTA V vehicle archives into FiveM resources from the Windows 11 context menu",
   "license": "MIT",
   "engines": {
     "node": ">=22"

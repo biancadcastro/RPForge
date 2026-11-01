@@ -11,3 +11,6 @@ coverage/
 .tools/
 packaging-stage/
 release/
+*.pfx
+*.p12
+*.key

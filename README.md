@@ -1,11 +1,12 @@
-# RPF to FiveM
+# RPF Forge
 
 Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Windows.
-Código aberto, licença MIT. Independente do RedHorn Studio e do RedHorn Garage.
+Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
+O desenvolvimento atual permanece local, sem autorização para publicação.
 
 ## Instalar no Windows pelo instalador
 
-Abra `RPF-to-FiveM-Setup-0.1.1-x64.exe` e conclua a instalacao.
+Abra `RPF-Forge-Setup-0.2.0-x64.exe` e conclua a instalacao.
 O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
 abrir terminal ou baixar outros programas. Nao requer administrador.
 O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.
@@ -29,11 +30,12 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 ## Usar
 
 1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
-2. Selecione **Converter RPF para FiveM**. No Windows 11, pode estar em **Mostrar mais opções**.
+2. Selecione **Converter RPF para FiveM**, fornecido pela extensão nativa do RPF Forge para o menu moderno do Windows 11.
 3. Aguarde o resultado na janela de console; pressione Enter para fechar.
 
-O menu aparece nas pastas em geral; a presença de RPF é verificada ao clicar.
-Esta implementação não instala extensão COM para filtrar pastas dinamicamente.
+A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
+e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF.
+As entradas tradicionais permanecem para compatibilidade.
 Não pesquisa em subpastas do Windows, mas extrai RPFs aninhados dentro dos arquivos.
 
 Para uma pasta `meu_carro` contendo `dlc.rpf`, a saída é:
@@ -103,6 +105,22 @@ npm test
 ```
 
 ### Gerar e validar o instalador local
+
+Desde a versao 0.2.0, o instalador inclui uma DLL C++ e um pacote de identidade assinado
+com certificado **RPF Forge Local Test**. Esta assinatura e apenas para testes locais.
+Antes da instalacao, a confianca no certificado publico precisa de autorizacao explicita
+do usuario. A ferramenta nao importa certificados automaticamente nem ativa modo de
+desenvolvedor. Uma assinatura de distribuicao sera necessaria para uma futura publicacao.
+A implantacao MSIX nesta maquina exige confianca em `LocalMachine\TrustedPeople`,
+com autorizacao explicita e UAC. `CurrentUser\TrustedPeople` nao foi suficiente.
+O script `Trust-LocalTestCertificate.ps1` executa somente esse passo autorizado;
+nao e chamado automaticamente pelo instalador e nao altera o repositorio Root.
+
+O compilador nativo usado nesta maquina e LLVM-MinGW 20261020 UCRT x64 (release oficial
+`mstorsjo/llvm-mingw`, SHA-256 do ZIP: `fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd`).
+O empacotamento usa Microsoft.Windows.SDK.BuildTools 10.0.28000.2957 do NuGet oficial.
+Ambos ficam em `.tools`, fora do Git e do instalador. A chave de assinatura permanece
+no repositorio pessoal de certificados do Windows, nunca no codigo ou instalador.
 
 ```powershell
 npm run installer

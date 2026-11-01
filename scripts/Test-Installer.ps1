@@ -1,9 +1,10 @@
 param([string]$InstallerPath)
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSHOME 'Modules\Appx\Appx.psd1') -ErrorAction Stop
 $projectRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 if (!$InstallerPath) {
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
-    $InstallerPath = Join-Path $projectRoot "release\RPF-to-FiveM-Setup-$version-x64.exe"
+    $InstallerPath = Join-Path $projectRoot "release\RPF-Forge-Setup-$version-x64.exe"
 }
 $InstallerPath = (Resolve-Path -LiteralPath $InstallerPath).Path
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ('rpf-installer-test-' + [guid]::NewGuid().ToString('N'))
@@ -39,6 +40,7 @@ try {
     $command = (Get-Item -LiteralPath "$menuKey\command").GetValue('')
     if (!$command.Contains($runtime) -or !$command.Contains($cli)) { throw 'Menu aponta para outro programa.' }
     & (Join-Path $PSScriptRoot 'Test-ContextMenu.ps1')
+    & (Join-Path $PSScriptRoot 'Test-ModernMenu.ps1') -InstallDir $installDir
     # No Node, npm or other executable can be found through PATH during conversion.
     $previousPath = $env:PATH
     try {
@@ -54,6 +56,7 @@ try {
     $installed = $false
     if (Test-Path -LiteralPath $menuKey) { throw 'Menu permaneceu apos desinstalar.' }
     if (Test-Path -LiteralPath $backgroundKey) { throw 'Menu do fundo permaneceu apos desinstalar.' }
+    if (Get-AppxPackage -Name 'RedHorn.RPFForge.Local') { throw 'Pacote moderno permaneceu apos desinstalar.' }
     if (Test-Path -LiteralPath $runtime) { throw 'Runtime permaneceu apos desinstalar.' }
     if (!(Test-Path -LiteralPath $output) -or !(Test-Path -LiteralPath (Join-Path $inputDir 'vehicle.rpf'))) { throw 'Dados de usuario foram removidos.' }
     Write-Host "PASS: instalacao, menu, runtime sem PATH, conversao e desinstalacao. Logs: $testRoot"

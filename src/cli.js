@@ -4,7 +4,7 @@ const args = process.argv.slice(2);
 const interactive = args[0] === '--interactive';
 if (interactive) args.shift();
 if (args.length !== 1 || args[0] === '--help') {
-  console.log('RPF to FiveM\nUso: node src/cli.js "pasta contendo .rpf"\nAceita GTA V Legacy RPF7 OPEN/NONE. Preserva os originais.');
+  console.log('RPF Forge\nUso: node src/cli.js "pasta contendo .rpf"\nAceita GTA V Legacy RPF7 OPEN/NONE. Preserva os originais.');
   process.exitCode = args[0] === '--help' ? 0 : 1;
 } else {
   try {

@@ -41,6 +41,8 @@ try {
     }
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $projectRoot 'src') -Destination $stage -Recurse
+    & (Join-Path $PSScriptRoot 'Build-Shell.ps1') -Destination (Join-Path $stage 'shell')
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'windows') -Destination $stage -Recurse
     foreach ($name in @('package.json', 'package-lock.json', 'LICENSE')) {
         Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
     }
@@ -54,11 +56,11 @@ try {
     Copy-Item -LiteralPath $nodePath -Destination (Join-Path $runtimeDir 'node.exe')
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nodejs/node/$nodeVersion/LICENSE" -OutFile (Join-Path $runtimeDir 'LICENSE.txt') -UseBasicParsing
     $instructions = @'
-RPF to FiveM
+RPF Forge
 
 1. Clique com o botao direito na pasta que contem o arquivo .rpf.
 2. Selecione Converter RPF para FiveM.
-   No Windows 11, procure em Mostrar mais opcoes.
+   A extensao usa o menu principal do Windows 11.
 3. O addon sera criado em uma nova pasta terminada em _fivem.
 4. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
 
@@ -69,14 +71,14 @@ Arquivos criptografados, mapas e audio customizado nao sao suportados.
 O menu aparece nas pastas e verifica os RPFs quando acionado.
 Valide o resultado no FiveM antes de usar em producao.
 
-Para remover, use Configuracoes > Aplicativos > RPF to FiveM.
+Para remover, use Configuracoes > Aplicativos > RPF Forge.
 Seus addons e arquivos originais nao sao apagados na desinstalacao.
 '@
     Set-Content -LiteralPath (Join-Path $stage 'LEIA-ME.txt') -Value $instructions -Encoding UTF8
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
     & $CompilerPath "/DAppVersion=$version" "/DPayloadDir=$stage" "/DReleaseDir=$release" (Join-Path $projectRoot 'installer\setup.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar instalador.' }
-    $installer = Join-Path $release "RPF-to-FiveM-Setup-$version-x64.exe"
+    $installer = Join-Path $release "RPF-Forge-Setup-$version-x64.exe"
     $hash = Get-Sha256 $installer
     Set-Content -LiteralPath "$installer.sha256" -Value "$hash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
     Write-Host "Instalador local: $installer"
