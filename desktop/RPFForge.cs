@@ -340,7 +340,9 @@ namespace RPFForge {
         public void RenderBitmap(string destination) {
             renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000);
             Show(); PerformLayout(); Application.DoEvents();
-            using (var image = new Bitmap(Width, Height)) { DrawToBitmap(image, new Rectangle(Point.Empty, Size)); image.Save(destination, System.Drawing.Imaging.ImageFormat.Png); }
+            // Render only the app content; Form.DrawToBitmap synthesizes legacy window chrome.
+            Control content = Controls[0];
+            using (var image = new Bitmap(content.Width, content.Height)) { content.DrawToBitmap(image, new Rectangle(Point.Empty, content.Size)); image.Save(destination, System.Drawing.Imaging.ImageFormat.Png); }
             Hide();
         }
         public void PrepareBackgroundTest() { renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000); }

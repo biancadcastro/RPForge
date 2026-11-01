@@ -4,8 +4,8 @@ Conteúdo: `docs/guia-usuario/conteudo.json`. A versão navegável e o PDF são 
 por `build_manual.py`, usando ReportLab e as fontes locais do Windows. O PDF final
 fica em `output/pdf` e uma cópia acompanha o guia em `docs/guia-usuario`.
 
-Os PNGs foram capturados pelo renderizador da versão instalada 0.3.1, com exemplos
-fictícios. A tela de YTYP registra uma geração real de um modelo sintético. Não há
+Os PNGs mostram a área cliente da interface 0.3.1, sem a moldura desenhada pelo
+Windows, com exemplos fictícios. A tela de YTYP registra uma geração real de um modelo sintético. Não há
 assets do jogo, acervo privado ou credenciais no pacote de documentação.
 
 As logos são as variantes finais aprovadas da identidade RPForge. Pixelify Sans
