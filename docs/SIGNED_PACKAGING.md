@@ -36,6 +36,19 @@ disponíveis no Windows que executa o processo.
 
 ## Limites atuais
 
+O nome interno de distribuição previsto no template é `RedHorn.RPFForge`, separado
+de `RedHorn.RPFForge.Local`. O nome exibido continua sendo RPForge.
+Após receber e configurar o Subject exato do certificado aprovado, gerar o manifesto:
+
+```powershell
+./scripts/Prepare-DistributionIdentity.ps1 -Destination .tools/distribution-identity
+```
+
+O script aplica a versão do projeto e o Publisher aprovado ao XML, recusando
+certificados locais e configuração pendente. Ele não gera certificado, pacote MSIX
+ou instalador e não registra a identidade no Windows. A futura instalação deverá
+tratar a migração da identidade local e a remoção de cada identidade com seu dono.
+
 Sem `-ValidateSignedInputsOnly`, os parâmetros de artefatos assinados interrompem
 o script antes de qualquer ferramenta de compilação ou empacotamento. Isso evita
 cair silenciosamente no fluxo que gera a identidade local.
