@@ -16,6 +16,7 @@ AppPublisher=Bianca de Castro
 DefaultDirName={localappdata}\Programs\RPF to FiveM
 DefaultGroupName=RPForge
 UsePreviousGroup=no
+UsePreviousLanguage=no
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
