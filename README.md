@@ -22,7 +22,7 @@ nao as contem. Nao gerar outro instalador sem pedido explicito.
 
 ## Instalar no Windows pelo instalador
 
-Abra `RPF-Forge-Setup-0.2.0-x64.exe` e conclua a instalacao.
+Abra `RPF-Forge-Setup-0.3.0-x64.exe` e conclua a instalacao.
 O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
 abrir terminal ou baixar outros programas. Nao requer administrador.
 O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.

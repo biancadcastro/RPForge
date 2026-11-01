@@ -3,7 +3,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $PSHOME 'Modules\Appx\Appx.psd1') -ErrorAction Stop
 if ($Unregister) {
+    $owner = Get-ItemPropertyValue -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner' -ErrorAction SilentlyContinue
+    if ($owner -and $owner -ne $root) { Write-Host 'Menu de outra instalacao preservado.'; return }
     Get-AppxPackage -Name 'RedHorn.RPFForge.Local' | Remove-AppxPackage -ErrorAction Stop
+    if ($owner -eq $root) { Remove-ItemProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner' }
 } else {
     # Sparse-package logos and PRI resources are resolved from ExternalLocation.
     $sourceAssets = Join-Path $root 'shell\Assets'
@@ -25,6 +28,8 @@ if ($Unregister) {
     }
     $registered = Get-AppxPackage -Name 'RedHorn.RPFForge.Local'
     if (!$registered -or $registered.Status -ne 'Ok') { throw 'Identidade do menu moderno nao ficou ativa.' }
+    New-Item -Path 'HKCU:\Software\RPForge' -Force | Out-Null
+    New-ItemProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner' -Value $root -PropertyType String -Force | Out-Null
 }
 Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class ForgeRefresh { [DllImport("shell32.dll")] public static extern void SHChangeNotify(uint eventId, uint flags, IntPtr item1, IntPtr item2); }'
 [ForgeRefresh]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)

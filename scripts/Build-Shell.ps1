@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$Destination)
+param([Parameter(Mandatory=$true)][string]$Destination, [string]$NativeBinaryPath)
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
 Import-Module (Join-Path $PSHOME 'Modules\PKI\pki.psd1') -ErrorAction Stop
@@ -15,8 +15,12 @@ New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.png') -Destination (Join-Path $Destination 'logo.png') -Force
 Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.png') -Destination (Join-Path $Destination 'rpforge-mark-v3.png') -Force
 Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.ico') -Destination (Join-Path $Destination 'rpforge-mark-v3.ico') -Force
-& $compiler -std=c++17 -O2 -shared -static -Wno-dll-attribute-on-redeclaration -o (Join-Path $Destination 'ForgeShell.dll') (Join-Path $root 'shell\ForgeShell.cpp') -lole32 -lshell32 -lshlwapi -luuid
-if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar extensao.' }
+if ($NativeBinaryPath) {
+    Copy-Item -LiteralPath $NativeBinaryPath -Destination (Join-Path $Destination 'ForgeShell.dll')
+} else {
+    & $compiler -std=c++17 -O2 -shared -static -Wno-dll-attribute-on-redeclaration -o (Join-Path $Destination 'ForgeShell.dll') (Join-Path $root 'shell\ForgeShell.cpp') -lole32 -lshell32 -lshlwapi -luuid
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar extensao.' }
+}
 $testExe = Join-Path $tools 'TestForgeShell.exe'
 & $compiler -std=c++17 -O2 -static -municode -o $testExe (Join-Path $root 'shell\TestShell.cpp') -lole32 -lshell32 -luuid
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar teste COM.' }
@@ -30,6 +34,11 @@ if ($LASTEXITCODE -ne 0) { throw "Teste COM falhou: $LASTEXITCODE" }
 $identity = Join-Path $tools 'forge-identity'
 New-Item -ItemType Directory -Path $identity -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'shell\AppxManifest.xml') -Destination (Join-Path $identity 'AppxManifest.xml')
+$manifestPath = Join-Path $identity 'AppxManifest.xml'
+$manifest = [xml][IO.File]::ReadAllText($manifestPath)
+$version = (Get-Content -LiteralPath (Join-Path $root 'package.json') -Raw | ConvertFrom-Json).version
+$manifest.Package.Identity.Version = "$version.0"
+$manifest.Save($manifestPath)
 & (Join-Path $PSScriptRoot 'Prepare-ShellVisualResources.ps1') -Destination $identity
 Copy-Item -LiteralPath (Join-Path $identity 'Assets') -Destination $Destination -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $identity 'resources.pri') -Destination (Join-Path $Destination 'resources.pri') -Force
