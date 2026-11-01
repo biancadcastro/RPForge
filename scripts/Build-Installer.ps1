@@ -19,6 +19,7 @@ Push-Location $projectRoot
 try {
     & npm.cmd test
     if ($LASTEXITCODE -ne 0) { throw 'Testes falharam; instalador nao sera gerado.' }
+    & (Join-Path $PSScriptRoot 'Build-Desktop.ps1')
     if (!$CompilerPath) {
         $CompilerPath = Join-Path $tools 'inno-6.7.3\ISCC.exe'
         if (!(Test-Path -LiteralPath $CompilerPath)) {
@@ -41,6 +42,7 @@ try {
     }
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $projectRoot 'src') -Destination $stage -Recurse
+    Copy-Item -LiteralPath (Join-Path $projectRoot '.tools\desktop\RPFForge.exe') -Destination (Join-Path $stage 'RPFForge.exe')
     & (Join-Path $PSScriptRoot 'Build-Shell.ps1') -Destination (Join-Path $stage 'shell')
     Copy-Item -LiteralPath (Join-Path $projectRoot 'windows') -Destination $stage -Recurse
     foreach ($name in @('package.json', 'package-lock.json', 'LICENSE')) {
@@ -61,9 +63,10 @@ RPF Forge
 1. Clique com o botao direito na pasta que contem o arquivo .rpf.
 2. Selecione Converter RPF para FiveM.
    A extensao usa o menu principal do Windows 11.
-3. Responda se quer alterar o spawn do carro e informe o novo nome, se desejar.
-4. O addon sera criado numa pasta com o spawn escolhido (ou o atual).
-5. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
+3. Revise a previa na janela e preencha o novo spawn, se desejar.
+4. Na aba Destinos, escolha o tratamento para pastas existentes.
+5. Atualize a previa depois de editar e clique em Converter selecionados.
+6. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
 
 Nao requer Node.js separado, GTA, OpenIV ou CodeWalker instalados.
 Os RPFs originais sao preservados. Saidas existentes nao sao sobrescritas.

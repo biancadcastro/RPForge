@@ -49,6 +49,7 @@ Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM"; Va
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM\command"; ValueType: string; ValueData: """{app}\runtime\node.exe"" ""{app}\src\cli.js"" --interactive ""%V"""
 
 [Icons]
+Name: "{group}\RPF Forge"; Filename: "{app}\RPFForge.exe"
 Name: "{group}\Como usar RPF Forge"; Filename: "{app}\LEIA-ME.txt"
 Name: "{group}\Desinstalar RPF Forge"; Filename: "{uninstallexe}"
 

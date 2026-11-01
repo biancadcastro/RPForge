@@ -10,6 +10,9 @@
   },
   "scripts": {
     "test": "node --test",
+    "desktop:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Desktop.ps1",
+    "desktop:test": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-DesktopWorkflow.ps1",
+    "update:local": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Update-LocalDevelopment.ps1",
     "convert": "node src/cli.js",
     "installer": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Installer.ps1",
     "menu:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File windows/Install-ContextMenu.ps1",

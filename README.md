@@ -4,6 +4,10 @@ Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Wind
 Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
 O desenvolvimento atual permanece local, sem autorização para publicação.
 
+Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
+As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0
+nao as contem. Nao gerar outro instalador sem pedido explicito.
+
 ## Instalar no Windows pelo instalador
 
 Abra `RPF-Forge-Setup-0.2.0-x64.exe` e conclua a instalacao.
@@ -31,8 +35,10 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 
 1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
 2. Selecione **Converter RPF para FiveM**, fornecido pela extensão nativa do RPF Forge para o menu moderno do Windows 11.
-3. Responda **Quer alterar o spawn do carro?** com `s` ou `n`. Se escolher sim, informe o novo spawn.
-4. Aguarde o resultado na janela de console; pressione Enter para fechar.
+3. A janela do RPF Forge analisa o pacote e mostra os veiculos. Preencha **Novo spawn** se quiser renomear; vazio mantem o atual.
+4. Na aba **Destinos**, selecione os RPFs e escolha outro nome, backup/substituicao ou cancelamento para pastas existentes.
+5. Clique em **Analisar / atualizar previa** depois de editar e revise **Previa e validacao** e **Arquivos por peso**.
+6. Clique em **Converter selecionados**. O botao **Abrir resultado** fica disponivel ao concluir.
 
 A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
 e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF.
@@ -58,7 +64,7 @@ meu_carro/
 ```
 
 Copie a pasta gerada para `resources` e adicione `ensure carro` ao seu `server.cfg`.
-Não é gerado relatório JSON. Arquivos auxiliares ignorados são informados no console.
+Não é gerado relatório JSON. Arquivos auxiliares ignorados e correcoes aparecem na previa e no resultado.
 Ao escolher um novo spawn, a pasta recebe esse nome e os YFTs, YTDs e referências
 correspondentes nos metas são atualizados. Dicionários e handling compartilhados são
 preservados quando necessários a outro veículo. Valores de física, áudio, texturas
@@ -76,11 +82,13 @@ npm run convert -- "C:\Mods\Meu Carro"
 ```
 
 Um addon é criado por RPF externo. Vários veículos no mesmo RPF permanecem no mesmo addon.
-Nesse caso, a pergunta é feita por veículo e a pasta usa `<primeiro_spawn>_pack`,
+Nesse caso, os spawns podem ser editados individualmente e a pasta usa `<primeiro_spawn>_pack`,
 considerando a ordem alfabética dos spawns finais. A execução sem `--interactive`
-mantém os spawns atuais; o menu do Explorer sempre usa o modo interativo.
-Metas ficam diretamente em `data`, sem subpastas numeradas. Metas de mesmo nome com
-conteudos divergentes sao recusados para evitar sobrescrita e perda de configuracoes.
+mantém os spawns atuais. O menu do Explorer abre a janela quando ela esta instalada;
+`RPF_FORGE_CONSOLE=1` preserva o modo de perguntas no terminal para diagnostico.
+Metas ficam diretamente em `data`, sem subpastas numeradas. Definicoes compativeis de
+metas do mesmo nome sao unificadas por identidade (modelo, handling, kit etc.).
+Definicoes contraditorias sao recusadas e conflitos de IDs de modkit sao detectados.
 O manifest inclui o comentario `-- Convertido com RPF Forge`.
 Pecas de tuning e seus arquivos associados ficam em `stream/mods`.
 Modelos principais, seus `_hi` e dicionarios compartilhados permanecem em `stream`.
@@ -88,7 +96,7 @@ Opcoes visuais e referencias vinculadas em `carcols.meta` cujo modelo nao veio n
 sao removidas automaticamente. A verificacao considera arquivos YFT/YDR, incluindo
 subpastas, sem distinguir maiusculas. Melhorias de desempenho (`statMods`), liveries,
 IDs de modkit e configuracoes de sirene permanecem preservados. A lista do que foi
-removido aparece somente no console, sem criar relatorio no addon.
+removido aparece na previa e no resultado, sem criar relatorio no addon.
 
 ## Compatibilidade e proteção dos arquivos
 
@@ -96,9 +104,12 @@ removido aparece somente no console, sem criar relatorio no addon.
 - RPFs internos, binários DEFLATE e resources RSC7, incluindo entradas maiores que 16 MiB.
 - Stream de `.yft`, `.ytd`, `.ydr`, `.ydd`, `.ybn` e `.ycd`.
 - Metas: vehicles, handling, carcols, carvariations, vehiclelayouts e caraddoncontentunlocks.
-- `dlctext.meta`, `shopdata.meta` e `shop_vehicle.meta` sao ignorados: nao entram em `data` nem no manifest. A lista aparece apenas no console.
+- `dlctext.meta`, `shopdata.meta` e `shop_vehicle.meta` sao ignorados: nao entram em `data` nem no manifest.
 - Validação de XML, presença dos YFTs declarados e conflitos de nomes.
-- Originais preservados, saída preparada em pasta temporária e recusada se já existir.
+- Originais preservados, previa sem gravacao, saida preparada em pasta temporaria e verificada por hash antes da entrega.
+- Pastas existentes: cancelamento, outro nome ou backup e substituicao. O backup permanece ao lado do addon; arquivos em uso nao sao forcados a fechar.
+- Validacao de modelos, variacoes, handling, dicionarios, tuning, modkits e manifest. Dependencias externas/embutidas sao avisos quando nao podem ser confirmadas.
+- Diagnostico de peso dos arquivos, ordenado do maior para o menor. E tamanho em disco, sem estimativa de memoria de video ou FPS.
 - Falhas em um arquivo não impedem a análise dos demais RPFs da pasta.
 - Sem upload de assets, telemetria, executáveis externos, chaves do GTA ou conteúdo do jogo no repositório.
 
@@ -124,7 +135,15 @@ e `HKCU\Software\Classes\Directory\Background\shell`.
 ```powershell
 npm ci
 npm test
+npm run desktop:build
+npm run desktop:test
 ```
+
+Para atualizar somente o codigo e a janela da instalacao local existente, use
+`npm run update:local`. Esse comando guarda backup e nao gera Setup nem publica.
+O fluxo da janela usa pedidos locais temporarios, nao abre servidor HTTP e nao envia arquivos pela rede.
+O teste desktop exercita a interface e seu processo de conversao com um RPF sintetico,
+incluindo previa, edicao de spawn, backup/substituicao, resultado e pasta vazia.
 
 ### Gerar e validar o instalador local
 
