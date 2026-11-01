@@ -32,8 +32,8 @@ export function makeRpf(files) {
     archive.writeUInt16LE(entry.nameOffset, at);
     archive.writeUIntLE(entry.resource || entry.compressed ? entry.payload.length : 0, at + 2, 3);
     archive.writeUIntLE(entry.offset / 512 + (entry.resource ? 0x800000 : 0), at + 5, 3);
-    archive.writeUInt32LE(entry.resource ? 0x10000000 : entry.data.length, at + 8);
-    archive.writeUInt32LE(entry.resource ? 0x20000000 : 0, at + 12);
+    archive.writeUInt32LE(entry.resource ? entry.systemFlags ?? 0x10000000 : entry.data.length, at + 8);
+    archive.writeUInt32LE(entry.resource ? entry.graphicsFlags ?? 0x20000000 : 0, at + 12);
     entry.payload.copy(archive, entry.offset);
   });
   return archive;

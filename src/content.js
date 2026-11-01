@@ -3,7 +3,7 @@ import { DOMParser } from '@xmldom/xmldom';
 import { outputName } from './output.js';
 import { buildYtyp, readDrawable } from './ytyp.js';
 
-const STREAM = new Set(['.ydr', '.ydd', '.ytd', '.ybn', '.ycd', '.ymap', '.ytyp', '.ymt', '.yld']);
+const STREAM = new Set(['.ydr', '.ydd', '.ytd', '.ybn', '.ycd', '.ymap', '.ytyp', '.ymt', '.yld', '.ymf']);
 const ADMIN = new Set(['content.xml', 'setup2.xml', 'dlctext.meta']);
 const METAS = {
   'gtxd.meta': ['GTXD_PARENTING_DATA', 'CMapParentTxds'],
@@ -68,7 +68,7 @@ export function prepareContent(entries, archive, options, sourceHash, sourceByte
         if (!collectionName(stem) && !peds.has(stem.toLowerCase())) throw new Error(`YMT requer suporte específico: ${entry.path}`);
         if (collectionName(stem)) { clothing = true; collections.add(stem.toLowerCase()); }
       }
-      if (ext === '.ymap' || ext === '.ytyp') types.add('map');
+      if (ext === '.ymap' || ext === '.ytyp' || ext === '.ymf') types.add('map');
       if (ext === '.ycd') types.add('animation');
       add('stream/' + name, entry.data);
       if (ext === '.ytyp') register('DLC_ITYP_REQUEST', 'stream/' + name);

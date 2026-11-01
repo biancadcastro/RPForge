@@ -55,3 +55,15 @@ test('invalid models prevent partial files and duplicate identities are refused'
   const model = readDrawable(drawable(), 'a.ydr');
   assert.throws(() => buildYtyp([model, model], 'props'), /repetido/);
 });
+
+test('257 models split into two YTYPs without dropping the boundary model', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'forge-ytyp-batch-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = drawable();
+  for (let i = 0; i < 257; i++) await writeFile(path.join(root, 'own_' + String(i).padStart(3, '0') + '.ydr'), bytes);
+  const [result] = await generateFolderYtyp(root);
+  assert.equal(result.models.length, 257); assert.equal(result.generated.length, 2);
+  const hash = Buffer.alloc(4); hash.writeUInt32LE(jenkHash('own_256'));
+  assert.ok(inflateRawSync((await readFile(result.generated[1])).subarray(16)).includes(hash));
+  assert.equal((await readdir(root)).filter(n => n.endsWith('.ydr')).length, 257);
+});

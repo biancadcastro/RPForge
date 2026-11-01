@@ -381,6 +381,22 @@ namespace RPFForge {
                 await SelectOrigin(props);
                 if (!File.Exists(Path.Combine(props, "rpforge_props_1.ytyp"))) throw new Exception("Generating again must preserve the existing YTYP.");
             }
+            foreach (var kind in new[] { "map", "clothing" }) {
+                string contentFolder = Path.Combine(fixtureFolder, kind + "-test");
+                if (!Directory.Exists(contentFolder)) continue;
+                await SelectOrigin(contentFolder);
+                if (!previewValid || vehicles.Rows.Count != 1 || IsVehicle(preview.Values.First())) throw new Exception("Non-vehicle content was not identified: " + details.Text);
+                string contentName = "DESKTOP_" + kind.ToUpperInvariant();
+                vehicles.Rows[0].Cells["target"].Value = contentName;
+                await ReviewConfiguration();
+                if (!previewValid || !reviewed) throw new Exception("Content review failed: " + details.Text);
+                await ConvertSelection();
+                string contentOutput = Path.Combine(contentFolder, contentName);
+                string manifest = File.ReadAllText(Path.Combine(contentOutput, "fxmanifest.lua"));
+                if (!manifest.Contains(kind == "map" ? "DLC_ITYP_REQUEST" : "SHOP_PED_APPAREL_META_FILE")) throw new Exception("Missing content manifest registration.");
+                if (kind == "map" && !File.Exists(Path.Combine(contentOutput, "stream", "_manifest.ymf"))) throw new Exception("Map manifest was not preserved.");
+                if (kind == "clothing" && !File.Exists(Path.Combine(contentOutput, "stream", "mp_f_freemode_01_ownfixture^jbib_000_u.ydd"))) throw new Exception("Clothing collection was renamed with its resource folder.");
+            }
         }
     }
 }

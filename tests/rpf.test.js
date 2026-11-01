@@ -19,6 +19,15 @@ test('extracts nested RPF archives recursively', () => {
   assert.equal([...readRpf(archive)][0].path, 'vehicles.rpf/car.yft');
 });
 
+test('preserves real resource page flags and Legacy drawable version when rebuilding RSC7', () => {
+  const header = Buffer.alloc(16); header.write('RSC7'); header.writeUInt32LE(165, 4);
+  header.writeUInt32LE(0xa0000000, 8); header.writeUInt32LE(0x50000000, 12);
+  const source = Buffer.concat([header, Buffer.from('own fixture payload')]);
+  const archive = makeRpf([{ name: 'own.ydr', data: source, resource: true, systemFlags: 0xa0000000, graphicsFlags: 0x50000000 }]);
+  const [file] = [...readRpf(archive)];
+  assert.deepEqual(file.data, source);
+});
+
 test('rejects encrypted, truncated, cyclical and unsafe archives', () => {
   const encrypted = vehicleArchive();
   encrypted.writeUInt32LE(0x0ffffff9, 12);

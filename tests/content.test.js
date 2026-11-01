@@ -18,7 +18,7 @@ async function fixture(t, entries, name = 'pack') {
 }
 
 test('map/MLO resource registers archetypes, preserves binaries, source and review before writing', async t => {
-  const f = await fixture(t, [file('interior.ymap'), file('interior.ytyp'), file('room.ydr'), file('room.ybn'), file('room.ytd')]);
+  const f = await fixture(t, [file('interior.ymap'), file('interior.ytyp'), file('_manifest.ymf'), file('room.ydr'), file('room.ybn'), file('room.ytd')]);
   assert.equal(f.preview.kind, 'map');
   assert.deepEqual(await readdir(f.root), ['pack.rpf']);
   const [result] = await f.convert({ spawns: { pack: 'MyMap' } });
@@ -27,6 +27,7 @@ test('map/MLO resource registers archetypes, preserves binaries, source and revi
   assert.match(manifest, /this_is_a_map 'yes'/);
   assert.match(manifest, /data_file 'DLC_ITYP_REQUEST' 'stream\/interior.ytyp'/);
   assert.equal(await readFile(path.join(result.output, 'stream/room.ydr'), 'utf8'), 'room.ydr');
+  assert.equal(await readFile(path.join(result.output, 'stream/_manifest.ymf'), 'utf8'), '_manifest.ymf');
   assert.deepEqual(await readFile(path.join(f.root, 'pack.rpf')), f.source);
   const [again] = await f.convert({ spawns: { pack: 'MyMap' } });
   assert.equal(again.ok, false); assert.match(again.error, /já existe/);
