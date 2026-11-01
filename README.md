@@ -5,7 +5,7 @@ Código aberto, licença MIT. Independente do RedHorn Studio e do RedHorn Garage
 
 ## Instalar no Windows pelo instalador
 
-Abra `RPF-to-FiveM-Setup-0.1.0-x64.exe` e conclua a instalacao.
+Abra `RPF-to-FiveM-Setup-0.1.1-x64.exe` e conclua a instalacao.
 O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
 abrir terminal ou baixar outros programas. Nao requer administrador.
 O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.
@@ -28,7 +28,7 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 
 ## Usar
 
-1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf` diretamente dentro dela.
+1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
 2. Selecione **Converter RPF para FiveM**. No Windows 11, pode estar em **Mostrar mais opções**.
 3. Aguarde o resultado na janela de console; pressione Enter para fechar.
 
@@ -92,7 +92,8 @@ Não corrige conflitos de modkits entre recursos, dependências externas ou erro
 npm run menu:uninstall
 ```
 
-Remove somente `HKCU\Software\Classes\Directory\shell\RpfToFiveM`.
+Remove somente as entradas `RpfToFiveM` em `HKCU\Software\Classes\Directory\shell`
+e `HKCU\Software\Classes\Directory\Background\shell`.
 
 ## Desenvolvimento
 

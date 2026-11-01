@@ -1,11 +1,13 @@
 {
   "name": "rpf-to-fivem",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Windows context menu to convert open GTA V vehicle RPF archives into FiveM resources",
   "license": "MIT",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test",
     "convert": "node src/cli.js",
@@ -13,5 +15,7 @@
     "menu:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File windows/Install-ContextMenu.ps1",
     "menu:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File windows/Uninstall-ContextMenu.ps1"
   },
-  "dependencies": { "@xmldom/xmldom": "0.9.12" }
+  "dependencies": {
+    "@xmldom/xmldom": "0.9.12"
+  }
 }
