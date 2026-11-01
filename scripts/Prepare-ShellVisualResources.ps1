@@ -1,7 +1,12 @@
-param([Parameter(Mandatory=$true)][string]$Destination)
+param([Parameter(Mandatory=$true)][string]$Destination, [string]$SdkDirectory)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$sdk = Join-Path $root '.tools\windows-sdk-buildtools\bin\10.0.28000.0\x64'
+if (!$SdkDirectory) {
+    . (Join-Path $PSScriptRoot 'Forge-BuildTools.ps1')
+    $sdkRoot = Initialize-ForgeTool $root 'sdk'
+    $SdkDirectory = Join-Path $sdkRoot 'bin\10.0.28000.0\x64'
+}
+$sdk = $SdkDirectory
 $assets = Join-Path $Destination 'Assets'
 New-Item -ItemType Directory -Path $assets -Force | Out-Null
 Copy-Item -Path (Join-Path $root 'shell\VisualAssets\*.png') -Destination $assets -Force

@@ -3,11 +3,13 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
 Import-Module (Join-Path $PSHOME 'Modules\PKI\pki.psd1') -ErrorAction Stop
 $root = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'Forge-BuildTools.ps1')
 $tools = Join-Path $root '.tools'
-$llvm = Join-Path $tools 'llvm-mingw-20261020-ucrt-x86_64'
+$llvm = Initialize-ForgeTool $root 'llvm'
 $compiler = Join-Path $llvm 'bin\x86_64-w64-mingw32-clang++.exe'
 if (!(Test-Path -LiteralPath $compiler)) { throw 'LLVM-MinGW 20261020 x64 necessario no cache .tools (ver README).' }
-$sdk = Join-Path $tools 'windows-sdk-buildtools\bin\10.0.28000.0\x64'
+$sdkRoot = Initialize-ForgeTool $root 'sdk'
+$sdk = Join-Path $sdkRoot 'bin\10.0.28000.0\x64'
 $makeappx = Join-Path $sdk 'makeappx.exe'
 $signtool = Join-Path $sdk 'signtool.exe'
 if (!(Test-Path -LiteralPath $makeappx)) { throw 'Windows SDK BuildTools necessario no cache .tools.' }
@@ -39,7 +41,7 @@ $manifest = [xml][IO.File]::ReadAllText($manifestPath)
 $version = (Get-Content -LiteralPath (Join-Path $root 'package.json') -Raw | ConvertFrom-Json).version
 $manifest.Package.Identity.Version = "$version.0"
 $manifest.Save($manifestPath)
-& (Join-Path $PSScriptRoot 'Prepare-ShellVisualResources.ps1') -Destination $identity
+& (Join-Path $PSScriptRoot 'Prepare-ShellVisualResources.ps1') -Destination $identity -SdkDirectory $sdk
 Copy-Item -LiteralPath (Join-Path $identity 'Assets') -Destination $Destination -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $identity 'resources.pri') -Destination (Join-Path $Destination 'resources.pri') -Force
 $package = Join-Path $Destination 'RPFForge.identity.msix'
