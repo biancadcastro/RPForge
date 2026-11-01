@@ -46,7 +46,7 @@ const sbom = { bomFormat: 'CycloneDX', specVersion: '1.6', version: 1,
   components, dependencies: [{ ref: 'rpf-forge', dependsOn: components.map(c => c['bom-ref']) }],
 };
 const manifest = { schemaVersion: 1, product: 'RPForge', version: nativeVersion, packageVersion: pkg.version,
-  repository: 'https://github.com/biancadcastro/rpf-to-fivem', revision, dirty: dirty === 'true',
+  repository: 'https://github.com/biancadcastro/RPForge', revision, dirty: dirty === 'true',
   sourceTreeSha256: checksum(JSON.stringify(source)), sources: source, binaries,
   toolchainLockSha256: checksum(await readFile(path.join(root, 'build/toolchains.json'))),
   hostedBuild: process.env.GITHUB_ACTIONS === 'true', workflowRunId: process.env.GITHUB_RUN_ID ?? null,
