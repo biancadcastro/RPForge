@@ -1,0 +1,37 @@
+# Manutenção da documentação de usuários
+
+Conteúdo: `docs/guia-usuario/conteudo.json`. A versão navegável e o PDF são gerados
+por `build_manual.py`, usando ReportLab e as fontes locais do Windows. O PDF final
+fica em `output/pdf` e uma cópia acompanha o guia em `docs/guia-usuario`.
+
+Os PNGs foram capturados pelo renderizador da versão instalada 0.3.1, com exemplos
+fictícios. A tela de YTYP registra uma geração real de um modelo sintético. Não há
+assets do jogo, acervo privado ou credenciais no pacote de documentação.
+
+As logos são as variantes finais aprovadas da identidade RPForge. Pixelify Sans
+mantém seu aviso OFL em `assets/OFL.txt`. Os arquivos originais de marca não foram
+alterados.
+
+## Revisão editorial solicitada
+
+Referência: https://github.com/lynote-ai/humanize-text
+
+Foram consultados README, `docs/techniques.md` e `docs/pipeline.md`. A abordagem de
+reescrita em rodadas foi adaptada localmente ao português: primeiro a ordem das
+instruções, depois a linguagem e, por fim, a conferência dos significados e dos
+nomes dos botões no aplicativo.
+
+O pipeline externo do projeto não foi executado: exige serviços de LLM/tradução e
+chaves de API, e seu fluxo padrão termina em inglês. Nenhum texto do RPForge foi
+enviado a esses serviços. Não foi aplicada tradução intermediária, avaliação de
+detectores ou alteração de fatos para produzir o manual.
+
+## Validação da edição 0.3.1
+
+- 18 páginas renderizadas com Poppler e revisadas visualmente.
+- Extração de texto, fontes, limites inferiores e índice clicável conferidos.
+- HTML aberto no navegador; busca, navegação e diálogo de ampliação testados.
+- Imagens carregadas e ausência de rolagem horizontal verificadas.
+- Todas as referências locais de imagens, fontes, páginas e PDF verificadas.
+
+Estas alterações não geram nem substituem o instalador do aplicativo.

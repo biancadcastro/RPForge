@@ -1,0 +1,13 @@
+RPForge - Guia do usuário 0.3.1
+
+Para consultar no navegador, abra index.html.
+Para ler, imprimir ou compartilhar o manual, abra Manual-RPForge-0.3.1.pdf.
+
+O guia funciona offline. Mantenha index.html, estilo.css, interacao.js e a pasta
+assets juntos. Não é necessário instalar programas, abrir um servidor ou criar conta.
+
+As capturas foram produzidas no RPForge 0.3.1 com exemplos fictícios. O roteiro
+acompanha a instalação, conversão de RPFs, nomes de veículos, pastas existentes,
+geração de YTYP e problemas comuns.
+
+Edição de 1 de novembro de 2026. Esta versão do aplicativo é local de testes.

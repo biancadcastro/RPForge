@@ -1,211 +1,116 @@
-# RPForge
+<div align="center">
 
-Converta RPFs de conteúdo GTA V Legacy em recursos FiveM e gere YTYPs de modelos YDR pelo botão direito do Windows.
-Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença GPLv3 (GPL-3.0-only).
-O desenvolvimento atual permanece local, sem autorização para publicação.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/guia-usuario/assets/logo-dark.png">
+  <img src="docs/guia-usuario/assets/logo-light.png" alt="RPForge" width="360">
+</picture>
 
-**Code signing policy:** [politica e status da preparacao para SignPath](docs/CODE_SIGNING_POLICY.md).
-Ainda nao ha aprovacao ou assinatura de distribuicao pela SignPath Foundation.
-Veja tambem [privacidade](docs/PRIVACY.md) e [roteiro da candidatura](docs/SIGNPATH_PREPARATION.md).
-O [build de preparacao SignPath](docs/SIGNPATH_BUILD.md) usa ferramentas fixadas,
-metadados verificados, SBOM e proveniencia. Produz somente binarios proprios sem assinatura;
-nao gera instalador, nao altera certificados e nao publica. O workflow permanece manual
-e a assinatura esta desativada ate a aprovacao/configuracao explicita.
-Avisos de componentes externos: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+### Seus pacotes de GTA V, organizados para o FiveM. 🔥
 
-Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
-Tipos suportados, geração em um clique e limites: [conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md).
-O projeto local está centralizado em `D:\RedHorn\Desenvolvimento\RPForge`, com a marca em `design\identidade`.
-Interface atual: [guia de uso](docs/INTERFACE.md), [identidade visual](docs/IDENTIDADE.md) e [desenvolvimento/testes](docs/DESENVOLVIMENTO_INTERFACE.md).
-A versão local 0.3.1 inclui a interface atual, conversão de conteúdos, geração de YTYP e código próprio sob GPLv3.
-Instaladores são gerados somente mediante pedido explícito.
-Auditoria e ciclo de instalação: [validação da versão 0.3.0](docs/AUDITORIA_0.3.0.md).
+Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do Windows.
 
-## Instalar no Windows pelo instalador
+**🪟 Windows 11 · 🚗 GTA V Legacy · 📦 Versão 0.3.1 · 📖 GPLv3**
 
-Abra `RPForge-Setup-0.3.1-x64.exe`. A pasta padrão é
-`%LOCALAPPDATA%\Programs\RPForge`; o caminho antigo não é selecionado automaticamente.
-O instalador inclui o código-fonte correspondente em `source`, sob GPLv3.
-O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
-abrir terminal ou baixar outros programas. Nao requer administrador.
-O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.
+[📘 Manual ilustrado](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) · [🧭 Começar a usar](#-comece-por-aqui) · [🛠️ Resolver problemas](#-precisa-de-ajuda)
 
-O instalador e gerado somente sob pedido e permanece local ate autorizacao de publicacao.
+</div>
 
-## Instalar a partir do codigo-fonte
+---
 
-Requer **Node.js 22 ou superior**, com `node` e `npm` no PATH.
-Baixe o projeto para uma pasta permanente (ou clone com Git) e abra um terminal nela:
+## ✨ O que o RPForge faz
 
-```powershell
-npm ci
-npm test
-npm run menu:install
-```
+| Para você que quer… | O RPForge ajuda a… |
+| --- | --- |
+| 🚗 Adicionar um veículo ao FiveM | Extrair um RPF aberto e criar a pasta do addon com os arquivos organizados. |
+| ✏️ Alterar o spawn | Atualizar o nome do veículo e as referências correspondentes. Aceita maiúsculas e minúsculas. |
+| 🔧 Organizar o tuning | Colocar peças em `stream/mods` e remover opções visuais sem o modelo necessário no pacote. |
+| 🗺️ Converter outros conteúdos | Preparar roupas identificadas, mapas, props, animações, texturas e tipos reconhecidos de peds, armas e áudio. |
+| 🧱 Gerar YTYPs | Criar YTYPs básicos a partir de modelos `.ydr`, sem substituir os arquivos que já existem. |
+| 🛡️ Conferir antes de gravar | Revisar a saída, decidir como tratar pastas existentes e preservar backups. |
 
-Não requer administrador. O menu é registrado somente para o usuário atual.
-Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
+O aplicativo funciona **sem login, sem terminal e sem instalar Node.js separadamente**. Seus arquivos não são enviados para um servidor de conversão.
 
-## Usar
+## 🖼️ Conheça o aplicativo
 
-1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
-2. Selecione **Converter com RPForge**, fornecido pela extensão nativa para o menu moderno do Windows 11.
-3. A análise começa automaticamente e abre **1. Configurar**. Revise os spawns e as pastas de saída na mesma tela.
-4. Para pastas existentes, escolha outro nome, backup/substituição ou cancelamento.
-5. Clique em **Revisar conversão**. O app valida automaticamente as edições e mostra o resumo.
-6. Clique em **Converter agora**. Ao terminar, **Resultado** permite abrir a pasta gerada ou iniciar uma **Nova conversão**.
+### Configure, revise e converta
 
-A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
-e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF ou YDR.
-As entradas tradicionais permanecem para compatibilidade.
-Não pesquisa em subpastas do Windows, mas extrai RPFs aninhados dentro dos arquivos.
+![Tela Configurar do RPForge com exemplos fictícios de veículos e escolhas de destino](docs/guia-usuario/assets/02-veiculos.png)
 
-Para um carro com spawn `carro`, mantendo o nome atual, a saída é:
+Os nomes ficam na mesma tela. Se a pasta de saída já existir, você escolhe como continuar.
 
-```text
-meu_carro/
-  dlc.rpf                       # original preservado
-  carro/
-    fxmanifest.lua
-    stream/
-      carro.yft
-      carro_hi.yft
-      carro.ytd
-      mods/
-        carro_bumper.yft
-    data/
-      vehicles.meta
-      handling.meta
-```
+### Gere YTYPs pelo botão direito
 
-Copie a pasta gerada para `resources` e adicione `ensure carro` ao seu `server.cfg`.
-Não é gerado relatório JSON. Arquivos auxiliares ignorados e correcoes aparecem na previa e no resultado.
-Ao escolher um novo spawn, a pasta recebe esse nome e os YFTs, YTDs e referências
-correspondentes nos metas são atualizados. Dicionários e handling compartilhados são
-preservados quando necessários a outro veículo. Valores de física, áudio, texturas
-internas e liveries permanecem intactos. Nomes novos aceitam letras maiúsculas e minúsculas, números e `_`,
-começam com letra e têm até 63 caracteres; nomes reservados do Windows são recusados.
-A capitalização digitada é preservada na pasta, arquivos e referências. Conflitos são
-verificados sem distinguir maiúsculas de minúsculas (`Carro` e `CARRO` conflitam).
-A ferramenta não altera a base de testes ou `server.cfg`.
-Valide o veículo no FiveM antes de colocar em produção.
+![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/11-ytyp.png)
 
-Também pode executar sem o menu:
+As capturas são da versão 0.3.1 e usam exemplos fictícios. O [manual em PDF](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) acompanha cada etapa com imagens e instruções.
 
-```powershell
-npm run convert -- "C:\Mods\Meu Carro"
-```
+## 🧭 Comece por aqui
 
-Um addon é criado por RPF externo. Vários veículos no mesmo RPF permanecem no mesmo addon.
-Nesse caso, os spawns podem ser editados individualmente e a pasta usa `<primeiro_spawn>_pack`,
-considerando a ordem alfabética dos spawns finais. A execução sem `--interactive`
-mantém os spawns atuais. O menu do Explorer abre a janela quando ela esta instalada;
-`RPF_FORGE_CONSOLE=1` preserva o modo de perguntas no terminal para diagnostico.
-Metas ficam diretamente em `data`, sem subpastas numeradas. Definicoes compativeis de
-metas do mesmo nome sao unificadas por identidade (modelo, handling, kit etc.).
-Definicoes contraditorias sao recusadas e conflitos de IDs de modkit sao detectados.
-O manifest inclui o comentario `-- Convertido com RPForge`.
-Pecas de tuning e seus arquivos associados ficam em `stream/mods`.
-Modelos principais, seus `_hi` e dicionarios compartilhados permanecem em `stream`.
-Opcoes visuais e referencias vinculadas em `carcols.meta` cujo modelo nao veio no RPF
-sao removidas automaticamente. A verificacao considera arquivos YFT/YDR, incluindo
-subpastas, sem distinguir maiusculas. Melhorias de desempenho (`statMods`), liveries,
-IDs de modkit e configuracoes de sirene permanecem preservados. A lista do que foi
-removido aparece na previa e no resultado, sem criar relatorio no addon.
+1. Instale o RPForge usando o arquivo fornecido pela equipe.
+2. Coloque o `.rpf` em uma pasta e clique com o botão direito nela.
+3. Escolha **Converter com RPForge**.
+4. Em **Configurar**, mantenha os nomes ou edite o spawn.
+5. Clique em **Revisar conversão**, confira o resumo e use **Converter agora**.
+6. Use **Abrir resultado** e teste o addon no FiveM.
 
-## Compatibilidade e proteção dos arquivos
+Para YTYP, reúna os `.ydr` em uma pasta e use **Gerar YTYP com RPForge**. A geração começa automaticamente.
 
-- GTA V **Legacy RPF7 OPEN/NONE**, sem necessidade de instalar GTA, OpenIV ou CodeWalker.
-- RPFs internos, binários DEFLATE e resources RSC7, incluindo entradas maiores que 16 MiB.
-- Stream de `.yft`, `.ytd`, `.ydr`, `.ydd`, `.ybn` e `.ycd`.
-- Metas: vehicles, handling, carcols, carvariations, vehiclelayouts e caraddoncontentunlocks.
-- `dlctext.meta`, `shopdata.meta` e `shop_vehicle.meta` sao ignorados: nao entram em `data` nem no manifest.
-- Validação de XML, presença dos YFTs declarados e conflitos de nomes.
-- Originais preservados, previa sem gravacao, saida preparada em pasta temporaria e verificada por hash antes da entrega.
-- Pastas existentes: cancelamento, outro nome ou backup e substituicao. O backup permanece ao lado do addon; arquivos em uso nao sao forcados a fechar.
-- Validacao de modelos, variacoes, handling, dicionarios, tuning, modkits e manifest. Dependencias externas/embutidas sao avisos quando nao podem ser confirmadas.
-- Diagnostico de peso dos arquivos, ordenado do maior para o menor. E tamanho em disco, sem estimativa de memoria de video ou FPS.
-- Falhas em um arquivo não impedem a análise dos demais RPFs da pasta.
-- Sem upload de assets, telemetria, executáveis externos, chaves do GTA ou conteúdo do jogo no repositório.
+### 📥 Instalação
 
-Aceita também roupas com coleção identificada, mapas/interiores, props, animações, texturas,
-peds, armas e os formatos de áudio descritos no guia de conteúdos. Em pastas com YDRs e sem RPF,
-**Gerar YTYP com RPForge** gera os arquivos automaticamente em um clique.
-Não aceita RPF criptografado ou GTA V Enhanced. Metas/tipos especiais não suportados geram erro para evitar saída incompleta.
-Não executa scripts fornecidos pelo addon. Documentos e imagens não utilizados são informados no console.
+- Instalador atual: `RPForge-Setup-0.3.1-x64.exe`.
+- Pasta padrão: `%LOCALAPPDATA%\Programs\RPForge`.
+- O pacote inclui o aplicativo, o runtime e o código-fonte correspondente.
 
-Limites desta versão: RPF de até 512 MiB, entrada de até 256 MiB, 1 GiB acumulado de extração,
-100 mil entradas e 16 níveis de RPF. O processamento usa memória; não é um extrator genérico de arquivos enormes.
-Não corrige conflitos de modkits entre recursos, dependências externas ou erros originais do modelo.
+**Distribuição em preparação:** esta é uma edição local de testes. Ainda não há uma release pública nem assinatura de distribuição pela SignPath. Use o instalador fornecido pela equipe; em outro computador, pode ser necessário reconhecer o certificado local de teste com orientação da equipe.
 
-## Remover o menu
+## 📚 Documentação para usuários
 
-```powershell
-npm run menu:uninstall
-```
+| Guia | O que você encontra |
+| --- | --- |
+| [📘 Manual oficial em PDF](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) | 18 páginas com instalação, capturas das telas, tutoriais e dúvidas frequentes. |
+| [🌐 Guia offline em HTML](docs/guia-usuario/index.html) | Navegação por assunto, busca e imagens ampliáveis. Abra o arquivo no navegador após baixar o projeto. |
+| [🪟 Fluxo da interface](docs/INTERFACE.md) | Configurar, revisar, converter e encontrar o resultado. |
+| [📦 Conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md) | Tipos aceitos e limites da conversão. |
 
-Remove somente as entradas `RpfToFiveM` em `HKCU\Software\Classes\Directory\shell`
-e `HKCU\Software\Classes\Directory\Background\shell`.
+## 💾 Seus arquivos continuam com você
 
-## Desenvolvimento
+O RPF original permanece intacto. A análise e a revisão não criam o addon; a gravação começa em **Converter agora**.
 
-```powershell
-npm ci
-npm test
-npm run desktop:build
-npm run desktop:test
-```
+Se uma pasta já existir, escolha **Cancelar**, **Usar outro nome** ou **Backup e substituir**. Os backups ficam ao lado da saída. O RPForge não altera seu `server.cfg` nem copia addons para a base de testes automaticamente.
 
-Para atualizar somente o codigo e a janela da instalacao local existente, use
-`npm run update:local`. Esse comando guarda backup e nao gera Setup nem publica.
-O fluxo da janela usa pedidos locais temporarios, nao abre servidor HTTP e nao envia arquivos pela rede.
-O teste desktop exercita a interface e seu processo de conversao com um RPF sintetico,
-incluindo previa, edicao de spawn, backup/substituicao, resultado e pasta vazia.
+## 🛠️ Precisa de ajuda?
 
-### Gerar e validar o instalador local
+- **O menu não apareceu?** Selecione uma única pasta com `.rpf` ou `.ydr`. Confira também **Mostrar mais opções** no Windows.
+- **Nenhum arquivo foi encontrado?** Escolha a pasta que contém o arquivo. A busca não percorre subpastas do Windows.
+- **O RPF foi recusado?** A versão atual aceita GTA V **Legacy**, RPF7 **OPEN/NONE**. Arquivos criptografados e GTA V Enhanced não são aceitos.
+- **Converteu, mas o conteúdo não funciona no jogo?** Confira a ativação do recurso, o spawn e as dependências do servidor.
 
-Desde a versao 0.2.0, o instalador inclui uma DLL C++ e um pacote de identidade assinado
-com certificado **RPF Forge Local Test**. Esta assinatura e apenas para testes locais.
-Antes da instalacao, a confianca no certificado publico precisa de autorizacao explicita
-do usuario. A ferramenta nao importa certificados automaticamente nem ativa modo de
-desenvolvedor. Uma assinatura de distribuicao sera necessaria para uma futura publicacao.
-A implantacao MSIX nesta maquina exige confianca em `LocalMachine\TrustedPeople`,
-com autorizacao explicita e UAC. `CurrentUser\TrustedPeople` nao foi suficiente.
-O script `Trust-LocalTestCertificate.ps1` executa somente esse passo autorizado;
-nao e chamado automaticamente pelo instalador e nao altera o repositorio Root.
+Ao abrir um relato em [Issues](https://github.com/biancadcastro/RPForge/issues), informe a versão do app, o passo em que ocorreu o problema e o texto do erro. Evite anexar conteúdo pago, dados pessoais ou um acervo inteiro.
 
-O compilador nativo usado nesta maquina e LLVM-MinGW 20261020 UCRT x64 (release oficial
-`mstorsjo/llvm-mingw`, SHA-256 do ZIP: `fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd`).
-O empacotamento usa Microsoft.Windows.SDK.BuildTools 10.0.28000.2957 do NuGet oficial.
-Ambos ficam em `.tools`, fora do Git e do instalador. A chave de assinatura permanece
-no repositorio pessoal de certificados do Windows, nunca no codigo ou instalador.
+> 💡 O tamanho em disco não é uma estimativa de FPS ou VRAM. YTYPs básicos não recriam salas e portais de MLO. Teste o resultado no FiveM antes de usar em produção.
 
-```powershell
-npm run installer
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Installer.ps1
-```
+## 📜 Licença e privacidade
 
-O build roda os testes, prepara somente arquivos do programa, inclui Node.js x64 e sua
-licenca, instala um compilador Inno Setup 6.7.3 no cache local do projeto apos verificar
-o SHA-256 oficial e gera o instalador em `release`, junto com o hash. E possivel indicar
-um compilador existente usando `-CompilerPath` no script de build.
-Verifique os termos do compilador para a modalidade de distribuicao pretendida.
+O código próprio do RPForge usa **[GNU GPL versão 3](LICENSE)** (`GPL-3.0-only`). As dependências mantêm suas licenças: veja [avisos de terceiros](THIRD_PARTY_NOTICES.md) e [NOTICE](NOTICE).
 
-O teste de ciclo de vida instala silenciosamente em uma pasta temporaria, verifica
-o menu, converte um RPF sintetico usando apenas o runtime incluido e desinstala.
-Confirma que os arquivos do usuario permanecem e restaura o menu de desenvolvimento.
-Nao ha upload ou criacao automatica de release no GitHub. O `.exe` ainda nao possui assinatura digital.
+Consulte também a [política de privacidade](docs/PRIVACY.md) e a [Code signing policy](docs/CODE_SIGNING_POLICY.md). A licença do aplicativo não concede direitos sobre os mods processados.
 
-Os testes criam RPFs sintéticos; não dependem de assets proprietários.
-A suíte cobre extração, RPF aninhado, cabeçalhos RSC7, arquivos inválidos, conflitos, XML,
-preservação do original e recusa de sobrescrita. Não substitui validação dentro do jogo.
+<details>
+<summary>🧑‍💻 Contribuir com o projeto</summary>
 
-Referências técnicas: [manifest FiveM](https://docs.fivem.net/docs/scripting-reference/resource-manifest/),
-[tipos de data_file](https://docs.fivem.net/docs/game-references/data-files/) e
-[estrutura RPF7 documentada no CodeWalker](https://github.com/dexyfex/CodeWalker/blob/master/CodeWalker.Core/GameFiles/RpfFile.cs).
-A biblioteca CodeWalker não é incorporada ou distribuída.
+O desenvolvimento é separado do uso do aplicativo. Para trabalhar no código, consulte a [documentação da interface](docs/DESENVOLVIMENTO_INTERFACE.md), o [roteiro de assinatura](docs/SIGNPATH_PREPARATION.md) e as [verificações de build](docs/SIGNPATH_BUILD.md).
 
-Dependência: `@xmldom/xmldom` (MIT), com sua licença mantida no pacote instalado.
-A licença deste projeto não concede direitos sobre os mods convertidos.
+Os testes usam arquivos sintéticos. Instaladores e releases são gerados somente mediante solicitação; credenciais, backups pessoais e conteúdo do jogo ficam fora do repositório.
 
-Não afiliado à Rockstar Games ou Cfx.re.
+</details>
+
+---
+
+<div align="center">
+
+**RPForge · por Bianca de Castro** 🧡
+
+Ferramenta independente do RedHorn Studio e do RedHorn Garage.<br>
+Não afiliada à Rockstar Games ou à Cfx.re.
+
+</div>
