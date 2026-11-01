@@ -1,4 +1,4 @@
-import { readFile, writeFile, readdir, lstat } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -28,6 +28,19 @@ const components = Object.entries(lock.packages).filter(([name, item]) => name &
 components.push({ type: 'application', 'bom-ref': 'node-runtime', name: 'Node.js', version: tools.nodeVersion, licenses: [{ license: { id: 'MIT' } }], properties: [{ name: 'rpf-forge:upstream-signature', value: 'Preserve OpenJS Foundation signature; do not sign with project certificate' }], externalReferences: [{ type: 'distribution', url: tools.tools.node.url }] });
 components.push({ type: 'library', 'bom-ref': 'native-runtime', name: 'LLVM-MinGW runtime libraries', version: tools.tools.llvm.version, licenses: [{ license: { name: 'See licenses/llvm-mingw-LICENSE.txt for aggregate upstream terms' } }], properties: [{ name: 'rpf-forge:linkage', value: 'static' }] });
 components.push({ type: 'framework', 'bom-ref': 'system-dotnet', name: 'Microsoft .NET Framework', version: '4.8', scope: 'required', properties: [{ name: 'rpf-forge:redistribution', value: 'Windows system library, not included in signing artifact' }] });
+const fontFiles = ['PixelifySans-Regular.ttf', 'PixelifySans-Bold.ttf'];
+components.push({
+  type: 'library', 'bom-ref': 'font:pixelify-sans', name: 'Pixelify Sans', scope: 'required',
+  licenses: [{ license: { id: 'OFL-1.1' } }],
+  properties: [{ name: 'rpf-forge:embedding', value: 'Regular and Bold embedded in RPFForge.exe' }],
+  components: await Promise.all(fontFiles.map(async name => ({
+    type: 'data', name, 'bom-ref': `font:pixelify-sans:${name}`,
+    hashes: [{ alg: 'SHA-256', content: checksum(await readFile(path.join(root, 'desktop/fonts', name))) }],
+    licenses: [{ license: { id: 'OFL-1.1' } }],
+  }))),
+});
+await mkdir(path.join(destination, 'licenses'), { recursive: true });
+await copyFile(path.join(root, 'desktop/fonts/OFL.txt'), path.join(destination, 'licenses/Pixelify-Sans-OFL.txt'));
 const sbom = { bomFormat: 'CycloneDX', specVersion: '1.6', version: 1,
   metadata: { component: { type: 'application', 'bom-ref': 'rpf-forge', name: 'RPF Forge', version: pkg.version, licenses: [{ license: { id: 'MIT' } }] }, tools: { components: Object.entries(tools.tools).filter(([, tool]) => !tool.optional).map(([name, tool]) => ({ type: 'application', name, version: tool.version, hashes: [{ alg: 'SHA-256', content: tool.sha256 }], scope: 'excluded' })) } },
   components, dependencies: [{ ref: 'rpf-forge', dependsOn: components.map(c => c['bom-ref']) }],

@@ -66,6 +66,16 @@ test('inventory excludes dev dependencies, secrets and machine paths, and binds 
   assert.ok(sbom.components.some(c => c.name === '@xmldom/xmldom'));
   assert.ok(sbom.components.some(c => c.name === 'Node.js'));
   assert.ok(!sbom.components.some(c => c.name === 'yaml'));
+  const font = sbom.components.find(c => c.name === 'Pixelify Sans');
+  assert.ok(font, 'Embedded fonts must appear in the runtime inventory');
+  assert.equal(font.licenses[0].license.id, 'OFL-1.1');
+  assert.ok(sbom.dependencies[0].dependsOn.includes(font['bom-ref']));
+  assert.deepEqual(font.components.map(c => c.name).sort(), ['PixelifySans-Bold.ttf', 'PixelifySans-Regular.ttf']);
+  for (const component of font.components) {
+    const bytes = await readFile(path.join(root, 'desktop/fonts', component.name));
+    assert.equal(component.hashes[0].content, createHash('sha256').update(bytes).digest('hex'));
+  }
+  assert.deepEqual(await readFile(path.join(destination, 'licenses/Pixelify-Sans-OFL.txt')), await readFile(path.join(root, 'desktop/fonts/OFL.txt')));
 });
 
 test('public identity is separate from the local-test identity and contains no assumed publisher', async () => {

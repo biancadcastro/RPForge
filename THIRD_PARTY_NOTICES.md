@@ -7,6 +7,7 @@ of its dependencies, Windows system libraries or build tools.
 | --- | --- | --- | --- |
 | Node.js | Unmodified runtime for the converter | `build/toolchains.json` | MIT and the third-party notices in the upstream `LICENSE` |
 | `@xmldom/xmldom` | Runtime XML parser | `package-lock.json` | MIT; preserve the upstream package `LICENSE` |
+| Pixelify Sans Regular and Bold | Fonts embedded in the desktop executable | Checked-in `desktop/fonts/*.ttf`, identified by SHA-256 in the SBOM | SIL Open Font License 1.1; complete notice in `desktop/fonts/OFL.txt`, embedded in Help and copied to `licenses/Pixelify-Sans-OFL.txt` |
 | LLVM-MinGW runtime libraries | Statically linked native C++ support | Pinned LLVM-MinGW archive | Apache-2.0 with LLVM exceptions and the other applicable notices in the distribution's aggregate `LICENSE.TXT` |
 | Microsoft .NET Framework | Windows system dependency for the current desktop app | .NET Framework 4.8 reference contract | Provided by Windows; not included in the signing bundle |
 | `yaml` | Development-only workflow validation | `package-lock.json` | ISC; not included in production npm dependencies |
@@ -15,8 +16,8 @@ of its dependencies, Windows system libraries or build tools.
 | Windows SDK BuildTools | Optional future identity-package preparation | Pinned NuGet package | Upstream SDK terms; SDK not shipped |
 | Inno Setup | Legacy local-test installer builder | Legacy build script | Inno Setup license; not executed or included by the SignPath binary preparation workflow |
 
-The unsigned preparation build copies the complete project, Node.js, xmldom and
-LLVM-MinGW notices into `licenses/`, and emits an inventory in `sbom.cdx.json`.
+The unsigned preparation build copies the complete project, Node.js, xmldom,
+Pixelify Sans and LLVM-MinGW notices into `licenses/`, and emits an inventory in `sbom.cdx.json`.
 The aggregate LLVM notice includes tools as well as libraries; it is retained intact
 to avoid dropping applicable upstream notices. The SBOM records native runtime linkage
 without asserting that every component of the compiler distribution is shipped.
