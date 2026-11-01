@@ -17,8 +17,9 @@ Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
 Tipos suportados, geração em um clique e limites: [conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md).
 O projeto local está centralizado em `D:\RedHorn\Desenvolvimento\RPForge`, com a marca em `design\identidade`.
 Interface atual: [guia de uso](docs/INTERFACE.md), [identidade visual](docs/IDENTIDADE.md) e [desenvolvimento/testes](docs/DESENVOLVIMENTO_INTERFACE.md).
-As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0
-nao as contem. Nao gerar outro instalador sem pedido explicito.
+A versão local 0.3.0 inclui a interface atual, conversão de conteúdos e geração de YTYP.
+Instaladores são gerados somente mediante pedido explícito.
+Auditoria e ciclo de instalação: [validação da versão 0.3.0](docs/AUDITORIA_0.3.0.md).
 
 ## Instalar no Windows pelo instalador
 
