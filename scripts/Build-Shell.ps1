@@ -30,6 +30,9 @@ if ($LASTEXITCODE -ne 0) { throw "Teste COM falhou: $LASTEXITCODE" }
 $identity = Join-Path $tools 'forge-identity'
 New-Item -ItemType Directory -Path $identity -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'shell\AppxManifest.xml') -Destination (Join-Path $identity 'AppxManifest.xml')
+& (Join-Path $PSScriptRoot 'Prepare-ShellVisualResources.ps1') -Destination $identity
+Copy-Item -LiteralPath (Join-Path $identity 'Assets') -Destination $Destination -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $identity 'resources.pri') -Destination (Join-Path $Destination 'resources.pri') -Force
 $package = Join-Path $Destination 'RPFForge.identity.msix'
 & $makeappx pack /o /nv /d $identity /p $package
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao empacotar identidade.' }

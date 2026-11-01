@@ -6,7 +6,19 @@ if (!$package -or $package.Status -ne 'Ok') { throw 'Pacote moderno nao registra
 $manifest = Get-AppxPackageManifest -Package $package.PackageFullName
 if ($manifest.Package.Properties.DisplayName -ne 'RPForge') { throw 'Nome do pacote incorreto.' }
 if ($manifest.Package.Applications.Application.Executable -ne 'RPFForge.exe') { throw 'O agrupamento do menu deve usar o executavel RPForge, nunca o Node.' }
-if ($manifest.Package.Properties.Logo -ne 'shell\rpforge-mark-v3.png') { throw 'Marca antiga no agrupamento do menu.' }
+if ($manifest.Package.Properties.Logo -ne 'Assets\StoreLogo.png') { throw 'Marca antiga no agrupamento do menu.' }
+foreach ($logo in @('Assets\StoreLogo.png', 'Assets\LargeLogo.png', 'Assets\MenuLogo.png', 'resources.pri')) {
+    if (!(Test-Path -LiteralPath (Join-Path $InstallDir $logo))) { throw "Recurso visual ausente na localizacao externa: $logo" }
+}
+Add-Type -AssemblyName System.Drawing
+foreach ($size in @(16,20,24,32,48,256)) {
+    $file = Join-Path $InstallDir "Assets\MenuLogo.targetsize-${size}_altform-unplated.png"
+    if (!(Test-Path -LiteralPath $file)) { throw "Icone sem placa ausente: $size" }
+    $bitmap = [Drawing.Bitmap]::FromFile($file)
+    try {
+        if ($bitmap.Width -ne $size -or $bitmap.Height -ne $size -or $bitmap.GetPixel(0,0).A -ne 0) { throw "Dimensoes ou transparencia incorretas: $size" }
+    } finally { $bitmap.Dispose() }
+}
 foreach ($name in @('rpforge-mark-v3.png', 'rpforge-mark-v3.ico')) {
     if (!(Test-Path -LiteralPath (Join-Path $InstallDir ('shell\' + $name)))) { throw "Icone do menu ausente: $name" }
 }

@@ -45,5 +45,9 @@ Alterações de layout não devem introduzir versões regeneradas da marca, font
 O ícone do Windows usa o símbolo vetorial aprovado sem fundo, com margens reduzidas e versões de 16, 20, 24, 32, 40, 48, 64, 128 e 256 pixels no ICO. A janela e o recurso do executável usam o mesmo arquivo; o texto Converter com RPForge foi preservado.
 
 
-O agrupamento do menu moderno usa a identidade RPForge e o executável RPFForge.exe. A imagem e o ICO são registrados como shell/rpforge-mark-v3.png e shell/rpforge-mark-v3.ico, evitando reutilizar o cadastro visual antigo do Node. O teste do menu verifica esses vínculos.
+O agrupamento do menu moderno usa a identidade RPForge e o executável RPFForge.exe. As ações usam shell/rpforge-mark-v3.ico. O agrupamento usa Assets/MenuLogo.png, variantes targetsize sem placa e resources.pri na raiz externa da instalação. O teste do menu verifica os arquivos físicos e a transparência, além do cadastro.
 
+
+A integração sparse resolve os arquivos visuais na ExternalLocation. O build prepara Assets e resources.pri; o registro copia esses recursos para a raiz instalada antes de atualizar a identidade. A atualização preserva janelas RPForge abertas e não reinicia o Explorer. A aparência foi conferida no menu principal do Explorer.
+
+Referência: https://github.com/microsoft/winappCli/blob/main/docs/guides/sparse.md

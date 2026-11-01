@@ -7,14 +7,14 @@
  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
  IgnorableNamespaces="uap uap10 rescap desktop4 desktop5 com">
- <Identity Name="RedHorn.RPFForge.Local" Publisher="CN=RPF Forge Local Test" Version="0.2.0.2" ProcessorArchitecture="x64" />
- <Properties><DisplayName>RPForge</DisplayName><PublisherDisplayName>RedHorn</PublisherDisplayName><Logo>shell\rpforge-mark-v3.png</Logo><uap10:AllowExternalContent>true</uap10:AllowExternalContent></Properties>
+ <Identity Name="RedHorn.RPFForge.Local" Publisher="CN=RPF Forge Local Test" Version="0.2.0.4" ProcessorArchitecture="x64" />
+ <Properties><DisplayName>RPForge</DisplayName><PublisherDisplayName>RedHorn</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo><uap10:AllowExternalContent>true</uap10:AllowExternalContent></Properties>
  <Resources><Resource Language="pt-br" /></Resources>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" /></Dependencies>
  <Capabilities><rescap:Capability Name="runFullTrust" /><rescap:Capability Name="unvirtualizedResources" /></Capabilities>
  <Applications>
   <Application Id="RPFForge" Executable="RPFForge.exe" uap10:TrustLevel="mediumIL" uap10:RuntimeBehavior="win32App">
-   <uap:VisualElements AppListEntry="none" DisplayName="RPForge" Description="Conversor de addons FiveM" BackgroundColor="transparent" Square150x150Logo="shell\rpforge-mark-v3.png" Square44x44Logo="shell\rpforge-mark-v3.png" />
+   <uap:VisualElements AppListEntry="none" DisplayName="RPForge" Description="Conversor de addons FiveM" BackgroundColor="transparent" Square150x150Logo="Assets\LargeLogo.png" Square44x44Logo="Assets\MenuLogo.png" />
    <Extensions>
     <desktop4:Extension Category="windows.fileExplorerContextMenus"><desktop4:FileExplorerContextMenus>
      <desktop5:ItemType Type="Directory"><desktop5:Verb Id="ConvertRpf" Clsid="761CA256-61CC-4B1E-85DB-2F7D4E837010" /><desktop5:Verb Id="GenerateYtyp" Clsid="65B5221F-8946-4DE3-9F6B-94B831F39432" /></desktop5:ItemType>
