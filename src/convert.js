@@ -1,7 +1,8 @@
 import { readFile, readdir, lstat, mkdir, writeFile, rename, rm, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
-import { readRpf, LIMITS } from './rpf.js';
+import { readRpf, LIMITS, safeName } from './rpf.js';
+import { renameSpawns } from './spawns.js';
 
 const META = {
   'handling.meta': ['HANDLING_FILE', 'CHandlingDataMgr'],
@@ -19,13 +20,10 @@ export function resourceName(input) {
   return input.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'vehicle_addon';
 }
 
-export async function convertArchive(archive) {
+export async function convertArchive(archive, options = {}) {
   const stat = await lstat(archive);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > LIMITS.archiveBytes) throw new Error('RPF inválido, link ou maior que 512 MiB.');
-  const name = resourceName(path.basename(archive, path.extname(archive)) === 'dlc' ? path.basename(path.dirname(archive)) : path.basename(archive, path.extname(archive)));
-  const output = path.join(path.dirname(archive), `${name}_fivem`);
-  try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  const files = new Map();
+  let files = new Map();
   const metas = [];
   const skipped = [];
   const models = new Set();
@@ -64,7 +62,7 @@ export async function convertArchive(archive) {
       }
       const destination = `data/${String(metas.length + 1).padStart(3, '0')}/${basename}`;
       add(destination, entry.data);
-      metas.push({ type, destination });
+      metas.push({ type, destination, basename, doc });
     } else if (!ADMIN.has(basename)) {
       skipped.push(entry.path);
     }
@@ -77,9 +75,15 @@ export async function convertArchive(archive) {
   // Unknown game data may require extra manifest declarations: never silently call that ready.
   const blocking = skipped.filter(p => /\.(meta|ymt|rel|awc|ymap|ytyp)$/i.test(p));
   if (blocking.length) throw new Error(`Pacote requer suporte adicional para: ${blocking.join(', ')}`);
+  const requested = options.chooseSpawns ? await options.chooseSpawns({ archive: path.basename(archive), models: [...declaredModels].sort() }) : options.spawns;
+  const renamed = renameSpawns(files, metas, declaredModels, requested);
+  files = renamed.files;
+  const finalModels = renamed.models;
+  const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
+  const output = path.join(path.dirname(archive), name);
+  try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   const manifest = ["fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
-  add('conversion-report.json', Buffer.from(JSON.stringify({ version: 1, source: path.basename(archive), models: [...declaredModels].sort(), skipped, note: 'Conversão estrutural; validar funcionamento no FiveM. Arquivo original preservado.' }, null, 2)));
   const stage = await mkdtemp(path.join(path.dirname(archive), '.rpf-to-fivem-'));
   try {
     for (const { destination, data } of files.values()) {
@@ -96,17 +100,17 @@ export async function convertArchive(archive) {
     await rm(stage, { recursive: true, force: true });
     throw error;
   }
-  return { output, resource: path.basename(output), models: [...declaredModels].sort(), skipped };
+  return { output, resource: path.basename(output), models: finalModels, skipped };
 }
 
-export async function convertFolder(folder) {
+export async function convertFolder(folder, options = {}) {
   const root = path.resolve(folder);
   if (!(await lstat(root)).isDirectory()) throw new Error('Selecione uma pasta real, sem link.');
   const archives = (await readdir(root, { withFileTypes: true })).filter(e => e.isFile() && e.name.toLowerCase().endsWith('.rpf')).sort((a, b) => a.name.localeCompare(b.name));
   if (!archives.length) throw new Error('Nenhum .rpf diretamente nesta pasta.');
   const results = [];
   for (const archive of archives) {
-    try { results.push({ archive: archive.name, ok: true, ...await convertArchive(path.join(root, archive.name)) }); }
+    try { results.push({ archive: archive.name, ok: true, ...await convertArchive(path.join(root, archive.name), options) }); }
     catch (error) { results.push({ archive: archive.name, ok: false, error: error.message }); }
   }
   return results;

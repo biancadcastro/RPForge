@@ -19,7 +19,8 @@ test('creates stream/data/manifest, preserves original, refuses overwrite', asyn
   await writeFile(source, original);
   const [result] = await convertFolder(root);
   assert.equal(result.ok, true, result.error);
-  assert.equal(result.resource, 'police_pack_fivem');
+  assert.equal(result.resource, 'car');
+  assert.deepEqual((await readdir(result.output)).sort(), ['data', 'fxmanifest.lua', 'stream']);
   assert.deepEqual(result.models, ['car']);
   const manifest = await readFile(path.join(result.output, 'fxmanifest.lua'), 'utf8');
   assert.match(manifest, /fx_version 'cerulean'/);

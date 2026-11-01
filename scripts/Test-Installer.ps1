@@ -48,7 +48,7 @@ try {
         & $runtime $cli $inputDir
         if ($LASTEXITCODE -ne 0) { throw 'Conversao pelo runtime incluido falhou.' }
     } finally { $env:PATH = $previousPath }
-    $output = Join-Path $inputDir 'vehicle_fivem\fxmanifest.lua'
+    $output = Join-Path $inputDir 'car\fxmanifest.lua'
     if (!(Test-Path -LiteralPath $output)) { throw 'Addon nao foi criado.' }
     $uninstaller = Join-Path $installDir 'unins000.exe'
     $process = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -WindowStyle Hidden -Wait -PassThru

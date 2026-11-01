@@ -61,8 +61,9 @@ RPF Forge
 1. Clique com o botao direito na pasta que contem o arquivo .rpf.
 2. Selecione Converter RPF para FiveM.
    A extensao usa o menu principal do Windows 11.
-3. O addon sera criado em uma nova pasta terminada em _fivem.
-4. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
+3. Responda se quer alterar o spawn do carro e informe o novo nome, se desejar.
+4. O addon sera criado numa pasta com o spawn escolhido (ou o atual).
+5. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
 
 Nao requer Node.js separado, GTA, OpenIV ou CodeWalker instalados.
 Os RPFs originais sao preservados. Saidas existentes nao sao sobrescritas.

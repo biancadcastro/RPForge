@@ -31,21 +31,21 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 
 1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
 2. Selecione **Converter RPF para FiveM**, fornecido pela extensão nativa do RPF Forge para o menu moderno do Windows 11.
-3. Aguarde o resultado na janela de console; pressione Enter para fechar.
+3. Responda **Quer alterar o spawn do carro?** com `s` ou `n`. Se escolher sim, informe o novo spawn.
+4. Aguarde o resultado na janela de console; pressione Enter para fechar.
 
 A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
 e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF.
 As entradas tradicionais permanecem para compatibilidade.
 Não pesquisa em subpastas do Windows, mas extrai RPFs aninhados dentro dos arquivos.
 
-Para uma pasta `meu_carro` contendo `dlc.rpf`, a saída é:
+Para um carro com spawn `carro`, mantendo o nome atual, a saída é:
 
 ```text
 meu_carro/
   dlc.rpf                       # original preservado
-  meu_carro_fivem/
+  carro/
     fxmanifest.lua
-    conversion-report.json
     stream/
       carro.yft
       carro_hi.yft
@@ -55,8 +55,14 @@ meu_carro/
       002/handling.meta
 ```
 
-Copie a pasta gerada para `resources` e adicione `ensure meu_carro_fivem` ao seu `server.cfg`.
-A ferramenta não altera a base de testes, `server.cfg`, handling, liveries ou texturas.
+Copie a pasta gerada para `resources` e adicione `ensure carro` ao seu `server.cfg`.
+Não é gerado relatório JSON. Arquivos auxiliares ignorados são informados no console.
+Ao escolher um novo spawn, a pasta recebe esse nome e os YFTs, YTDs e referências
+correspondentes nos metas são atualizados. Dicionários e handling compartilhados são
+preservados quando necessários a outro veículo. Valores de física, áudio, texturas
+internas e liveries permanecem intactos. Nomes novos usam letras minúsculas, números e `_`,
+começam com letra e têm até 63 caracteres; nomes reservados do Windows são recusados.
+A ferramenta não altera a base de testes ou `server.cfg`.
 Valide o veículo no FiveM antes de colocar em produção.
 
 Também pode executar sem o menu:
@@ -66,6 +72,9 @@ npm run convert -- "C:\Mods\Meu Carro"
 ```
 
 Um addon é criado por RPF externo. Vários veículos no mesmo RPF permanecem no mesmo addon.
+Nesse caso, a pergunta é feita por veículo e a pasta usa `<primeiro_spawn>_pack`,
+considerando a ordem alfabética dos spawns finais. A execução sem `--interactive`
+mantém os spawns atuais; o menu do Explorer sempre usa o modo interativo.
 Metas são mantidos em subpastas numeradas para preservar múltiplas origens sem mesclar XMLs
 ou perder configurações. Este conversor não aplica regras particulares de servidores.
 
@@ -82,7 +91,7 @@ ou perder configurações. Este conversor não aplica regras particulares de ser
 
 Não aceita RPF criptografado, GTA V Enhanced, conversão de mapas, áudio customizado ou pacotes
 sem `vehicles.meta`. Metas/tipos especiais não suportados geram erro para evitar saída incompleta.
-Não executa scripts fornecidos pelo addon. Documentos e imagens não utilizados ficam listados no relatório.
+Não executa scripts fornecidos pelo addon. Documentos e imagens não utilizados são informados no console.
 
 Limites desta versão: RPF de até 512 MiB, entrada de até 256 MiB, 1 GiB acumulado de extração,
 100 mil entradas e 16 níveis de RPF. O processamento usa memória; não é um extrator genérico de arquivos enormes.

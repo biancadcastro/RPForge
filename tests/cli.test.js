@@ -13,7 +13,20 @@ test('interactive menu entry handles spaces and shell characters as literal path
   await writeFile(path.join(root, 'vehicle.rpf'), vehicleArchive());
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('../src/cli.js', import.meta.url)), '--interactive', root], { encoding: 'utf8', input: '\n' });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /ensure vehicle_fivem/);
+  assert.match(result.stdout, /Quer alterar o spawn do carro "car"/);
+  assert.match(result.stdout, /ensure car/);
   assert.match(result.stdout, /Pressione Enter/);
-  assert.match(await readFile(path.join(root, 'vehicle_fivem/fxmanifest.lua'), 'utf8'), /game 'gta5'/);
+  assert.match(await readFile(path.join(root, 'car/fxmanifest.lua'), 'utf8'), /game 'gta5'/);
+});
+
+test('interactive prompt accepts a new spawn and retries invalid names without losing buffered input', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'forge-cli-rename-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(path.join(root, 'dlc.rpf'), vehicleArchive());
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL('../src/cli.js', import.meta.url)), '--interactive', root], { encoding: 'utf8', input: 'talvez\ns\n../bad\nredhorncar\n\n' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Responda s ou n/);
+  assert.match(result.stdout, /Use um spawn/);
+  assert.match(result.stdout, /ensure redhorncar/);
+  assert.match(await readFile(path.join(root, 'redhorncar/data/001/vehicles.meta'), 'utf8'), /<modelName>redhorncar<\/modelName>/);
 });
