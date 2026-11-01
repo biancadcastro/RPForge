@@ -63,7 +63,7 @@ namespace RPFForge {
         readonly ToolTip hints = new ToolTip();
         readonly string[] titles = { "1. Configurar", "2. Revisar", "3. Resultado", "Espaço em disco", "Ajuda" };
         readonly string[] descriptions = {
-            "Como os veículos devem se chamar no jogo?",
+            "Confira os nomes e o tipo de conteúdo identificado.",
             "Confira os nomes e a pasta de saída antes de converter.",
             "Confira o resultado da operação e abra a pasta gerada.",
             "Arquivos de streaming do maior para o menor. Tamanho em disco não é uma estimativa de VRAM ou FPS.",
@@ -97,21 +97,21 @@ namespace RPFForge {
             var heading = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Margin = Padding.Empty };
             heading.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); heading.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225));
             heading.RowStyles.Add(new RowStyle(SizeType.Absolute, 42)); heading.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            heading.Controls.Add(new Label { Text = "Converter veículos", Font = ForgeFonts.Pixel(24, FontStyle.Bold), AutoSize = true, ForeColor = foreground, Margin = Padding.Empty }, 0, 0);
-            heading.Controls.Add(new Label { Text = "Selecione a pasta e escolha o nome dos veículos.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 1);
+            heading.Controls.Add(new Label { Text = "Converter RPFs", Font = ForgeFonts.Pixel(24, FontStyle.Bold), AutoSize = true, ForeColor = foreground, Margin = Padding.Empty }, 0, 0);
+            heading.Controls.Add(new Label { Text = "RPFs para FiveM. YTYPs automáticos para pastas com YDRs.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 1);
             stage.Text = "01 / ORIGEM"; stage.Dock = DockStyle.Fill; stage.TextAlign = ContentAlignment.MiddleRight; stage.ForeColor = red; stage.Font = new Font("Consolas", 10, FontStyle.Bold); heading.Controls.Add(stage, 1, 0);
             main.Controls.Add(heading, 0, 0);
             var pathRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Margin = Padding.Empty };
             pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
             pathRow.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); pathRow.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             pathRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            pathRow.Controls.Add(new Label { Text = "Pasta com os RPFs", ForeColor = muted, AutoSize = true, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 0);
+            pathRow.Controls.Add(new Label { Text = "Pasta com RPFs ou modelos YDR", ForeColor = muted, AutoSize = true, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 0);
             folder.Dock = DockStyle.Fill; folder.Margin = new Padding(0, 5, 12, 0); folder.BackColor = ForgeTheme.Raised; folder.ForeColor = foreground; folder.BorderStyle = BorderStyle.FixedSingle; folder.Font = new Font("Consolas", 10); folder.AccessibleName = "Pasta de origem com arquivos RPF";
             ((ForgeButton)browse).FlatFrame = true; ConfigureButton(browse, "Selecionar &pasta", false); browse.Dock = DockStyle.Fill; browse.Margin = Padding.Empty;
             var inputFrame = new ForgeInputFrame(folder) { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
             pathRow.Controls.Add(inputFrame, 0, 1); pathRow.Controls.Add(browse, 1, 1); main.Controls.Add(pathRow, 0, 1);
             var stats = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = new Padding(0, 4, 0, 8) };
-            foreach (var entry in new[] { Tuple.Create("VEÍCULOS", countCars), Tuple.Create("ARQUIVOS RPF", countArchives), Tuple.Create("AVISOS / ERROS", countWarnings), Tuple.Create("STREAMING EM DISCO", countWeight) }) {
+            foreach (var entry in new[] { Tuple.Create("ITENS", countCars), Tuple.Create("ARQUIVOS RPF", countArchives), Tuple.Create("AVISOS / ERROS", countWarnings), Tuple.Create("ARQUIVOS EM DISCO", countWeight) }) {
                 stats.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25)); var panel = new Panel { Dock = DockStyle.Fill, BackColor = surface, Margin = new Padding(0, 0, 8, 0), Padding = new Padding(12, 8, 12, 4) };
                 entry.Item2.Text = "—"; entry.Item2.Dock = DockStyle.Fill; entry.Item2.Font = ForgeFonts.Pixel(22, FontStyle.Bold); entry.Item2.ForeColor = foreground;
                 panel.Controls.Add(entry.Item2); panel.Controls.Add(new Label { Text = entry.Item1, Dock = DockStyle.Top, Height = 20, ForeColor = muted, Font = ForgeFonts.Pixel(10, FontStyle.Bold) }); stats.Controls.Add(panel);
@@ -126,7 +126,7 @@ namespace RPFForge {
             tabs.Dock = DockStyle.Fill; tabs.Margin = Padding.Empty; tabs.TabStop = false;
             SetupGrid(vehicles); SetupGrid(destinations); SetupGrid(assets);
             vehicles.EditMode = DataGridViewEditMode.EditOnEnter;
-            AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 28); AddTextColumn(vehicles, "current", "Nome original", true, 28); AddTextColumn(vehicles, "target", "Nome no jogo", false, 44);
+            AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 28); AddTextColumn(vehicles, "current", "Nome original", true, 28); AddTextColumn(vehicles, "target", "Nome no jogo", false, 44); AddTextColumn(vehicles, "kind", "Conteúdo", true, 24);
             vehicles.CellPainting += PaintEditableCell;
             destinations.Columns.Add(new DataGridViewCheckBoxColumn { Name = "selected", HeaderText = "Converter", Width = 78, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
             AddTextColumn(destinations, "archive", "Arquivo RPF", true, 28); AddTextColumn(destinations, "output", "Pasta de saída", false, 30); AddTextColumn(destinations, "exists", "Destino", true, 18);
@@ -185,7 +185,7 @@ namespace RPFForge {
         void UpdateCounts(int cars, int archives, int warnings, int errors, double bytes) {
             SetWorkspaceReady(true);
             countCars.Text = cars.ToString(); countArchives.Text = archives.ToString(); countWarnings.Text = warnings + " / " + errors; countWarnings.ForeColor = errors > 0 ? ForgeTheme.Error : warnings > 0 ? ForgeTheme.Warning : foreground; countWeight.Text = FormatSize(bytes);
-            empty.Visible = cars == 0; vehicles.Visible = cars > 0; emptyTitle.Text = errors > 0 ? "Não foi possível ler os veículos" : "Nenhum veículo encontrado"; emptyHelp.Text = errors > 0 ? "Veja o diagnóstico em Prévia e resultado.\nCorrija a origem e analise novamente." : "Confira se a pasta contém RPFs abertos de veículos GTA V Legacy.\nA busca não percorre subpastas do Windows.";
+            empty.Visible = cars == 0; vehicles.Visible = cars > 0; emptyTitle.Text = errors > 0 ? "Não foi possível ler os RPFs" : "Nenhum conteúdo encontrado"; emptyHelp.Text = errors > 0 ? "Veja o diagnóstico em Prévia e resultado.\nCorrija a origem e analise novamente." : "Confira se a pasta contém RPFs abertos de GTA V Legacy.\nA busca não percorre subpastas do Windows.";
             RefreshNavigation();
         }
         void SetWorkspaceReady(bool ready) { if (mainLayout != null) { mainLayout.RowStyles[2].Height = ready ? 84 : 12; mainLayout.GetControlFromPosition(0, 2).Visible = ready; } }
@@ -203,6 +203,5 @@ namespace RPFForge {
             details.Text = "Nenhuma prévia disponível para esta pasta.\r\nClique em Analisar arquivos para continuar.";
         }
         protected override void Dispose(bool disposing) { if (disposing) { hints.Dispose(); } base.Dispose(disposing); }
-        const string HelpText = "COMO CONVERTER\r\n\r\n1. Escolha a pasta que contém os RPFs abertos.\r\n2. A análise começa automaticamente e abre Configurar.\r\n3. Revise os nomes e as pastas na mesma tela. Vazio mantém o spawn.\r\n4. Clique em Revisar conversão. As edições são validadas automaticamente.\r\n5. Confira o resumo e clique em Converter agora.\r\n6. Abra a pasta em Resultado ou inicie uma Nova conversão.\r\n\r\nNOMES E DESTINOS\r\n\r\nSpawns aceitam letras maiúsculas e minúsculas, números e _. Comece com letra e use até 63 caracteres. Nomes reservados do Windows são recusados. Maiúsculas são preservadas, mas conflitos são comparados sem diferenciar maiúsculas e minúsculas.\r\n\r\nCancelar: preserva a pasta existente e não converte esse RPF.\r\nUsar outro nome: escolha outro nome de saída e atualize a prévia.\r\nBackup e substituir: guarda a pasta anterior como backup antes de entregar o novo addon.\r\n\r\nO QUE É PRESERVADO\r\n\r\nRPF original, peças disponíveis, melhorias de desempenho, liveries, áudio e texturas internas. Opções de tuning sem modelo são removidas; dlctext.meta, shopdata.meta e shop_vehicle.meta são descartados. Metas ficam em data e tuning em stream/mods.\r\n\r\nLIMITES\r\n\r\nVeículos GTA V Legacy; arquivos RPF7 OPEN/NONE de até 512 MiB por RPF externo. Sem descriptografia, GTA V Enhanced, mapas ou áudio customizado. RPFs aninhados são lidos, mas subpastas do Windows não são pesquisadas. A validação estrutural não substitui testes no FiveM.\r\n\r\nATALHOS\r\n\r\nAlt+P: escolher pasta. Alt+A: continuar no fluxo. Alt+C: converter na etapa Revisar. Alt+R: abrir resultado. Tab/Shift+Tab: navegar pelos controles.\r\n\r\nTudo é processado localmente. A ferramenta não altera server.cfg nem copia arquivos para sua base de testes.";
     }
 }

@@ -6,7 +6,7 @@ O fluxo principal tem três etapas. Escolher a pasta inicia a análise automatic
 
 - Escolha a pasta de origem pelo seletor moderno do Windows; a análise começa ao confirmar. Cancelar mantém a configuração atual.
 - Nomes dos veículos e pastas de saída ficam juntos na mesma tela.
-- Deixe o novo spawn vazio para manter o original. `manter original` é apenas uma indicação visual, não um valor enviado ao backend.
+- Clique no nome para editar o spawn de veículos ou o nome do recurso dos demais conteúdos. O nome original já vem preenchido.
 - Marque os RPFs a converter. Em pacotes com vários veículos, cada spawn pode ser editado.
 - Se a pasta já existir, escolha explicitamente **Cancelar**, **Usar outro nome** ou **Backup e substituir**. O app não escolhe uma ação por você.
 - Clique em **Revisar conversão**. As edições são validadas automaticamente; não há um passo separado de reanálise.
@@ -35,7 +35,7 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 
 ## Ações auxiliares
 
-**Espaço em disco** mostra até 200 arquivos de streaming, do maior para o menor. Não estima VRAM/FPS, não exclui arquivos e não otimiza texturas automaticamente. **Ajuda** contém instruções, limites e licença da fonte. Essas páginas não são etapas obrigatórias da conversão.
+**Espaço em disco** mostra até 200 arquivos de streaming, do maior para o menor. Não estima VRAM/FPS, não exclui arquivos e não otimiza texturas automaticamente. **Ajuda** contém instruções e limites; a licença da fonte abre em uma janela separada. Essas páginas não são etapas obrigatórias da conversão.
 
 ## Teclado e estados
 
@@ -52,3 +52,5 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 A prévia executa o conversor real: revisar é leitura; Converter grava addons. Mudanças no código requerem uma nova instância. Janelas anteriores não são fechadas automaticamente. Nenhum instalador é gerado durante o desenvolvimento.
 
 A configuração mostra o nome original e o nome no jogo. As decisões de destino aparecem somente quando existe conflito. Revisão e resultado usam cartões com detalhes técnicos recolhidos. Ajuda e licenças são separadas; documentos têm rolagem escura e as ações de conflito usam menu estilizado.
+
+Pastas com YDRs e sem RPF iniciam a geração de YTYP automaticamente, em um clique, e mostram o resultado. Consulte [conteúdos e YTYP](CONTEUDOS_E_YTYP.md).

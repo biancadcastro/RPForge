@@ -74,6 +74,18 @@ int wmain(int argc, wchar_t** argv) {
         if (command->GetState(items,FALSE,&state) != E_PENDING) return 18;
         if (FAILED(command->GetState(items,TRUE,&state))) return 19;
         if (state != (i == 2 ? ECS_ENABLED : ECS_HIDDEN)) return 20;
+        if (i == 3) {
+            auto model = std::wstring(argv[i]) + L"\\synthetic.ydr";
+            HANDLE file = CreateFileW(model.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+            if (file == INVALID_HANDLE_VALUE) return 24;
+            CloseHandle(file);
+            HRESULT ydrState = command->GetState(items, TRUE, &state);
+            PWSTR ydrTitle = nullptr;
+            HRESULT ydrName = command->GetTitle(items, &ydrTitle);
+            bool titleOk = SUCCEEDED(ydrName) && !wcscmp(ydrTitle, L"Gerar YTYP com RPForge");
+            CoTaskMemFree(ydrTitle); DeleteFileW(model.c_str());
+            if (FAILED(ydrState) || state != ECS_ENABLED || !titleOk) return 25;
+        }
         items->Release(); CoTaskMemFree(pidl);
     }
     IObjectWithSite* site = nullptr;

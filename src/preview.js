@@ -26,7 +26,7 @@ export async function inspectFolder(folder, options = {}) {
       const plan = await prepareArchive(path.join(root, archive), { ...selected, onProgress: options.onProgress });
       const name = outputName(selected.outputName || plan.defaultName);
       const output = path.join(root, name);
-      results.push({ archive, selected: selected.selected !== false, ok: true, models: plan.originalModels, finalModels: plan.models, defaultName: plan.defaultName, outputName: name, output, exists: await exists(output), sourceHash: plan.sourceHash, sourceBytes: plan.sourceBytes, mergedSources: plan.mergedSources, removedTuning: plan.removedTuning, skipped: plan.skipped, audit: plan.audit, files: [...plan.files.values()].map(f => ({ path: f.destination, diskBytes: f.data.length })) });
+      results.push({ archive, selected: selected.selected !== false, ok: true, kind: plan.kind, models: plan.originalModels, finalModels: plan.models, defaultName: plan.defaultName, outputName: name, output, exists: await exists(output), sourceHash: plan.sourceHash, sourceBytes: plan.sourceBytes, mergedSources: plan.mergedSources, removedTuning: plan.removedTuning, skipped: plan.skipped, audit: plan.audit, files: [...plan.files.values()].map(f => ({ path: f.destination, diskBytes: f.data.length })) });
     } catch (error) { results.push({ archive, ok: false, error: error.message }); }
   }
   return results;

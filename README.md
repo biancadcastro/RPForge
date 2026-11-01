@@ -1,6 +1,6 @@
 # RPForge
 
-Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Windows.
+Converta RPFs de conteúdo GTA V Legacy em recursos FiveM e gere YTYPs de modelos YDR pelo botão direito do Windows.
 Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
 O desenvolvimento atual permanece local, sem autorização para publicação.
 
@@ -14,6 +14,8 @@ e a assinatura esta desativada ate a aprovacao/configuracao explicita.
 Avisos de componentes externos: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
+Tipos suportados, geração em um clique e limites: [conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md).
+O projeto local está centralizado em `D:\RedHorn\Desenvolvimento\RPForge`, com a marca em `design\identidade`.
 Interface atual: [guia de uso](docs/INTERFACE.md), [identidade visual](docs/IDENTIDADE.md) e [desenvolvimento/testes](docs/DESENVOLVIMENTO_INTERFACE.md).
 As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0
 nao as contem. Nao gerar outro instalador sem pedido explicito.
@@ -44,14 +46,14 @@ Mantenha a pasta do projeto no mesmo lugar; reinstale o menu se a mover.
 ## Usar
 
 1. Clique com o botão direito na pasta que contém `dlc.rpf` ou outros `.rpf`, ou no espaço vazio dentro dela.
-2. Selecione **Converter RPF para FiveM**, fornecido pela extensão nativa do RPF Forge para o menu moderno do Windows 11.
+2. Selecione **Converter com RPForge**, fornecido pela extensão nativa para o menu moderno do Windows 11.
 3. A análise começa automaticamente e abre **1. Configurar**. Revise os spawns e as pastas de saída na mesma tela.
 4. Para pastas existentes, escolha outro nome, backup/substituição ou cancelamento.
 5. Clique em **Revisar conversão**. O app valida automaticamente as edições e mostra o resumo.
 6. Clique em **Converter agora**. Ao terminar, **Resultado** permite abrir a pasta gerada ou iniciar uma **Nova conversão**.
 
 A extensão moderna implementa `IExplorerCommand` em C++ e registra os contextos de pasta
-e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF.
+e fundo de pasta com um pacote de identidade. Oculta a ação em pastas sem RPF ou YDR.
 As entradas tradicionais permanecem para compatibilidade.
 Não pesquisa em subpastas do Windows, mas extrai RPFs aninhados dentro dos arquivos.
 
@@ -123,8 +125,10 @@ removido aparece na previa e no resultado, sem criar relatorio no addon.
 - Falhas em um arquivo não impedem a análise dos demais RPFs da pasta.
 - Sem upload de assets, telemetria, executáveis externos, chaves do GTA ou conteúdo do jogo no repositório.
 
-Não aceita RPF criptografado, GTA V Enhanced, conversão de mapas, áudio customizado ou pacotes
-sem `vehicles.meta`. Metas/tipos especiais não suportados geram erro para evitar saída incompleta.
+Aceita também roupas com coleção identificada, mapas/interiores, props, animações, texturas,
+peds, armas e os formatos de áudio descritos no guia de conteúdos. Em pastas com YDRs e sem RPF,
+**Gerar YTYP com RPForge** gera os arquivos automaticamente em um clique.
+Não aceita RPF criptografado ou GTA V Enhanced. Metas/tipos especiais não suportados geram erro para evitar saída incompleta.
 Não executa scripts fornecidos pelo addon. Documentos e imagens não utilizados são informados no console.
 
 Limites desta versão: RPF de até 512 MiB, entrada de até 256 MiB, 1 GiB acumulado de extração,

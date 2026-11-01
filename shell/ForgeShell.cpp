@@ -94,9 +94,21 @@ public:
     ULONG STDMETHODCALLTYPE Release() override { ULONG n = --count; if (!n) delete this; return n; }
     HRESULT STDMETHODCALLTYPE SetSite(IUnknown* value) override { if (value) value->AddRef(); if (site) site->Release(); site = value; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetSite(REFIID id, void** output) override { if (!output) return E_POINTER; *output = nullptr; return site ? site->QueryInterface(id, output) : E_FAIL; }
-    HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"Converter com RPForge", value); }
+    HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray* items, PWSTR* value) override {
+        std::wstring directory;
+        if (SUCCEEDED(folder(items, directory))) {
+            WIN32_FIND_DATAW entry;
+            HANDLE rpf = FindFirstFileW((directory + L"\\*.rpf").c_str(), &entry);
+            if (rpf != INVALID_HANDLE_VALUE) FindClose(rpf);
+            else {
+                HANDLE ydr = FindFirstFileW((directory + L"\\*.ydr").c_str(), &entry);
+                if (ydr != INVALID_HANDLE_VALUE) { FindClose(ydr); return SHStrDupW(L"Gerar YTYP com RPForge", value); }
+            }
+        }
+        return SHStrDupW(L"Converter com RPForge", value);
+    }
     HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\RPFForge.exe,0").c_str(), value); }
-    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPForge: converter veiculos RPF para FiveM", value); }
+    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPForge: converter RPFs ou gerar YTYPs de modelos YDR", value); }
     HRESULT STDMETHODCALLTYPE GetCanonicalName(GUID* value) override { if (!value) return E_POINTER; *value = ForgeClsid; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetState(IShellItemArray* items, BOOL slow, EXPCMDSTATE* value) override {
         if (!value) return E_POINTER;
@@ -105,10 +117,13 @@ public:
         std::wstring directory;
         if (FAILED(folder(items, directory))) return S_OK;
         WIN32_FIND_DATAW entry;
-        HANDLE search = FindFirstFileW((directory + L"\\*.rpf").c_str(), &entry);
-        if (search != INVALID_HANDLE_VALUE) {
+        for (const auto pattern : { L"\\*.rpf", L"\\*.ydr" }) {
+          HANDLE search = FindFirstFileW((directory + pattern).c_str(), &entry);
+          if (search != INVALID_HANDLE_VALUE) {
             do { if (!(entry.dwFileAttributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT))) { *value = ECS_ENABLED; break; } } while (FindNextFileW(search, &entry));
             FindClose(search);
+          }
+          if (*value == ECS_ENABLED) break;
         }
         return S_OK;
     }
@@ -117,14 +132,14 @@ public:
         HRESULT hr = folder(items, directory);
         if (FAILED(hr)) return hr;
         const auto root = appRoot();
-        const auto node = root + L"\\runtime\\node.exe";
+        const auto executable = root + L"\\RPFForge.exe";
         // A trailing backslash must be doubled before the closing argument quote.
         std::wstring escaped = directory;
         if (!escaped.empty() && escaped.back() == L'\\') escaped += L'\\';
-        std::wstring command = L"\"" + node + L"\" \"" + root + L"\\src\\cli.js\" --interactive \"" + escaped + L"\"";
+        std::wstring command = L"\"" + executable + L"\" \"" + escaped + L"\"";
         STARTUPINFOW startup{sizeof(startup)};
         PROCESS_INFORMATION process{};
-        if (!CreateProcessW(node.c_str(), command.data(), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE, nullptr, root.c_str(), &startup, &process)) return HRESULT_FROM_WIN32(GetLastError());
+        if (!CreateProcessW(executable.c_str(), command.data(), nullptr, nullptr, FALSE, 0, nullptr, root.c_str(), &startup, &process)) return HRESULT_FROM_WIN32(GetLastError());
         CloseHandle(process.hThread); CloseHandle(process.hProcess);
         return S_OK;
     }

@@ -7,6 +7,7 @@ import { writePlan } from './output.js';
 import { readRpf, LIMITS, safeName } from './rpf.js';
 import { renameSpawns } from './spawns.js';
 import { organizeTuning, cleanMissingTuning } from './tuning.js';
+import { prepareContent } from './content.js';
 
 const STREAM = new Set(['.yft', '.ytd', '.ydr', '.ydd', '.ybn', '.ycd']);
 const ADMIN = new Set(['content.xml', 'setup2.xml']);
@@ -28,6 +29,8 @@ export async function prepareArchive(archive, options = {}) {
   const source = await readFile(archive);
   const sourceHash = createHash('sha256').update(source).digest('hex');
   if (options.expectedSource && options.expectedSource !== sourceHash) throw new Error('O RPF mudou desde a prévia. Analise novamente antes de converter.');
+  const entries = [...readRpf(source)];
+  if (!entries.some(e => path.posix.basename(e.path).toLowerCase() === 'vehicles.meta')) return prepareContent(entries, archive, options, sourceHash, stat.size);
   function add(destination, data) {
     const key = destination.toLowerCase();
     if (files.has(key)) {
@@ -37,7 +40,7 @@ export async function prepareArchive(archive, options = {}) {
     files.set(key, { destination, data });
   }
   options.onProgress?.({ phase: 'read', label: path.basename(archive), current: 0, total: 1 });
-  for (const entry of readRpf(source)) {
+  for (const entry of entries) {
     const basename = path.posix.basename(entry.path).toLowerCase();
     const ext = path.posix.extname(basename);
     if (IGNORED.has(basename)) { skipped.push(entry.path); continue; }
@@ -87,14 +90,14 @@ export async function prepareArchive(archive, options = {}) {
   add('fxmanifest.lua', Buffer.from(manifest));
   const audit = auditAddon(files);
   options.onProgress?.({ phase: 'audit', current: 1, total: 1, label: path.basename(archive) });
-  return { archive, files, metas, defaultName: name, models: finalModels, originalModels: [...declaredModels].sort(), skipped, removedTuning: cleaned.removed, audit, sourceHash, sourceBytes: stat.size, mergedSources };
+  return { archive, files, metas, kind: 'vehicle', defaultName: name, models: finalModels, originalModels: [...declaredModels].sort(), skipped, removedTuning: cleaned.removed, audit, sourceHash, sourceBytes: stat.size, mergedSources };
 }
 
 export async function convertArchive(archive, options = {}) {
   const plan = await prepareArchive(archive, options);
   if (!plan.audit.ok) throw new Error(`Validação final reprovada: ${plan.audit.issues.filter(i => i.severity === 'error').map(i => i.message).join(' ')}`);
   const destination = await writePlan(plan, options);
-  return { ...destination, models: plan.models, skipped: plan.skipped, removedTuning: plan.removedTuning, audit: plan.audit, mergedSources: plan.mergedSources };
+  return { ...destination, kind: plan.kind, models: plan.models, skipped: plan.skipped, removedTuning: plan.removedTuning, audit: plan.audit, mergedSources: plan.mergedSources };
 }
 
 export async function convertFolder(folder, options = {}) {

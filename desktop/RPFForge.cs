@@ -211,7 +211,9 @@ namespace RPFForge {
             if (total > 0) { progress.Style = ProgressBarStyle.Continuous; progress.Value = Math.Max(0, Math.Min(100, (int)(100 * Number(Get(message, "current")) / total))); }
         }
         async Task Analyze() {
-            if (busy) return; vehicles.EndEdit(); destinations.EndEdit();
+            if (busy) return;
+            if (Directory.Exists(folder.Text) && !Directory.EnumerateFiles(folder.Text, "*.rpf").Any() && Directory.EnumerateFiles(folder.Text, "*.ydr").Any()) { await GenerateYtyp(); return; }
+            vehicles.EndEdit(); destinations.EndEdit();
             reviewed = false; hasResults = false; lastOutput = ""; open.Enabled = false; stage.Text = "ANALISANDO PASTA";
             var requests = Requests(false); SetBusy(true, "Preparando a prévia; os originais permanecem intactos.");
             try { RenderPreview(await Execute("preview", requests), requests); }
@@ -253,7 +255,7 @@ namespace RPFForge {
                     int row = destinations.Rows.Add(selected, archive, TextValue(Get(result, "outputName")), Yes(Get(result, "exists")) ? "Já existe" : "Livre", policy); destinations.Rows[row].Tag = TextValue(Get(result, "defaultName"));
                     if (selected) { eligible = true; if (!Yes(Get(audit, "ok"))) selectedError = true; }
                     text.AppendLine("Saída: " + TextValue(Get(result, "output")) + (Yes(Get(result, "exists")) ? " [pasta existente — ação: " + policy + "]" : ""));
-                    text.AppendLine("Spawns finais: " + String.Join(", ", ArrayValue(Get(result, "finalModels")).Select(TextValue)));
+                    text.AppendLine((IsVehicle(result) ? "Spawns finais: " : "Nome do recurso: ") + String.Join(", ", ArrayValue(Get(result, "finalModels")).Select(TextValue)));
                     text.AppendLine("Arquivos de streaming: " + FormatSize(Get(audit, "diskBytes")) + " em disco. RPF original: " + FormatSize(Get(result, "sourceBytes")) + ".");
                     if (Number(Get(result, "mergedSources")) > 0) text.AppendLine("Metas unificados: " + TextValue(Get(result, "mergedSources")) + " arquivos adicionais combinados.");
                     var removed = ArrayValue(Get(result, "removedTuning")); if (removed.Length > 0) text.AppendLine("Tuning sem modelo que será removido: " + String.Join(", ", removed.Select(TextValue)));
@@ -265,9 +267,9 @@ namespace RPFForge {
                 }
                 foreach (var file in weighted.OrderByDescending(p => Number(Get(p.Item2, "diskBytes"))).Take(200)) assets.Rows.Add(file.Item1, TextValue(Get(file.Item2, "path")), TextValue(Get(file.Item2, "kind")), FormatSize(Get(file.Item2, "diskBytes")));
                 text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS. A aba de peso apresenta até 200 arquivos, do maior para o menor.");
-                details.Text = text.ToString(); summary.Text = CountLabel(cars, "veículo", "veículos") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
+                details.Text = text.ToString(); summary.Text = CountLabel(cars, "item", "itens") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
                 reviewDetails.Text = details.Text;
-                SimplifyConfiguration();
+                UpdateContentLabels(); SimplifyConfiguration();
                 UpdateCounts(cars, results.Length, warnings, errors, weight);
                 stage.Text = errors > 0 ? "REVISE OS ERROS" : results.Length == 0 ? "NENHUM RPF ENCONTRADO" : "01 / CONFIGURAR"; stage.ForeColor = errors > 0 ? ForgeTheme.Error : red;
                 previewValid = eligible && !selectedError; convert.Enabled = previewValid && !busy;
@@ -280,7 +282,7 @@ namespace RPFForge {
             if (busy || !previewValid || !reviewed) return; vehicles.EndEdit(); destinations.EndEdit();
             if (!previewValid || !reviewed) return;
             lastOutput = ""; open.Enabled = false; stage.Text = "03 / CONVERSÃO";
-            var request = Requests(true); SetBusy(true, "Convertendo os veículos selecionados.");
+            var request = Requests(true); SetBusy(true, "Convertendo os conteúdos selecionados.");
             try { RenderResults(await Execute("convert", request)); }
             catch (Exception error) { hasResults = true; reviewed = false; details.Text = error.Message; resultView.ClearDocument(); resultView.AddSection("Não foi possível converter", error.Message, false, ForgeTheme.Error); tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
             finally { previewValid = false; SetBusy(false, "Confira o resultado. Use Nova conversão para começar outro pacote."); }
@@ -297,7 +299,7 @@ namespace RPFForge {
                 } else { if (Yes(Get(result, "cancelled"))) cancelled++; else failed++; text.AppendLine(TextValue(Get(result, "error"))); }
                 text.AppendLine();
             }
-            details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Valide os veículos no FiveM.";
+            details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Teste o recurso no FiveM.";
             stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "03 / CONCLUÍDO";
             stage.ForeColor = failed > 0 ? ForgeTheme.Error : warnings > 0 || success == 0 ? ForgeTheme.Warning : ForgeTheme.Success;
             BuildResultDocument(results);
@@ -371,6 +373,13 @@ namespace RPFForge {
             if (!open.Enabled) throw new Exception("Successful GUI conversion must allow opening output.");
             string empty = Path.Combine(fixtureFolder, "empty"); Directory.CreateDirectory(empty); await SelectOrigin(empty);
             if (previewValid || convert.Enabled) throw new Exception("Empty-folder GUI state must not convert.");
+            string props = Path.Combine(fixtureFolder, "props");
+            if (Directory.Exists(props)) {
+                await SelectOrigin(props);
+                if (!hasResults || !open.Enabled || !File.Exists(Path.Combine(props, "rpforge_props.ytyp"))) throw new Exception("Choosing a YDR folder must generate the YTYP immediately.");
+                await SelectOrigin(props);
+                if (!File.Exists(Path.Combine(props, "rpforge_props_1.ytyp"))) throw new Exception("Generating again must preserve the existing YTYP.");
+            }
         }
     }
 }

@@ -11,12 +11,12 @@ namespace RPFForge {
         void BuildReviewDocument() {
             reviewView.ClearDocument();
             if (!previewValid) {
-                reviewView.AddSection("Precisamos corrigir uma informação", "Volte aos nomes dos veículos e confira os campos. Nenhum arquivo foi convertido.");
+                reviewView.AddSection("Precisamos corrigir uma informação", "Confira os nomes e os diagnósticos abaixo. Nenhum arquivo foi convertido.");
                 reviewView.AddSection("O que aconteceu", details.Text, true, ForgeTheme.Error); return;
             }
             foreach (var pair in preview) {
                 var item = pair.Value;
-                reviewView.AddSection(System.IO.Path.GetFileName(pair.Key), "Nome no jogo: " + String.Join(", ", ArrayValue(Get(item, "finalModels")).Select(TextValue)) + "\nSalvar em: " + TextValue(Get(item, "output")));
+                reviewView.AddSection(System.IO.Path.GetFileName(pair.Key), ContentLabel(item) + "\n" + (IsVehicle(item) ? "Spawn no jogo: " : "Recurso: ") + String.Join(", ", ArrayValue(Get(item, "finalModels")).Select(TextValue)) + "\nSalvar em: " + TextValue(Get(item, "output")));
                 var audit = Map(Get(item, "audit"));
                 foreach (var value in ArrayValue(Get(audit, "issues"))) {
                     var issue = Map(value); reviewView.AddSection("Atenção", TextValue(Get(issue, "message")), false, TextValue(Get(issue, "severity")) == "error" ? ForgeTheme.Error : ForgeTheme.Warning);
@@ -44,10 +44,11 @@ namespace RPFForge {
         Control BuildHelpDocument() {
             helpView = new ForgeDocument { AccessibleName = "Ajuda do RPForge" };
             helpView.AddSection("1. Selecione a pasta", "Escolha a pasta que contém os arquivos RPF. A análise começa automaticamente.");
-            helpView.AddSection("2. Escolha o nome no jogo", "Para alterar o spawn, clique no nome na coluna “Nome no jogo” e edite. A pasta do addon acompanha esse nome.");
+            helpView.AddSection("2. Confira o nome", "Para veículos, clique no nome e edite o spawn. Para outros conteúdos, edite o nome do recurso; os arquivos internos mantêm seus nomes.");
             helpView.AddSection("3. Confira e converta", "Clique em Revisar. Confira os nomes e avisos e use Converter agora. Ao terminar, abra a pasta do addon.");
             helpView.AddSection("Se a pasta já existir", "Você poderá usar outro nome, preservar um backup e substituir ou cancelar. Nada será sobrescrito sem sua escolha.");
-            helpView.AddSection("O que o app aceita", "Veículos GTA V Legacy em RPF7 aberto, até 512 MiB por arquivo. RPFs internos são lidos; subpastas do Windows não são pesquisadas. Teste o addon no FiveM.");
+            helpView.AddSection("O que o app aceita", "RPF7 aberto de veículos, roupas com coleção identificada, mapas/interiores, animações e texturas de GTA V Legacy, até 512 MiB por RPF. Conteúdos sem suporte são informados antes de gravar. Teste o recurso no FiveM.");
+            helpView.AddSection("Gerar YTYP em um clique", "Clique com o botão direito em uma pasta com YDRs e escolha Gerar YTYP com RPForge. A geração começa automaticamente. YTYPs existentes são preservados; não é necessário instalar GTAUtil. Pastas com RPF abrem primeiro a conversão dos pacotes.");
             helpView.AddAction("Licenças", ShowLicenses);
             return helpView;
         }

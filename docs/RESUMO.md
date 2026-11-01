@@ -1,11 +1,11 @@
 # RPF Forge — resumo do aplicativo
 
-O RPF Forge transforma pacotes de veiculos GTA V Legacy em addons FiveM organizados.
+O RPForge transforma RPFs de conteúdos GTA V Legacy em recursos FiveM organizados e gera YTYPs de YDRs em um clique.
 E um produto independente do RedHorn Studio e do RedHorn Garage, com processamento local.
 
 ## Acesso e fluxo
 
-- Comando **Converter RPF para FiveM** no menu principal do Windows 11.
+- Comando **Converter com RPForge** no menu principal do Windows 11.
 - Funciona sobre a pasta e no espaco vazio dentro dela; a extensao detecta a presenca de RPF.
 - Janela RPForge com fluxo guiado **Configurar → Revisar → Resultado**, com **Espaço em disco** e **Ajuda** como ferramentas auxiliares.
 - Identidade pixel art e fonte Pixelify Sans do portfólio, embutidas para uso offline.
@@ -54,8 +54,8 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 
 ## Limites e desenvolvimento
 
-- Suporte atual: veiculos GTA V Legacy em RPFs abertos, ate 512 MiB por arquivo externo.
-- Sem suporte a RPF criptografado, GTA V Enhanced, mapas ou audio customizado.
+- Suporte atual: veículos, roupas, mapas/interiores, props, animações, texturas, peds, armas e formatos de áudio reconhecidos em RPFs abertos, até 512 MiB por arquivo externo.
+- Sem suporte a RPF criptografado, GTA V Enhanced ou metas não reconhecidos. Consulte CONTEUDOS_E_YTYP.md para a matriz de suporte e limites.
 - A validacao estrutural nao substitui o teste no FiveM nem confirma dependencias de outros recursos.
 - Interface de desenvolvimento para Windows, usando o runtime ja incluido na instalacao local.
 - Nada e publicado automaticamente. Instaladores novos somente sob pedido explicito.
