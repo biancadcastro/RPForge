@@ -1,0 +1,6 @@
+# Review ownership is prepared locally. Branch protection must be configured separately.
+* @biancadcastro
+/.github/ @biancadcastro
+/scripts/ @biancadcastro
+/build/ @biancadcastro
+/signpath/ @biancadcastro

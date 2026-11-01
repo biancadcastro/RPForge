@@ -12,16 +12,20 @@ assinaturas a SignPath antes de sua confirmacao.
 - Aprovacao de pedidos de assinatura e publicacao: biancadcastro, explicitamente, para cada versao.
 
 A configuracao efetiva de permissoes e de autenticacao multifator nas contas do GitHub e
-da SignPath ainda precisa ser confirmada pela mantenedora. Nao ha integracao ativa ou
-credencial da SignPath neste repositorio.
+da SignPath ainda precisa ser confirmada pela mantenedora. A integracao esta preparada,
+desativada por padrao, sem credencial da SignPath neste repositorio.
 
 ## Origem dos artefatos
 
-O processo de distribuicao devera compilar os binarios proprios a partir de uma revisao
-identificada do repositorio, com ferramentas e dependencias fixadas e testes pertinentes.
-O aplicativo, a extensao do Explorer e os pacotes terao nome e versao coerentes.
+O caminho `Build-UnsignedBinaries.ps1` compila os binarios proprios a partir de uma revisao
+identificada, com ferramentas e dependencias fixadas, verificacoes e testes pertinentes.
+Produto, versao, empresa e nomes originais dos binarios sao gerados e conferidos juntos.
+O manifesto de origem e o SBOM acompanham os binarios sem assinatura.
 Arquivos de terceiros, como o Node.js, manterao suas licencas e assinaturas originais;
 nao serao assinados como se fossem codigo proprio do RPF Forge.
+O workflow preparado e manual, usa runners GitHub e actions fixadas por SHA, exige
+opt-in, configuracao aprovada e ambiente com revisao humana para pedir assinatura.
+Ele nao publica releases e nao produz instaladores.
 
 ## Privacidade e alteracoes do sistema
 

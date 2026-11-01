@@ -1,0 +1,95 @@
+name: SignPath preparation (manual, no installer)
+on:
+  workflow_dispatch:
+    inputs:
+      request_signing:
+        description: Request signing only after Foundation approval and environment review
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    if: github.actor == 'biancadcastro' && github.ref == 'refs/heads/main'
+    runs-on: windows-2025
+    timeout-minutes: 30
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      signing-version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node scripts/check-signpath.mjs
+      - name: Reject unconfigured signing requests before building
+        if: inputs.request_signing
+        run: node scripts/check-signpath.mjs --request-signing
+        env:
+          SIGNPATH_ENABLED: ${{ vars.SIGNPATH_ENABLED }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_POLICY_SLUG: ${{ vars.SIGNPATH_POLICY_SLUG }}
+      - name: Build and test own unsigned binaries, licenses and provenance
+        shell: powershell
+        run: ./scripts/Build-UnsignedBinaries.ps1
+      - id: version
+        shell: powershell
+        run: |
+          $manifest = Get-Content .tools/signpath/unsigned/build-manifest.json -Raw | ConvertFrom-Json
+          if ($manifest.dirty) { throw 'Dirty source cannot be submitted.' }
+          "value=$($manifest.version)" >> $env:GITHUB_OUTPUT
+      - id: upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: rpf-forge-unsigned-${{ github.sha }}
+          path: .tools/signpath/unsigned/
+          if-no-files-found: error
+          retention-days: 7
+  request-signing:
+    needs: build
+    if: inputs.request_signing && vars.SIGNPATH_ENABLED == 'true' && github.actor == 'biancadcastro'
+    runs-on: windows-2025
+    timeout-minutes: 30
+    environment: signpath-signing
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+      - run: npm ci --ignore-scripts
+      - run: node scripts/check-signpath.mjs --request-signing
+        env:
+          SIGNPATH_ENABLED: ${{ vars.SIGNPATH_ENABLED }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_POLICY_SLUG: ${{ vars.SIGNPATH_POLICY_SLUG }}
+      - run: node scripts/check-github-approval.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Submit reviewed own binaries only
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: rpf-forge
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: rpf-forge-binaries
+          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: .tools/signpath/signed
+          parameters: |
+            version: ${{ toJSON(needs.build.outputs.signing-version) }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: rpf-forge-signed-${{ github.sha }}
+          path: .tools/signpath/signed/
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "enabled": false,
+  "approvedByFoundation": false,
+  "manualApprovalRequired": true,
+  "maintainer": "biancadcastro",
+  "productName": "RPF Forge",
+  "projectSlug": "rpf-forge",
+  "artifactConfigurationSlug": "rpf-forge-binaries",
+  "organizationId": null,
+  "signingPolicySlug": null,
+  "publisherSubject": null,
+  "ownBinaries": ["RPFForge.exe", "ForgeShell.dll"]
+}

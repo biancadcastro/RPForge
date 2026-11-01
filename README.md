@@ -7,6 +7,11 @@ O desenvolvimento atual permanece local, sem autorização para publicação.
 **Code signing policy:** [politica e status da preparacao para SignPath](docs/CODE_SIGNING_POLICY.md).
 Ainda nao ha aprovacao ou assinatura de distribuicao pela SignPath Foundation.
 Veja tambem [privacidade](docs/PRIVACY.md) e [roteiro da candidatura](docs/SIGNPATH_PREPARATION.md).
+O [build de preparacao SignPath](docs/SIGNPATH_BUILD.md) usa ferramentas fixadas,
+metadados verificados, SBOM e proveniencia. Produz somente binarios proprios sem assinatura;
+nao gera instalador, nao altera certificados e nao publica. O workflow permanece manual
+e a assinatura esta desativada ate a aprovacao/configuracao explicita.
+Avisos de componentes externos: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
 As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0

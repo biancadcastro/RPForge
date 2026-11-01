@@ -10,6 +10,8 @@
   },
   "scripts": {
     "test": "node --test",
+    "signpath:check": "node scripts/check-signpath.mjs",
+    "signpath:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-UnsignedBinaries.ps1",
     "desktop:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Desktop.ps1",
     "desktop:test": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-DesktopWorkflow.ps1",
     "update:local": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Update-LocalDevelopment.ps1",
@@ -20,5 +22,8 @@
   },
   "dependencies": {
     "@xmldom/xmldom": "0.9.12"
+  },
+  "devDependencies": {
+    "yaml": "2.9.1"
   }
 }

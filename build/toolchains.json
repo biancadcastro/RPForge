@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "nodeVersion": "24.22.0",
+  "tools": {
+    "llvm": {
+      "version": "20261020",
+      "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20261020/llvm-mingw-20261020-ucrt-x86_64.zip",
+      "sha256": "fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd",
+      "root": "llvm-mingw-20261020-ucrt-x86_64",
+      "probe": "bin/x86_64-w64-mingw32-clang++.exe"
+    },
+    "roslyn": {
+      "version": "5.9.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.compilers.toolset/5.9.0/microsoft.net.compilers.toolset.5.9.0.nupkg",
+      "sha256": "b0227910320c5af14d80ec32b5e1a759c1e3cc2ec12e7d9cc8862cf826bd9551",
+      "root": "",
+      "probe": "tasks/net472/csc.exe"
+    },
+    "references": {
+      "version": "1.0.3",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netframework.referenceassemblies.net48/1.0.3/microsoft.netframework.referenceassemblies.net48.1.0.3.nupkg",
+      "sha256": "8a7e348538e7eb91351696911689f49e3d4f63f8bab517432bbe159b8b1104a2",
+      "root": "",
+      "probe": "build/.NETFramework/v4.8/mscorlib.dll"
+    },
+    "node": {
+      "version": "24.22.0",
+      "url": "https://nodejs.org/dist/v24.22.0/node-v24.22.0-win-x64.zip",
+      "sha256": "f9683a19877e12a9b167305c8db71040d812876359de21f0d2e97c3f321f80c3",
+      "root": "node-v24.22.0-win-x64",
+      "probe": "node.exe"
+    },
+    "sdk": {
+      "version": "10.0.28000.2957",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.windows.sdk.buildtools/10.0.28000.2957/microsoft.windows.sdk.buildtools.10.0.28000.2957.nupkg",
+      "sha256": "b7163fc6f636172726d0985963e4f7f11c41afe1c7fdfe78f8051877360ed696",
+      "root": "",
+      "probe": "bin/10.0.28000.0/x64/makeappx.exe",
+      "optional": true
+    }
+  }
+}
