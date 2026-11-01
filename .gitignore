@@ -8,3 +8,6 @@ output/
 *.log
 .env*
 coverage/
+.tools/
+packaging-stage/
+release/

@@ -3,7 +3,16 @@
 Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Windows.
 Código aberto, licença MIT. Independente do RedHorn Studio e do RedHorn Garage.
 
-## Instalar no Windows
+## Instalar no Windows pelo instalador
+
+Abra `RPF-to-FiveM-Setup-0.1.0-x64.exe` e conclua a instalacao.
+O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
+abrir terminal ou baixar outros programas. Nao requer administrador.
+O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.
+
+O instalador e gerado somente sob pedido e permanece local ate autorizacao de publicacao.
+
+## Instalar a partir do codigo-fonte
 
 Requer **Node.js 22 ou superior**, com `node` e `npm` no PATH.
 Baixe o projeto para uma pasta permanente (ou clone com Git) e abra um terminal nela:
@@ -91,6 +100,24 @@ Remove somente `HKCU\Software\Classes\Directory\shell\RpfToFiveM`.
 npm ci
 npm test
 ```
+
+### Gerar e validar o instalador local
+
+```powershell
+npm run installer
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Installer.ps1
+```
+
+O build roda os testes, prepara somente arquivos do programa, inclui Node.js x64 e sua
+licenca, instala um compilador Inno Setup 6.7.3 no cache local do projeto apos verificar
+o SHA-256 oficial e gera o instalador em `release`, junto com o hash. E possivel indicar
+um compilador existente usando `-CompilerPath` no script de build.
+Verifique os termos do compilador para a modalidade de distribuicao pretendida.
+
+O teste de ciclo de vida instala silenciosamente em uma pasta temporaria, verifica
+o menu, converte um RPF sintetico usando apenas o runtime incluido e desinstala.
+Confirma que os arquivos do usuario permanecem e restaura o menu de desenvolvimento.
+Nao ha upload ou criacao automatica de release no GitHub. O `.exe` ainda nao possui assinatura digital.
 
 Os testes criam RPFs sintéticos; não dependem de assets proprietários.
 A suíte cobre extração, RPF aninhado, cabeçalhos RSC7, arquivos inválidos, conflitos, XML,
