@@ -70,7 +70,7 @@ export async function generateFolderYtyp(folder, options = {}) {
   }
   // Parse every model before writing anything. Publish each completed file without overwriting.
   const stage = await mkdtemp(path.join(root, '.rpforge-ytyp-'));
-  const generated = [];
+  const generated = [], published = [];
   try {
     for (let index = 0; index < models.length; index += schema.capacity) {
       const name = 'rpforge_props' + (index ? '_' + (index / schema.capacity + 1) : '');
@@ -84,8 +84,20 @@ export async function generateFolderYtyp(folder, options = {}) {
         await writeFile(temporary, bytes);
         try { await link(temporary, target); break; } catch (error) { if (error.code !== 'EEXIST') throw error; suffix++; }
       }
+      const identity = await lstat(target);
+      published.push({ target, identity, bytes: await readFile(temporary) });
       siblings.add(path.basename(target).toLowerCase()); generated.push(target);
+      options.onProgress?.({ phase: 'write', current: generated.length, total: Math.ceil(models.length / schema.capacity), label: path.basename(target) });
     }
+  } catch (error) {
+    // Roll back only files created by this operation; preserve replacements or edits.
+    for (const { target, identity, bytes } of published.reverse()) {
+      try {
+        const current = await lstat(target);
+        if (current.dev === identity.dev && current.ino === identity.ino && !current.isSymbolicLink() && bytes.equals(await readFile(target))) await rm(target);
+      } catch (cleanupError) { if (cleanupError.code !== 'ENOENT') error.message += ` Não foi possível limpar ${path.basename(target)}: ${cleanupError.message}`; }
+    }
+    throw error;
   } finally { await rm(stage, { recursive: true, force: true }); }
   return [{ ok: true, kind: 'ytyp', archive: path.basename(root), output: root, generated, models: models.map(m => m.name), audit: { issues: [{ severity: 'warning', message: 'YTYP binário criado com os limites dos modelos. Texturas compartilhadas e configurações especiais de MLO não são inferidas; confira esses casos no jogo.' }] } }];
 }

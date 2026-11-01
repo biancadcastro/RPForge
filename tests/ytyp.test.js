@@ -67,3 +67,15 @@ test('257 models split into two YTYPs without dropping the boundary model', asyn
   assert.ok(inflateRawSync((await readFile(result.generated[1])).subarray(16)).includes(hash));
   assert.equal((await readdir(root)).filter(n => n.endsWith('.ydr')).length, 257);
 });
+
+test('failed multi-file generation rolls back its own outputs and preserves existing files', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'forge-ytyp-rollback-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (let i = 0; i < 257; i++) await writeFile(path.join(root, `model_${i}.ydr`), drawable());
+  await writeFile(path.join(root, 'rpforge_props.ytyp'), 'user file');
+  await assert.rejects(generateFolderYtyp(root, { onProgress(event) {
+    if (event.phase === 'write' && event.current === 2) throw new Error('simulated publication failure');
+  } }), /simulated publication failure/);
+  assert.deepEqual((await readdir(root)).filter(name => !name.endsWith('.ydr')), ['rpforge_props.ytyp']);
+  assert.equal(await readFile(path.join(root, 'rpforge_props.ytyp'), 'utf8'), 'user file');
+});
