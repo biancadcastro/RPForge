@@ -63,11 +63,11 @@ namespace RPFForge {
         readonly ToolTip hints = new ToolTip();
         readonly string[] titles = { "1. Configurar", "2. Revisar", "3. Resultado", "Espaço em disco", "Ajuda" };
         readonly string[] descriptions = {
-            "Escolha os nomes e as pastas abaixo. Depois clique em Revisar conversão para continuar.",
-            "Confira nomes, pastas, avisos e alterações. A conversão só começa em Converter agora.",
+            "Como os veículos devem se chamar no jogo?",
+            "Confira os nomes e a pasta de saída antes de converter.",
             "Confira o resultado da operação e abra a pasta gerada.",
             "Arquivos de streaming do maior para o menor. Tamanho em disco não é uma estimativa de VRAM ou FPS.",
-            "Guia rápido de conversão, segurança dos arquivos e limites de suporte."
+            "Respostas rápidas para usar o RPForge."
         };
 
         void BuildInterface() {
@@ -78,18 +78,18 @@ namespace RPFForge {
             var shell = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
             shell.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220)); shell.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             var side = new TableLayoutPanel { Dock = DockStyle.Fill, BackColor = surface, Padding = new Padding(16, 24, 16, 20), ColumnCount = 1, RowCount = 9 };
-            side.RowStyles.Add(new RowStyle(SizeType.Absolute, 70)); side.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
+            side.RowStyles.Add(new RowStyle(SizeType.Absolute, 70)); side.RowStyles.Add(new RowStyle(SizeType.Absolute, 20));
             for (int i = 0; i < 5; i++) side.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-            side.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); side.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
+            side.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); side.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
             var brand = new PictureBox { Image = BrandAssets.Logo(), SizeMode = PictureBoxSizeMode.Zoom, Dock = DockStyle.Fill, AccessibleName = "RPForge", Margin = Padding.Empty };
             side.Controls.Add(brand, 0, 0);
-            side.Controls.Add(new Label { Text = "Sua forja de recursos\nGTA V → FiveM", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Padding = new Padding(4, 8, 0, 0) }, 0, 1);
+            side.Controls.Add(new Label { Text = "", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Padding = new Padding(4, 8, 0, 0) }, 0, 1);
             for (int i = 0; i < navigation.Length; i++) {
                 int index = i; var button = new ForgeButton { Navigation = true, Text = titles[i], Dock = DockStyle.Fill, Margin = new Padding(0, 4, 0, 4), AccessibleName = titles[i], TabIndex = i };
                 ConfigureButton(button, button.Text, false); button.Dock = DockStyle.Fill; button.Margin = new Padding(0, 4, 0, 4);
                 button.Click += async delegate { if (index == 1) await ReviewConfiguration(); else if (index != 2 || hasResults) tabs.SelectedIndex = index; }; navigation[i] = button; side.Controls.Add(button, 0, i + 2);
             }
-            side.Controls.Add(new Label { Text = "PROCESSAMENTO LOCAL\nSeus arquivos ficam no computador.\nOs RPFs originais são preservados.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Padding = new Padding(4, 12, 0, 0) }, 0, 8);
+            side.Controls.Add(new Label { Text = "", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Padding = new Padding(4, 12, 0, 0) }, 0, 8);
             shell.Controls.Add(side, 0, 0);
             var main = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24, 20, 24, 16), ColumnCount = 1, RowCount = 7 };
             mainLayout = main;
@@ -97,17 +97,17 @@ namespace RPFForge {
             var heading = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Margin = Padding.Empty };
             heading.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); heading.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225));
             heading.RowStyles.Add(new RowStyle(SizeType.Absolute, 42)); heading.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            heading.Controls.Add(new Label { Text = "De RPF a recurso FiveM", Font = ForgeFonts.Pixel(24, FontStyle.Bold), AutoSize = true, ForeColor = foreground, Margin = Padding.Empty }, 0, 0);
-            heading.Controls.Add(new Label { Text = "Analise o pacote, revise as alterações e converta com segurança.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 1);
+            heading.Controls.Add(new Label { Text = "Converter veículos", Font = ForgeFonts.Pixel(24, FontStyle.Bold), AutoSize = true, ForeColor = foreground, Margin = Padding.Empty }, 0, 0);
+            heading.Controls.Add(new Label { Text = "Selecione a pasta e escolha o nome dos veículos.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 1);
             stage.Text = "01 / ORIGEM"; stage.Dock = DockStyle.Fill; stage.TextAlign = ContentAlignment.MiddleRight; stage.ForeColor = red; stage.Font = new Font("Consolas", 10, FontStyle.Bold); heading.Controls.Add(stage, 1, 0);
             main.Controls.Add(heading, 0, 0);
             var pathRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Margin = Padding.Empty };
             pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); pathRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
             pathRow.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); pathRow.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             pathRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            pathRow.Controls.Add(new Label { Text = "Pasta de origem", ForeColor = muted, AutoSize = true, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 0);
+            pathRow.Controls.Add(new Label { Text = "Pasta com os RPFs", ForeColor = muted, AutoSize = true, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 0);
             folder.Dock = DockStyle.Fill; folder.Margin = new Padding(0, 5, 12, 0); folder.BackColor = ForgeTheme.Raised; folder.ForeColor = foreground; folder.BorderStyle = BorderStyle.FixedSingle; folder.Font = new Font("Consolas", 10); folder.AccessibleName = "Pasta de origem com arquivos RPF";
-            ConfigureButton(browse, "Escolher &pasta", false); browse.Dock = DockStyle.Fill; browse.Margin = Padding.Empty;
+            ConfigureButton(browse, "Selecionar &pasta", false); browse.Dock = DockStyle.Fill; browse.Margin = Padding.Empty;
             var inputFrame = new ForgeInputFrame(folder) { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
             pathRow.Controls.Add(inputFrame, 0, 1); pathRow.Controls.Add(browse, 1, 1); main.Controls.Add(pathRow, 0, 1);
             var stats = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = new Padding(0, 4, 0, 8) };
@@ -125,11 +125,13 @@ namespace RPFForge {
             workspace.Controls.Add(pageTitle, 0, 0); workspace.Controls.Add(pageHelp, 0, 1);
             tabs.Dock = DockStyle.Fill; tabs.Margin = Padding.Empty; tabs.TabStop = false;
             SetupGrid(vehicles); SetupGrid(destinations); SetupGrid(assets);
-            AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 28); AddTextColumn(vehicles, "current", "Spawn original", true, 28); AddTextColumn(vehicles, "target", "Novo spawn (opcional)", false, 44);
+            AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 28); AddTextColumn(vehicles, "current", "Nome original", true, 28); AddTextColumn(vehicles, "target", "Nome no jogo", false, 44);
             vehicles.CellPainting += PaintEditableCell;
             destinations.Columns.Add(new DataGridViewCheckBoxColumn { Name = "selected", HeaderText = "Converter", Width = 78, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
             AddTextColumn(destinations, "archive", "Arquivo RPF", true, 28); AddTextColumn(destinations, "output", "Pasta de saída", false, 30); AddTextColumn(destinations, "exists", "Destino", true, 18);
-            var choice = new DataGridViewComboBoxColumn { Name = "policy", HeaderText = "Se a pasta existir", FillWeight = 34, FlatStyle = FlatStyle.Flat }; choice.Items.AddRange("Escolha uma ação", "Cancelar", "Usar outro nome", "Backup e substituir"); destinations.Columns.Add(choice);
+            var choice = new DataGridViewTextBoxColumn { Name = "policy", HeaderText = "Como continuar", FillWeight = 34, ReadOnly = true }; destinations.Columns.Add(choice);
+            destinations.CellClick += delegate(object sender, DataGridViewCellEventArgs e) { if (e.RowIndex >= 0 && e.ColumnIndex == destinations.Columns["policy"].Index) OpenPolicyMenu(e.RowIndex); };
+            destinations.KeyDown += delegate(object sender, KeyEventArgs e) { if (destinations.CurrentCell != null && destinations.CurrentCell.ColumnIndex == destinations.Columns["policy"].Index && (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter || (e.Alt && e.KeyCode == Keys.Down))) { e.Handled = true; e.SuppressKeyPress = true; OpenPolicyMenu(destinations.CurrentCell.RowIndex); } };
             destinations.CellPainting += PaintEditableCell;
             destinations.EditingControlShowing += delegate(object sender, DataGridViewEditingControlShowingEventArgs e) { e.Control.BackColor = ForgeTheme.Raised; e.Control.ForeColor = foreground; var combo = e.Control as ComboBox; if (combo != null) combo.FlatStyle = FlatStyle.Flat; };
             AddTextColumn(assets, "archive", "RPF", true, 22); AddTextColumn(assets, "file", "Arquivo", true, 52); AddTextColumn(assets, "kind", "Tipo", true, 12); AddTextColumn(assets, "size", "Tamanho", true, 18); assets.ReadOnly = true;
@@ -139,21 +141,21 @@ namespace RPFForge {
             var configuration = new TableLayoutPanel { Dock = DockStyle.Top, Height = 344, ColumnCount = 1, RowCount = 4, Margin = Padding.Empty };
             configurationLayout = configuration;
             configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 160)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 32)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 128));
-            configuration.Controls.Add(new Label { Text = "NOMES DOS VEÍCULOS · deixe vazio para manter o original", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10) }, 0, 0);
+            configuration.Controls.Add(new Label { Text = "Mantenha o nome original ou digite um novo nome.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10) }, 0, 0);
             configuration.Controls.Add(vehicles, 0, 1);
-            configuration.Controls.Add(new Label { Text = "PASTAS DE SAÍDA · escolha o tratamento se a pasta já existir", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10), Padding = new Padding(0, 8, 0, 0) }, 0, 2);
+            configuration.Controls.Add(new Label { Text = "Já existe uma pasta com esse nome. Escolha como continuar.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10), Padding = new Padding(0, 8, 0, 0) }, 0, 2);
             configuration.Controls.Add(destinations, 0, 3);
             reviewDetails.Multiline = true; reviewDetails.ReadOnly = true; reviewDetails.ScrollBars = ScrollBars.Both; reviewDetails.WordWrap = false; reviewDetails.Dock = DockStyle.Fill; reviewDetails.BackColor = surface; reviewDetails.ForeColor = foreground; reviewDetails.BorderStyle = BorderStyle.None; reviewDetails.Font = new Font("Consolas", 10); reviewDetails.AccessibleName = "Resumo da conversão a confirmar";
             var configurationScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true }; configurationScroll.Controls.Add(configuration);
-            AddTab(titles[0], configurationScroll); AddTab(titles[1], reviewDetails); AddTab(titles[2], details); AddTab(titles[3], assets);
-            var help = new TextBox { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, ScrollBars = ScrollBars.Vertical, BorderStyle = BorderStyle.None, BackColor = surface, ForeColor = foreground, Font = ForgeFonts.Pixel(12), Text = HelpText + "\r\n\r\nTIPOGRAFIA — PIXELIFY SANS\r\n\r\n" + ForgeFonts.License, AccessibleName = "Guia rápido RPForge" }; AddTab(titles[4], help);
+            AddTab(titles[0], configurationScroll); AddTab(titles[1], reviewView); AddTab(titles[2], resultView); AddTab(titles[3], assets);
+            AddTab(titles[4], BuildHelpDocument());
             BuildEmptyState(); tabs.TabPages[0].Controls.Add(empty); empty.BringToFront(); vehicles.Visible = false;
             tabs.SelectedIndexChanged += delegate { RefreshNavigation(); }; RefreshNavigation();
             workspace.Controls.Add(tabs, 0, 2); main.Controls.Add(workspace, 0, 3);
             summary.Dock = DockStyle.Fill; summary.ForeColor = muted; summary.TextAlign = ContentAlignment.MiddleLeft; summary.AutoEllipsis = true; summary.Text = "Escolha a pasta que contém os RPFs para começar."; main.Controls.Add(summary, 0, 4);
             progress.Dock = DockStyle.Fill; progress.Margin = new Padding(0, 0, 0, 4); progress.Maximum = 100; main.Controls.Add(progress, 0, 5);
             var footer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty }; footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); footer.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 570));
-            status.Dock = DockStyle.Fill; status.ForeColor = muted; status.TextAlign = ContentAlignment.MiddleLeft; status.Font = ForgeFonts.Pixel(11); status.Text = "Tudo é processado localmente."; status.AccessibleName = "Estado da operação";
+            status.Dock = DockStyle.Fill; status.ForeColor = muted; status.TextAlign = ContentAlignment.MiddleLeft; status.Font = ForgeFonts.Pixel(11); status.Text = ""; status.AccessibleName = "Estado da operação";
             var actions = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false, Margin = Padding.Empty };
             ConfigureButton(convert, "&Converter selecionados", true); convert.Width = 205; ConfigureButton(analyze, "&Escolher pasta", true); analyze.Width = 250; ConfigureButton(open, "Abrir &resultado", false); open.Width = 165;
             ConfigureButton(back, "← &Voltar", false); back.Width = 140; back.Click += delegate { tabs.SelectedIndex = 0; };

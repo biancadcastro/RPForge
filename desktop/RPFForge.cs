@@ -109,7 +109,7 @@ namespace RPFForge {
             browse.Click += async delegate {
                 string selected;
                 try { selected = ForgeFolderPicker.Choose(Handle, folder.Text); }
-                catch (Exception error) { status.Text = "Não foi possível abrir a pasta. Você também pode digitar o caminho no campo de origem."; details.Text = error.Message; tabs.SelectedIndex = 2; return; }
+                catch (Exception error) { status.Text = "Não foi possível abrir a pasta. Tente selecionar a pasta novamente."; details.Text = error.Message; previewValid = false; BuildReviewDocument(); tabs.SelectedIndex = 1; return; }
                 await SelectOrigin(selected);
             };
             folder.TextChanged += delegate { if (!busy) ResetOrigin(); };
@@ -214,7 +214,7 @@ namespace RPFForge {
             reviewed = false; hasResults = false; lastOutput = ""; open.Enabled = false; stage.Text = "ANALISANDO PASTA";
             var requests = Requests(false); SetBusy(true, "Preparando a prévia; os originais permanecem intactos.");
             try { RenderPreview(await Execute("preview", requests), requests); }
-            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; reviewDetails.Text = details.Text; tabs.SelectedIndex = 1; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
+            catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; reviewDetails.Text = details.Text; BuildReviewDocument(); tabs.SelectedIndex = 1; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
             finally { SetBusy(false, previewValid ? "Configure os nomes e as pastas; depois clique em Revisar conversão." : "Revise o diagnóstico ou escolha outra pasta."); }
         }
         void RenderPreview(object[] results, Dictionary<string, object> requests) {
@@ -245,7 +245,7 @@ namespace RPFForge {
                     }
                     var audit = Map(Get(result, "audit")); errors += (int)Number(Get(audit, "errors")); warnings += (int)Number(Get(audit, "warnings")); weight += Number(Get(audit, "diskBytes"));
                     var spawns = Map(Get(requested, "spawns"));
-                    foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model); vehicles.Rows.Add(archive, name, TextValue(Get(spawns, name))); cars++; }
+                    foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model); vehicles.Rows.Add(archive, name, spawns.ContainsKey(name) ? TextValue(Get(spawns, name)) : name); cars++; }
                     foreach (object model in ArrayValue(Get(result, "models"))) { string name = TextValue(model), target = TextValue(Get(spawns, name)); if (target.Length > 0 && target != name) text.AppendLine("Renomeação: " + name + " → " + target + " (arquivos e referências correspondentes nos metas)"); }
                     string policy = TextValue(Get(requested, "existing")); policy = policy == "backup" ? "Backup e substituir" : policy == "rename" ? "Usar outro nome" : "Cancelar";
                     if (Yes(Get(result, "exists")) && (Yes(Get(requested, "policyPending")) || !requested.ContainsKey("existing") || (!Yes(Get(requested, "reviewedExisting")) && TextValue(Get(requested, "existing")) == "cancel"))) policy = "Escolha uma ação";
@@ -266,9 +266,11 @@ namespace RPFForge {
                 text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS. A aba de peso apresenta até 200 arquivos, do maior para o menor.");
                 details.Text = text.ToString(); summary.Text = CountLabel(cars, "veículo", "veículos") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
                 reviewDetails.Text = details.Text;
+                SimplifyConfiguration();
                 UpdateCounts(cars, results.Length, warnings, errors, weight);
                 stage.Text = errors > 0 ? "REVISE OS ERROS" : results.Length == 0 ? "NENHUM RPF ENCONTRADO" : "01 / CONFIGURAR"; stage.ForeColor = errors > 0 ? ForgeTheme.Error : red;
                 previewValid = eligible && !selectedError; convert.Enabled = previewValid && !busy;
+                BuildReviewDocument();
                 if (errors > 0) tabs.SelectedIndex = 1;
                 RefreshActions();
             } finally { rendering = false; }
@@ -279,7 +281,7 @@ namespace RPFForge {
             lastOutput = ""; open.Enabled = false; stage.Text = "03 / CONVERSÃO";
             var request = Requests(true); SetBusy(true, "Convertendo os veículos selecionados.");
             try { RenderResults(await Execute("convert", request)); }
-            catch (Exception error) { hasResults = true; reviewed = false; details.Text = error.Message; tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
+            catch (Exception error) { hasResults = true; reviewed = false; details.Text = error.Message; resultView.ClearDocument(); resultView.AddSection("Não foi possível converter", error.Message, false, ForgeTheme.Error); tabs.SelectedIndex = 2; summary.Text = "A conversão não foi concluída. Confira o diagnóstico antes de tentar novamente."; stage.Text = "CONVERSÃO INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
             finally { previewValid = false; SetBusy(false, "Confira o resultado. Use Nova conversão para começar outro pacote."); }
         }
         void RenderResults(object[] results) {
@@ -297,6 +299,7 @@ namespace RPFForge {
             details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Valide os veículos no FiveM.";
             stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "03 / CONCLUÍDO";
             stage.ForeColor = failed > 0 ? ForgeTheme.Error : warnings > 0 || success == 0 ? ForgeTheme.Warning : ForgeTheme.Success;
+            BuildResultDocument(results);
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
         public void SelfTest() {

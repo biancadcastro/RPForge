@@ -25,6 +25,9 @@ namespace RPFForge {
             tabs.SelectedIndex = 3; RenderBitmap(Path.Combine(directory, "05-espaco.png"));
             ClientSize = new Size(1024, 700); tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "06-compacto.png"));
             tabs.SelectedIndex = 4; RenderBitmap(Path.Combine(directory, "07-ajuda.png"));
+            helpView.ScrollTo(Int32.MaxValue); RenderBitmap(Path.Combine(directory, "10-ajuda-final.png"));
+            File.WriteAllText(Path.Combine(directory, "scroll-check.txt"), "extent=" + helpView.ContentExtent + ", view=" + helpView.Height + ", position=" + helpView.ScrollPosition);
+            if (helpView.ScrollPosition <= 0) throw new Exception("Help document cannot scroll to the licensing action.");
             RenderResults(new object[] { new Dictionary<string, object> { { "archive", "broken.rpf" }, { "ok", false }, { "error", "O RPF mudou depois da prévia. Analise os arquivos novamente." } } });
             RenderBitmap(Path.Combine(directory, "08-erro.png"));
             RenderResults(new object[] { new Dictionary<string, object> { { "archive", "esportivos.rpf" }, { "ok", true }, { "output", @"C:\Mods\elegy2_pack" }, { "resource", "elegy2_pack" }, { "audit", new Dictionary<string, object> { { "issues", new object[0] } } } } });

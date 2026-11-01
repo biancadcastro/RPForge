@@ -50,3 +50,5 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 ## Desenvolvimento
 
 A prévia executa o conversor real: revisar é leitura; Converter grava addons. Mudanças no código requerem uma nova instância. Janelas anteriores não são fechadas automaticamente. Nenhum instalador é gerado durante o desenvolvimento.
+
+A configuração mostra o nome original e o nome no jogo. As decisões de destino aparecem somente quando existe conflito. Revisão e resultado usam cartões com detalhes técnicos recolhidos. Ajuda e licenças são separadas; documentos têm rolagem escura e as ações de conflito usam menu estilizado.
