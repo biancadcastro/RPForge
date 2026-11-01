@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isForbiddenTrackedPath } from './repository-policy.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const [destination, nativeVersion, revision, dirty] = process.argv.slice(2);
@@ -14,7 +15,7 @@ const tools = JSON.parse(await readFile(path.join(root, 'build/toolchains.json')
 const sourceFiles = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean).sort();
 const source = [];
 for (const name of sourceFiles) {
-  if (/(?:^|\/)(?:node_modules|\.tools|release|packaging-stage)\//.test(name) || /\.(?:pfx|p12|key|rpf|yft|ytd|ydd|ydr|ybn|exe|dll)$/i.test(name) || /(?:^|\/)\.env(?:\.|$)/i.test(name)) throw new Error(`Arquivo privado ou gerado versionado: ${name}`);
+  if (isForbiddenTrackedPath(name)) throw new Error(`Arquivo privado ou gerado versionado: ${name}`);
   source.push({ path: name, sha256: checksum(await readFile(path.join(root, name))) });
 }
 const binaries = [];

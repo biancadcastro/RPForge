@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { parse } from 'yaml';
 import { DOMParser } from '@xmldom/xmldom';
+import { isForbiddenTrackedPath } from './repository-policy.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = relative => readFile(path.join(root, relative), 'utf8');
@@ -30,7 +31,7 @@ for (const filename of ['.github/workflows/test.yml', '.github/workflows/signpat
   }
 }
 const tracked = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
-for (const file of tracked) if (/\.(?:pfx|p12|key|rpf|yft|ytd|ydd|ydr|exe|dll)$/i.test(file) || /(?:^|\/)\.env(?:\.|$)/.test(file) || /^(?:\.tools|node_modules|release|packaging-stage)\//.test(file)) throw new Error(`Arquivo privado ou gerado no Git: ${file}`);
+for (const file of tracked) if (isForbiddenTrackedPath(file)) throw new Error(`Arquivo privado ou gerado no Git: ${file}`);
 if (process.argv.includes('--request-signing')) {
   if (!config.enabled || !config.approvedByFoundation || !config.manualApprovalRequired) throw new Error('Assinatura desativada ou aprovacao da Foundation pendente.');
   if (process.env.SIGNPATH_ENABLED !== 'true' || process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch' || process.env.GITHUB_ACTOR !== config.maintainer || process.env.GITHUB_REF !== 'refs/heads/main') throw new Error('Pedido de assinatura exige opt-in e execucao manual pela mantenedora na main.');
