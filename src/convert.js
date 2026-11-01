@@ -1,18 +1,13 @@
-import { readFile, readdir, lstat, mkdir, writeFile, rename, rm, mkdtemp } from 'node:fs/promises';
+import { readFile, readdir, lstat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { DOMParser } from '@xmldom/xmldom';
+import { META, parseMeta, mergeMetadata, serializeXml, records, child, normalized } from './metadata.js';
+import { auditAddon } from './audit.js';
+import { writePlan } from './output.js';
 import { readRpf, LIMITS, safeName } from './rpf.js';
 import { renameSpawns } from './spawns.js';
 import { organizeTuning, cleanMissingTuning } from './tuning.js';
 
-const META = {
-  'handling.meta': ['HANDLING_FILE', 'CHandlingDataMgr'],
-  'vehicles.meta': ['VEHICLE_METADATA_FILE', 'CVehicleModelInfo__InitDataList'],
-  'carcols.meta': ['CARCOLS_FILE', 'CVehicleModelInfoVarGlobal'],
-  'carvariations.meta': ['VEHICLE_VARIATION_FILE', 'CVehicleModelInfoVariation'],
-  'vehiclelayouts.meta': ['VEHICLE_LAYOUTS_FILE', 'CVehicleMetadataMgr'],
-  'caraddoncontentunlocks.meta': ['CONTENT_UNLOCKING_META_FILE', 'SContentUnlocks'],
-};
 const STREAM = new Set(['.yft', '.ytd', '.ydr', '.ydd', '.ybn', '.ycd']);
 const ADMIN = new Set(['content.xml', 'setup2.xml']);
 const IGNORED = new Set(['dlctext.meta', 'shopdata.meta', 'shop_vehicle.meta']);
@@ -21,7 +16,7 @@ export function resourceName(input) {
   return input.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'vehicle_addon';
 }
 
-export async function convertArchive(archive, options = {}) {
+export async function prepareArchive(archive, options = {}) {
   const stat = await lstat(archive);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > LIMITS.archiveBytes) throw new Error('RPF inválido, link ou maior que 512 MiB.');
   let files = new Map();
@@ -29,6 +24,10 @@ export async function convertArchive(archive, options = {}) {
   const skipped = [];
   const models = new Set();
   const declaredModels = new Set();
+  let mergedSources = 0;
+  const source = await readFile(archive);
+  const sourceHash = createHash('sha256').update(source).digest('hex');
+  if (options.expectedSource && options.expectedSource !== sourceHash) throw new Error('O RPF mudou desde a prévia. Analise novamente antes de converter.');
   function add(destination, data) {
     const key = destination.toLowerCase();
     if (files.has(key)) {
@@ -37,7 +36,8 @@ export async function convertArchive(archive, options = {}) {
     }
     files.set(key, { destination, data });
   }
-  for (const entry of readRpf(await readFile(archive))) {
+  options.onProgress?.({ phase: 'read', label: path.basename(archive), current: 0, total: 1 });
+  for (const entry of readRpf(source)) {
     const basename = path.posix.basename(entry.path).toLowerCase();
     const ext = path.posix.extname(basename);
     if (IGNORED.has(basename)) { skipped.push(entry.path); continue; }
@@ -46,28 +46,27 @@ export async function convertArchive(archive, options = {}) {
       add(`stream/${basename}`, entry.data);
       if (ext === '.yft' && !basename.endsWith('_hi.yft')) models.add(basename.slice(0, -4));
     } else if (META[basename]) {
-      const [type, expectedRoot] = META[basename];
-      const errors = [];
-      const xml = entry.data.toString('utf8').replace(/^\uFEFF/, '');
-      if (/<!DOCTYPE|<!ENTITY/i.test(xml)) throw new Error(`Declaração XML externa não suportada: ${entry.path}`);
-      let doc;
-      try { doc = new DOMParser({ onError: (level, message) => errors.push(message) }).parseFromString(xml, 'text/xml'); }
-      catch { throw new Error(`XML inválido: ${entry.path}`); }
-      if (errors.length || doc.documentElement?.tagName !== expectedRoot) throw new Error(`XML inválido ou raiz inesperada: ${entry.path}`);
-      if (basename === 'vehicles.meta') {
-        for (const element of Array.from(doc.getElementsByTagName('modelName'))) {
-          const model = element.textContent.trim().toLowerCase();
-          if (!/^[a-z0-9_]+$/.test(model)) throw new Error(`Nome de modelo inválido em ${entry.path}`);
-          if (declaredModels.has(model)) throw new Error(`Modelo declarado mais de uma vez: ${model}`);
-          declaredModels.add(model);
-        }
-      }
+      const [type] = META[basename];
+      const doc = parseMeta(entry.data, basename);
       const destination = `data/${basename}`;
-      add(destination, entry.data);
-      metas.push({ type, destination, basename, doc });
+      const previous = metas.find(meta => meta.basename === basename);
+      if (previous) {
+        mergeMetadata(previous.doc, doc, basename);
+        files.set(destination, { destination, data: serializeXml(previous.doc) });
+        mergedSources++;
+      } else {
+        add(destination, entry.data);
+        metas.push({ type, destination, basename, doc });
+      }
     } else if (!ADMIN.has(basename)) {
       skipped.push(entry.path);
     }
+  }
+  for (const item of records(metas.find(m => m.basename === 'vehicles.meta')?.doc, 'InitDatas')) {
+    const model = normalized(child(item, 'modelName'));
+    if (!/^[a-z0-9_]+$/.test(model)) throw new Error(`Nome de modelo inválido: ${model}`);
+    if (declaredModels.has(model)) throw new Error(`Modelo declarado mais de uma vez: ${model}`);
+    declaredModels.add(model);
   }
   if (!models.size || !metas.some(m => m.type === 'VEHICLE_METADATA_FILE')) throw new Error('Não foi encontrado um addon de veículo com YFT base e vehicles.meta.');
   if (!declaredModels.size) throw new Error('vehicles.meta não declara nenhum modelName.');
@@ -84,27 +83,18 @@ export async function convertArchive(archive, options = {}) {
   const cleaned = cleanMissingTuning(files, metas);
   files = cleaned.files;
   const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
-  const output = path.join(path.dirname(archive), name);
-  try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   const manifest = ['-- Convertido com RPF Forge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
-  const stage = await mkdtemp(path.join(path.dirname(archive), '.rpf-to-fivem-'));
-  try {
-    for (const { destination, data } of files.values()) {
-      const target = path.join(stage, destination);
-      await mkdir(path.dirname(target), { recursive: true });
-      await writeFile(target, data, { flag: 'wx' });
-    }
-    // A second existence check also avoids accidental replacement of an empty output directory.
-    try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-    await rename(stage, output);
-  } catch (error) {
-    // Only remove this invocation's staging directory, never the source or a previous addon.
-    if (path.dirname(stage) !== path.dirname(archive) || !path.basename(stage).startsWith('.rpf-to-fivem-')) throw error;
-    await rm(stage, { recursive: true, force: true });
-    throw error;
-  }
-  return { output, resource: path.basename(output), models: finalModels, skipped, removedTuning: cleaned.removed };
+  const audit = auditAddon(files);
+  options.onProgress?.({ phase: 'audit', current: 1, total: 1, label: path.basename(archive) });
+  return { archive, files, metas, defaultName: name, models: finalModels, originalModels: [...declaredModels].sort(), skipped, removedTuning: cleaned.removed, audit, sourceHash, sourceBytes: stat.size, mergedSources };
+}
+
+export async function convertArchive(archive, options = {}) {
+  const plan = await prepareArchive(archive, options);
+  if (!plan.audit.ok) throw new Error(`Validação final reprovada: ${plan.audit.issues.filter(i => i.severity === 'error').map(i => i.message).join(' ')}`);
+  const destination = await writePlan(plan, options);
+  return { ...destination, models: plan.models, skipped: plan.skipped, removedTuning: plan.removedTuning, audit: plan.audit, mergedSources: plan.mergedSources };
 }
 
 export async function convertFolder(folder, options = {}) {
@@ -115,7 +105,7 @@ export async function convertFolder(folder, options = {}) {
   const results = [];
   for (const archive of archives) {
     try { results.push({ archive: archive.name, ok: true, ...await convertArchive(path.join(root, archive.name), options) }); }
-    catch (error) { results.push({ archive: archive.name, ok: false, error: error.message }); }
+    catch (error) { results.push({ archive: archive.name, ok: false, cancelled: error.code === 'CANCELLED', error: error.message }); }
   }
   return results;
 }

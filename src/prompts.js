@@ -36,6 +36,16 @@ export function createPrompts(input = process.stdin, output = process.stdout) {
       return result;
     },
     async finish() { await ask('\nPressione Enter para fechar.'); },
+    async chooseOutput({ output, name }) {
+      output.write(`\nA pasta já existe: ${output}\n1 - Usar outro nome\n2 - Criar backup e substituir\n3 - Cancelar\n`);
+      while (true) {
+        const answer = await ask('Escolha [3]: ');
+        if (!answer || answer === '3') return { action: 'cancel' };
+        if (answer === '2') return { action: 'backup' };
+        if (answer === '1') return { action: 'rename', name: await ask(`Nome da pasta (Enter para escolher ${name}_2 ou o próximo livre): `) };
+        output.write('Escolha 1, 2 ou 3.\n');
+      }
+    },
     close() { readline.close(); },
   };
 }
