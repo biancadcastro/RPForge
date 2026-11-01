@@ -3,6 +3,7 @@ import path from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
 import { readRpf, LIMITS, safeName } from './rpf.js';
 import { renameSpawns } from './spawns.js';
+import { organizeTuning } from './tuning.js';
 
 const META = {
   'handling.meta': ['HANDLING_FILE', 'CHandlingDataMgr'],
@@ -77,8 +78,8 @@ export async function convertArchive(archive, options = {}) {
   if (blocking.length) throw new Error(`Pacote requer suporte adicional para: ${blocking.join(', ')}`);
   const requested = options.chooseSpawns ? await options.chooseSpawns({ archive: path.basename(archive), models: [...declaredModels].sort() }) : options.spawns;
   const renamed = renameSpawns(files, metas, declaredModels, requested);
-  files = renamed.files;
   const finalModels = renamed.models;
+  files = organizeTuning(renamed.files, metas, finalModels);
   const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
   const output = path.join(path.dirname(archive), name);
   try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }

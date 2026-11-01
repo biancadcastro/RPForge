@@ -50,6 +50,8 @@ meu_carro/
       carro.yft
       carro_hi.yft
       carro.ytd
+      mods/
+        carro_bumper.yft
     data/
       vehicles.meta
       handling.meta
@@ -80,6 +82,8 @@ mantém os spawns atuais; o menu do Explorer sempre usa o modo interativo.
 Metas ficam diretamente em `data`, sem subpastas numeradas. Metas de mesmo nome com
 conteudos divergentes sao recusados para evitar sobrescrita e perda de configuracoes.
 O manifest inclui o comentario `-- Convertido com RPF Forge`.
+Pecas de tuning e seus arquivos associados ficam em `stream/mods`.
+Modelos principais, seus `_hi` e dicionarios compartilhados permanecem em `stream`.
 
 ## Compatibilidade e proteção dos arquivos
 

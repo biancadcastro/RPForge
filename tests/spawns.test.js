@@ -38,7 +38,8 @@ test('renames spawn, dedicated dictionary, handling and tuning references, prese
   assert.equal(result.ok, true, result.error);
   assert.equal(result.resource, 'newcar');
   const streamed = await readdir(path.join(result.output, 'stream'));
-  for (const name of ['newcar.yft', 'newcar_hi.yft', 'newcar_bumper.yft', 'newcar.ytd', 'newcar+hi.ytd', 'car_anims.ycd']) assert.ok(streamed.includes(name), name);
+  for (const name of ['newcar.yft', 'newcar_hi.yft', 'newcar.ytd', 'newcar+hi.ytd', 'car_anims.ycd']) assert.ok(streamed.includes(name), name);
+  assert.deepEqual(await readdir(path.join(result.output, 'stream/mods')), ['newcar_bumper.yft']);
   assert.equal(await readFile(path.join(result.output, 'stream/newcar.ytd'), 'utf8'), 'livery untouched');
   const vehicles = await meta(result.output, 'vehicles.meta');
   for (const value of ['<modelName>newcar</modelName>', '<txdName>newcar</txdName>', '<handlingId>newcar</handlingId>', '<child>newcar</child>', '<audioNameHash>car</audioNameHash>', '<layout>LAYOUT_STANDARD</layout>']) assert.ok(vehicles.includes(value), value);
@@ -82,7 +83,8 @@ test('preserves uppercase and mixed-case spawns in folder, streamed names and me
     assert.equal(result.resource, spawn);
     assert.deepEqual(result.models, [spawn]);
     const stream = await readdir(path.join(result.output, 'stream'));
-    for (const name of [`${spawn}.yft`, `${spawn}_hi.yft`, `${spawn}.ytd`, `${spawn}_bumper.yft`]) assert.ok(stream.includes(name), name);
+    for (const name of [`${spawn}.yft`, `${spawn}_hi.yft`, `${spawn}.ytd`]) assert.ok(stream.includes(name), name);
+    assert.deepEqual(await readdir(path.join(result.output, 'stream/mods')), [`${spawn}_bumper.yft`]);
     const vehicles = await meta(result.output, 'vehicles.meta');
     assert.ok(vehicles.includes(`<modelName>${spawn}</modelName>`));
     assert.ok(vehicles.includes(`<txdName>${spawn}</txdName>`));

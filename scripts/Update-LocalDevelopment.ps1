@@ -8,7 +8,7 @@ foreach ($directory in @($installed, (Join-Path $installed 'src'))) {
 $backup = Join-Path $root ('.tools\local-update-backups\' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $backup -Force | Out-Null
 # Dependencies are copied before their importers. No registry or native shell changes.
-foreach ($name in @('spawns.js', 'prompts.js', 'rpf.js', 'convert.js', 'cli.js')) {
+foreach ($name in @('spawns.js', 'prompts.js', 'rpf.js', 'tuning.js', 'convert.js', 'cli.js')) {
     $source = Join-Path $root "src\$name"
     $target = Join-Path $installed "src\$name"
     if (Test-Path -LiteralPath $target) { Copy-Item -LiteralPath $target -Destination (Join-Path $backup $name) }
