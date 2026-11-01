@@ -44,7 +44,7 @@ namespace RPFForge {
         Control BuildHelpDocument() {
             helpView = new ForgeDocument { AccessibleName = "Ajuda do RPForge" };
             helpView.AddSection("1. Selecione a pasta", "Escolha a pasta que contém os arquivos RPF. A análise começa automaticamente.");
-            helpView.AddSection("2. Escolha o nome no jogo", "Mantenha o nome original ou digite o novo spawn. A pasta do addon acompanha esse nome.");
+            helpView.AddSection("2. Escolha o nome no jogo", "Para alterar o spawn, clique no nome na coluna “Nome no jogo” e edite. A pasta do addon acompanha esse nome.");
             helpView.AddSection("3. Confira e converta", "Clique em Revisar. Confira os nomes e avisos e use Converter agora. Ao terminar, abra a pasta do addon.");
             helpView.AddSection("Se a pasta já existir", "Você poderá usar outro nome, preservar um backup e substituir ou cancelar. Nada será sobrescrito sem sua escolha.");
             helpView.AddSection("O que o app aceita", "Veículos GTA V Legacy em RPF7 aberto, até 512 MiB por arquivo. RPFs internos são lidos; subpastas do Windows não são pesquisadas. Teste o addon no FiveM.");

@@ -125,6 +125,7 @@ namespace RPFForge {
             workspace.Controls.Add(pageTitle, 0, 0); workspace.Controls.Add(pageHelp, 0, 1);
             tabs.Dock = DockStyle.Fill; tabs.Margin = Padding.Empty; tabs.TabStop = false;
             SetupGrid(vehicles); SetupGrid(destinations); SetupGrid(assets);
+            vehicles.EditMode = DataGridViewEditMode.EditOnEnter;
             AddTextColumn(vehicles, "archive", "Arquivo RPF", true, 28); AddTextColumn(vehicles, "current", "Nome original", true, 28); AddTextColumn(vehicles, "target", "Nome no jogo", false, 44);
             vehicles.CellPainting += PaintEditableCell;
             destinations.Columns.Add(new DataGridViewCheckBoxColumn { Name = "selected", HeaderText = "Converter", Width = 78, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
@@ -141,7 +142,7 @@ namespace RPFForge {
             var configuration = new TableLayoutPanel { Dock = DockStyle.Top, Height = 344, ColumnCount = 1, RowCount = 4, Margin = Padding.Empty };
             configurationLayout = configuration;
             configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 24)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 160)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 32)); configuration.RowStyles.Add(new RowStyle(SizeType.Absolute, 128));
-            configuration.Controls.Add(new Label { Text = "Mantenha o nome original ou digite um novo nome.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10) }, 0, 0);
+            configuration.Controls.Add(new Label { Text = "Para alterar o spawn, clique no nome na coluna “Nome no jogo” e edite.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10) }, 0, 0);
             configuration.Controls.Add(vehicles, 0, 1);
             configuration.Controls.Add(new Label { Text = "Já existe uma pasta com esse nome. Escolha como continuar.", Dock = DockStyle.Fill, ForeColor = muted, Font = ForgeFonts.Pixel(10), Padding = new Padding(0, 8, 0, 0) }, 0, 2);
             configuration.Controls.Add(destinations, 0, 3);
