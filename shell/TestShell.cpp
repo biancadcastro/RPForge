@@ -58,6 +58,12 @@ int wmain(int argc, wchar_t** argv) {
     HRESULT creation = argc == 5 ? CoCreateInstance(id,nullptr,CLSCTX_LOCAL_SERVER,IID_PPV_ARGS(&command)) : factory->CreateInstance(nullptr,IID_PPV_ARGS(&command));
     if (FAILED(creation)) { printf("COM activation failed: %08lx\n",static_cast<unsigned long>(creation)); return 14; }
     factory->Release();
+    const CLSID ytypId = {0x65b5221f,0x8946,0x4de3,{0x9f,0x6b,0x94,0xb8,0x31,0xf3,0x94,0x32}};
+    IExplorerCommand* generator = nullptr;
+    if (FAILED(getFactory(ytypId,IID_PPV_ARGS(&factory)))) return 26;
+    HRESULT generated = argc == 5 ? CoCreateInstance(ytypId,nullptr,CLSCTX_LOCAL_SERVER,IID_PPV_ARGS(&generator)) : factory->CreateInstance(nullptr,IID_PPV_ARGS(&generator));
+    factory->Release();
+    if (FAILED(generated)) return 27;
     PWSTR title = nullptr;
     if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter com RPForge")) return 15;
     CoTaskMemFree(title);
@@ -74,14 +80,15 @@ int wmain(int argc, wchar_t** argv) {
         if (command->GetState(items,FALSE,&state) != E_PENDING) return 18;
         if (FAILED(command->GetState(items,TRUE,&state))) return 19;
         if (state != (i == 2 ? ECS_ENABLED : ECS_HIDDEN)) return 20;
-        if (i == 3) {
+        if (FAILED(generator->GetState(items,TRUE,&state)) || state != ECS_HIDDEN) return 28;
+        {
             auto model = std::wstring(argv[i]) + L"\\synthetic.ydr";
             HANDLE file = CreateFileW(model.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
             if (file == INVALID_HANDLE_VALUE) return 24;
             CloseHandle(file);
-            HRESULT ydrState = command->GetState(items, TRUE, &state);
+            HRESULT ydrState = generator->GetState(items, TRUE, &state);
             PWSTR ydrTitle = nullptr;
-            HRESULT ydrName = command->GetTitle(items, &ydrTitle);
+            HRESULT ydrName = generator->GetTitle(items, &ydrTitle);
             bool titleOk = SUCCEEDED(ydrName) && !wcscmp(ydrTitle, L"Gerar YTYP com RPForge");
             CoTaskMemFree(ydrTitle); DeleteFileW(model.c_str());
             if (FAILED(ydrState) || state != ECS_ENABLED || !titleOk) return 25;
@@ -97,7 +104,7 @@ int wmain(int argc, wchar_t** argv) {
         EXPCMDSTATE state;
         if (FAILED(command->GetState(nullptr,TRUE,&state)) || state != ECS_ENABLED) return 23;
     }
-    site->SetSite(nullptr); site->Release(); command->Release();
+    site->SetSite(nullptr); site->Release(); command->Release(); generator->Release();
     if (canUnload() != S_OK) return 22;
     FreeLibrary(dll); CoUninitialize();
     puts("PASS: COM factory, lifetime, title, async state, RPF folder visible, empty folder hidden and folder background site.");

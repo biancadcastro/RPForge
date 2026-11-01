@@ -19,4 +19,16 @@ New-Item -Path "$baseKey\command" -Force | Out-Null
 $command = '"{0}" "{1}" --interactive "{2}"' -f $nodePath, $cliPath, $menus[$baseKey]
 Set-Item -LiteralPath "$baseKey\command" -Value $command
 }
+$desktop = Join-Path $projectRoot 'RPFForge.exe'
+if (!(Test-Path -LiteralPath $desktop)) { $desktop = Join-Path $projectRoot '.tools\desktop\RPFForge.exe' }
+if (Test-Path -LiteralPath $desktop) {
+    foreach ($baseKey in $menus.Keys) {
+        $generatorKey = $baseKey.Replace('RpfToFiveM', 'RPForgeYtyp')
+        New-Item -Path $generatorKey -Force | Out-Null
+        Set-Item -LiteralPath $generatorKey -Value 'Gerar YTYP com RPForge'
+        New-ItemProperty -LiteralPath $generatorKey -Name Icon -Value "$desktop,0" -PropertyType String -Force | Out-Null
+        New-Item -Path "$generatorKey\command" -Force | Out-Null
+        Set-Item -LiteralPath "$generatorKey\command" -Value ('"{0}" --ytyp "{1}"' -f $desktop, $menus[$baseKey])
+    }
+}
 Write-Host 'Menu instalado para o usuario atual. No Windows 11, procure em Mostrar mais opcoes.'

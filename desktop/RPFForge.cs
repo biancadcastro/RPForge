@@ -71,7 +71,8 @@ namespace RPFForge {
                 }
                 return code;
             }
-            var window = new ForgeWindow(root, args.Length > 0 && args[0] != "--preview" ? args[0] : "");
+            bool generateYtyp = args.Length == 2 && args[0] == "--ytyp";
+            var window = new ForgeWindow(root, generateYtyp ? args[1] : args.Length > 0 && args[0] != "--preview" ? args[0] : "", generateYtyp);
             if (args.Contains("--preview")) window.Text = "RPForge — prévia de desenvolvimento";
             Application.Run(window); return 0;
         }
@@ -105,7 +106,7 @@ namespace RPFForge {
         static string CountLabel(int value, string singular, string plural) { return value + " " + (value == 1 ? singular : plural); }
         static string Quote(string value) { return "\"" + value.Replace("\"", "\\\"").TrimEnd('\\') + (value.EndsWith("\\") ? "\\\\" : "") + "\""; }
 
-        public ForgeWindow(string appRoot, string initialFolder) {
+        public ForgeWindow(string appRoot, string initialFolder, bool generateYtyp = false) {
             root = appRoot; BuildInterface();
             browse.Click += async delegate {
                 string selected;
@@ -123,7 +124,7 @@ namespace RPFForge {
             open.Click += delegate { if (!busy && Directory.Exists(lastOutput)) Process.Start("explorer.exe", Quote(lastOutput)); };
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; status.Text = "Aguarde a operação terminar antes de fechar, para preservar os arquivos."; } };
             folder.Text = initialFolder;
-            Shown += async delegate { if (Directory.Exists(folder.Text)) await Analyze(); };
+            Shown += async delegate { if (Directory.Exists(folder.Text)) { if (generateYtyp) await GenerateYtyp(); else await Analyze(); } };
         }
 
         async Task SelectOrigin(string selected) {

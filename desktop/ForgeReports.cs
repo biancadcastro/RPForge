@@ -48,7 +48,7 @@ namespace RPFForge {
             helpView.AddSection("3. Confira e converta", "Clique em Revisar. Confira os nomes e avisos e use Converter agora. Ao terminar, abra a pasta do addon.");
             helpView.AddSection("Se a pasta já existir", "Você poderá usar outro nome, preservar um backup e substituir ou cancelar. Nada será sobrescrito sem sua escolha.");
             helpView.AddSection("O que o app aceita", "RPF7 aberto de veículos, roupas com coleção identificada, mapas/interiores, animações e texturas de GTA V Legacy, até 512 MiB por RPF. Conteúdos sem suporte são informados antes de gravar. Teste o recurso no FiveM.");
-            helpView.AddSection("Gerar YTYP em um clique", "Clique com o botão direito em uma pasta com YDRs e escolha Gerar YTYP com RPForge. A geração começa automaticamente. YTYPs existentes são preservados; não é necessário instalar GTAUtil. Pastas com RPF abrem primeiro a conversão dos pacotes.");
+            helpView.AddSection("Gerar YTYP em um clique", "Clique com o botão direito em uma pasta com YDRs e escolha Gerar YTYP com RPForge. A geração começa automaticamente. YTYPs existentes são preservados; não é necessário instalar GTAUtil. As opções de converter RPF e gerar YTYP são independentes, inclusive em pastas com os dois tipos de arquivo.");
             helpView.AddAction("Licenças", ShowLicenses);
             return helpView;
         }
