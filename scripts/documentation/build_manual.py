@@ -22,9 +22,9 @@ W,H = A4
 M = 42
 WIDTH = W-2*M
 INK='#20202A'; MUTED='#62616B'; PAPER='#F4F1EA'; DARK='#14141B'; ORANGE='#FF7A32'
-fontdir = Path('C:/Windows/Fonts')
-pdfmetrics.registerFont(TTFont('Body', str(fontdir/'segoeui.ttf')))
-pdfmetrics.registerFont(TTFont('BodyBold', str(fontdir/'segoeuib.ttf')))
+fontdir = ASSETS
+pdfmetrics.registerFont(TTFont('Body', str(fontdir/'AtkinsonHyperlegible-Regular.ttf')))
+pdfmetrics.registerFont(TTFont('BodyBold', str(fontdir/'AtkinsonHyperlegible-Bold.ttf')))
 pdfmetrics.registerFont(TTFont('Pixel', str(ASSETS/'PixelifySans-Bold.ttf')))
 styles = {}
 for key,font,size,color in [('body','Body',10.5,INK),('small','Body',8.2,MUTED),('head','BodyBold',11.5,INK),('table','Body',9.5,INK)]:

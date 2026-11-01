@@ -1,7 +1,7 @@
 # Manutenção da documentação de usuários
 
 Conteúdo: `docs/guia-usuario/conteudo.json`. A versão navegável e o PDF são gerados
-por `build_manual.py`, usando ReportLab e as fontes locais do Windows. O PDF final
+por `build_manual.py`, usando ReportLab e fontes abertas incluídas no projeto. O PDF final
 fica em `output/pdf` e uma cópia acompanha o guia em `docs/guia-usuario`.
 
 Os PNGs mostram a área cliente da interface 0.3.1, sem a moldura desenhada pelo
@@ -9,7 +9,8 @@ Windows, com exemplos fictícios. A tela de YTYP registra uma geração real de 
 assets do jogo, acervo privado ou credenciais no pacote de documentação.
 
 As logos são as variantes finais aprovadas da identidade RPForge. Pixelify Sans
-mantém seu aviso OFL em `assets/OFL.txt`. Os arquivos originais de marca não foram
+mantém seu aviso OFL em `assets/OFL.txt`. Atkinson Hyperlegible, usada no corpo do PDF,
+mantém seu aviso em `assets/Atkinson-OFL.txt`. Os arquivos originais de marca não foram
 alterados.
 
 ## Revisão editorial solicitada

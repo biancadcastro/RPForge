@@ -8,6 +8,7 @@ of its dependencies, Windows system libraries or build tools.
 | Node.js | Unmodified runtime for the converter | `build/toolchains.json` | MIT and the third-party notices in the upstream `LICENSE` |
 | `@xmldom/xmldom` | Runtime XML parser | `package-lock.json` | MIT; preserve the upstream package `LICENSE` |
 | Pixelify Sans Regular and Bold | Fonts embedded in the desktop executable | Checked-in `desktop/fonts/*.ttf`, identified by SHA-256 in the SBOM | SIL Open Font License 1.1; complete notice in `desktop/fonts/OFL.txt`, embedded in Help and copied to `licenses/Pixelify-Sans-OFL.txt` |
+| Atkinson Hyperlegible Regular and Bold | Body text in the user manual PDF; not embedded in the app | Checked-in `docs/guia-usuario/assets/AtkinsonHyperlegible-*.ttf` | SIL Open Font License 1.1; complete notice in `docs/guia-usuario/assets/Atkinson-OFL.txt` |
 | LLVM-MinGW runtime libraries | Statically linked native C++ support | Pinned LLVM-MinGW archive | Apache-2.0 with LLVM exceptions and the other applicable notices in the distribution's aggregate `LICENSE.TXT` |
 | Microsoft .NET Framework | Windows system dependency for the current desktop app | .NET Framework 4.8 reference contract | Provided by Windows; not included in the signing bundle |
 | `yaml` | Development-only workflow validation | `package-lock.json` | ISC; not included in production npm dependencies |
