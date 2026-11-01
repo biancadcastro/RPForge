@@ -308,6 +308,7 @@ namespace RPFForge {
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
         public void SelfTest() {
+            if (!ProjectLicense().Contains("Version 3, 29 June 2007")) throw new Exception("Embedded GPLv3 license missing.");
             ForgeFolderPicker.SelfTest();
             if (convert.Enabled || open.Enabled) throw new Exception("Initial actions should be disabled.");
             if (tabs.TabPages.Count != 4 || navigation.Length != 4 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");

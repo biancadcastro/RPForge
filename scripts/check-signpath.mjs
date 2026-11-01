@@ -10,7 +10,7 @@ const read = relative => readFile(path.join(root, relative), 'utf8');
 const config = JSON.parse(await read('signpath/project.json'));
 const tools = JSON.parse(await read('build/toolchains.json'));
 const pkg = JSON.parse(await read('package.json'));
-if (pkg.license !== 'MIT' || !(await read('LICENSE')).startsWith('MIT License')) throw new Error('Licenca do projeto inconsistente.');
+if (pkg.license !== 'GPL-3.0-only' || !/GNU GENERAL PUBLIC LICENSE\s+Version 3, 29 June 2007/.test(await read('LICENSE'))) throw new Error('Licenca GPLv3 do projeto inconsistente.');
 if ((await read('.node-version')).trim() !== tools.nodeVersion) throw new Error('Versao do Node diverge da toolchain.');
 for (const [name, tool] of Object.entries(tools.tools)) {
   const url = new URL(tool.url);

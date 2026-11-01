@@ -58,7 +58,20 @@ try {
     & (Join-Path $projectRoot 'windows\Uninstall-ContextMenu.ps1')
     if (!(Get-AppxPackage -Name 'RedHorn.RPFForge.Local')) { throw 'Outra copia removeu o pacote ativo.' }
     & (Join-Path $PSScriptRoot 'Test-ContextMenu.ps1') -RequireYtyp
-    foreach ($file in @('licenses\Pixelify-Sans-OFL.txt','THIRD_PARTY_NOTICES.md','sbom.cdx.json','build-manifest.json')) { if (!(Test-Path -LiteralPath (Join-Path $installDir $file))) { throw "Inventario ou aviso ausente: $file" } }
+    foreach ($file in @('LICENSE','NOTICE','licenses\Pixelify-Sans-OFL.txt','THIRD_PARTY_NOTICES.md','sbom.cdx.json','build-manifest.json')) { if (!(Test-Path -LiteralPath (Join-Path $installDir $file))) { throw "Inventario ou aviso ausente: $file" } }
+    $installedVersion = (Get-Content -LiteralPath (Join-Path $installDir 'package.json') -Raw | ConvertFrom-Json).version
+    $sourceArchive = Join-Path $installDir "source\RPForge-source-$installedVersion.zip"
+    $sourceCheck = Join-Path $testRoot 'source-check'
+    Expand-Archive -LiteralPath $sourceArchive -DestinationPath $sourceCheck
+    $sourceLicense = Join-Path $sourceCheck 'RPForge\LICENSE'
+    if ([IO.File]::ReadAllText($sourceLicense).Replace("`r`n", "`n") -ne [IO.File]::ReadAllText((Join-Path $installDir 'LICENSE')).Replace("`r`n", "`n")) { throw 'Licenca do codigo-fonte diverge da licenca instalada.' }
+    $sourcePackage = Get-Content -LiteralPath (Join-Path $sourceCheck 'RPForge\package.json') -Raw | ConvertFrom-Json
+    if ($sourcePackage.license -ne 'GPL-3.0-only' -or $sourcePackage.version -ne $installedVersion) { throw 'Licenca ou versao do codigo-fonte incorreta.' }
+    foreach ($file in @('src\convert.js','desktop\RPFForge.cs','scripts\Build-Installer.ps1','installer\setup.iss')) {
+        if (!(Test-Path -LiteralPath (Join-Path $sourceCheck "RPForge\$file"))) { throw "Codigo-fonte incompleto: $file" }
+    }
+    $setupSource = [IO.File]::ReadAllText((Join-Path $sourceCheck 'RPForge\installer\setup.iss'))
+    if (!$setupSource.Contains('DefaultDirName={localappdata}\Programs\RPForge') -or !$setupSource.Contains('UsePreviousAppDir=no')) { throw 'O instalador deve usar a pasta RPForge sem reutilizar automaticamente o caminho antigo.' }
     & node.exe scripts/Create-DesktopFixtures.mjs (Join-Path $testRoot 'gui fixtures')
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar fixtures GUI.' }
     $previousPath = $env:PATH; $previousConsole = $env:RPF_FORGE_CONSOLE

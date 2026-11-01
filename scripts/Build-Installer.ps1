@@ -53,9 +53,16 @@ try {
     foreach ($name in @('sbom.cdx.json','build-manifest.json')) { Copy-Item -LiteralPath (Join-Path $binaryDirectory $name) -Destination $stage }
     Copy-Item -LiteralPath (Join-Path $projectRoot 'THIRD_PARTY_NOTICES.md') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $projectRoot 'windows') -Destination $stage -Recurse
-    foreach ($name in @('package.json', 'package-lock.json', 'LICENSE')) {
+    foreach ($name in @('package.json', 'package-lock.json', 'LICENSE', 'NOTICE')) {
         Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
     }
+    # Bundle the corresponding source locally instead of requiring a public download.
+    $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
+    $sourceDirectory = Join-Path $stage 'source'
+    New-Item -ItemType Directory -Path $sourceDirectory -Force | Out-Null
+    $sourceArchive = Join-Path $sourceDirectory "RPForge-source-$version.zip"
+    & git -C $projectRoot archive --format=zip --prefix=RPForge/ "--output=$sourceArchive" HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao preparar o codigo-fonte correspondente.' }
     Push-Location $stage
     try {
         & npm.cmd ci --omit=dev --ignore-scripts --no-audit --no-fund
@@ -87,6 +94,10 @@ Valide o resultado no FiveM antes de usar em producao.
 
 Para remover, use Configuracoes > Aplicativos > RPForge.
 Seus addons e arquivos originais nao sao apagados na desinstalacao.
+
+Codigo proprio sob GNU GPL versao 3. Veja LICENSE e NOTICE.
+O codigo-fonte correspondente, incluindo os scripts de compilacao e instalacao,
+esta no arquivo ZIP da pasta source. As dependencias mantem suas licencas proprias.
 '@
     Set-Content -LiteralPath (Join-Path $stage 'LEIA-ME.txt') -Value $instructions -Encoding UTF8
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
@@ -95,5 +106,8 @@ Seus addons e arquivos originais nao sao apagados na desinstalacao.
     $installer = Join-Path $release "RPForge-Setup-$version-x64.exe"
     $hash = Get-Sha256 $installer
     Set-Content -LiteralPath "$installer.sha256" -Value "$hash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
+    $sourceCopy = Join-Path $release ([IO.Path]::GetFileName($sourceArchive))
+    Copy-Item -LiteralPath $sourceArchive -Destination $sourceCopy -Force
+    Set-Content -LiteralPath "$sourceCopy.sha256" -Value "$(Get-Sha256 $sourceCopy)  $([IO.Path]::GetFileName($sourceCopy))" -Encoding ASCII
     Write-Host "Instalador local: $installer"
 } finally { Pop-Location }

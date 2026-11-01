@@ -1,7 +1,7 @@
 # RPForge
 
 Converta RPFs de conteúdo GTA V Legacy em recursos FiveM e gere YTYPs de modelos YDR pelo botão direito do Windows.
-Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
+Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença GPLv3 (GPL-3.0-only).
 O desenvolvimento atual permanece local, sem autorização para publicação.
 
 **Code signing policy:** [politica e status da preparacao para SignPath](docs/CODE_SIGNING_POLICY.md).
@@ -17,15 +17,15 @@ Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
 Tipos suportados, geração em um clique e limites: [conteúdos e YTYP](docs/CONTEUDOS_E_YTYP.md).
 O projeto local está centralizado em `D:\RedHorn\Desenvolvimento\RPForge`, com a marca em `design\identidade`.
 Interface atual: [guia de uso](docs/INTERFACE.md), [identidade visual](docs/IDENTIDADE.md) e [desenvolvimento/testes](docs/DESENVOLVIMENTO_INTERFACE.md).
-A versão local 0.3.0 inclui a interface atual, conversão de conteúdos e geração de YTYP.
+A versão local 0.3.1 inclui a interface atual, conversão de conteúdos, geração de YTYP e código próprio sob GPLv3.
 Instaladores são gerados somente mediante pedido explícito.
 Auditoria e ciclo de instalação: [validação da versão 0.3.0](docs/AUDITORIA_0.3.0.md).
 
 ## Instalar no Windows pelo instalador
 
-O próximo empacotamento usará `RPForge-Setup-0.3.0-x64.exe` e a pasta padrão
-`%LOCALAPPDATA%\Programs\RPForge`. A padronização está preparada no código;
-o instalador já auditado conserva seu nome anterior. A pasta instalada não foi movida manualmente.
+Abra `RPForge-Setup-0.3.1-x64.exe`. A pasta padrão é
+`%LOCALAPPDATA%\Programs\RPForge`; o caminho antigo não é selecionado automaticamente.
+O instalador inclui o código-fonte correspondente em `source`, sob GPLv3.
 O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
 abrir terminal ou baixar outros programas. Nao requer administrador.
 O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.

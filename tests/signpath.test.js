@@ -63,6 +63,8 @@ test('inventory excludes dev dependencies, secrets and machine paths, and binds 
   assert.ok(!raw.includes(root)); assert.ok(!raw.includes(os.homedir()));
   const sbom = JSON.parse(await readFile(path.join(destination, 'sbom.cdx.json')));
   assert.equal(sbom.bomFormat, 'CycloneDX');
+  assert.equal(sbom.metadata.component.licenses[0].license.id, 'GPL-3.0-only');
+  assert.equal(sbom.components.find(c => c.name === '@xmldom/xmldom').licenses[0].license.id, 'MIT');
   assert.ok(sbom.components.some(c => c.name === '@xmldom/xmldom'));
   assert.ok(sbom.components.some(c => c.name === 'Node.js'));
   assert.ok(!sbom.components.some(c => c.name === 'yaml'));

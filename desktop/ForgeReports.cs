@@ -54,7 +54,15 @@ namespace RPFForge {
         }
         void ShowLicenses() {
             using (var window = new Form { Text = "RPForge — licenças", StartPosition = FormStartPosition.CenterParent, ClientSize = new Size(760, 580), MinimumSize = new Size(500, 400), BackColor = surface, ForeColor = foreground, Padding = new Padding(20), Font = new Font("Segoe UI", 10) }) {
-                var document = new ForgeDocument(); document.AddSection("Pixelify Sans", ForgeFonts.License, true, foreground); window.Controls.Add(document); window.ShowDialog(this);
+                var document = new ForgeDocument(); document.AddSection("RPForge — GPLv3", "Copyright (c) 2026 Bianca de Castro. Código próprio sob GNU GPL versão 3. O instalador inclui o código-fonte correspondente na pasta source. As licenças dos componentes de terceiros são preservadas.");
+                document.AddSection("GNU General Public License — versão 3", ProjectLicense(), true, foreground);
+                document.AddSection("Pixelify Sans", ForgeFonts.License, true, foreground); window.Controls.Add(document); window.ShowDialog(this);
+            }
+        }
+        static string ProjectLicense() {
+            using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("RPForge.LICENSE")) {
+                if (stream == null) throw new InvalidOperationException("Licença do RPForge não encontrada.");
+                using (var reader = new System.IO.StreamReader(stream)) return reader.ReadToEnd();
             }
         }
         void SimplifyConfiguration() {

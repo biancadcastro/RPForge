@@ -1,0 +1,12 @@
+RPForge
+Copyright (c) 2026 Bianca de Castro
+
+The project's own code is licensed under the GNU General Public License,
+version 3 only (SPDX: GPL-3.0-only). See LICENSE for the complete terms.
+This software is provided without warranty, as specified in that license.
+
+The installer includes the corresponding project source in source/.
+Build and installation scripts are included in that source archive.
+Third-party components retain their own licenses; see THIRD_PARTY_NOTICES.md
+and licenses/. The project license does not grant rights to game content
+or third-party assets processed by the application.

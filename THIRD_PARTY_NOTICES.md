@@ -1,6 +1,6 @@
 # Third-party components and notices
 
-RPForge source code is licensed under MIT. That license does not replace the terms
+RPForge source code is licensed under GNU GPL version 3 only (GPL-3.0-only). That license does not replace the terms
 of its dependencies, Windows system libraries or build tools.
 
 | Component | Role | Version source | License / notice |

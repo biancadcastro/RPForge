@@ -42,7 +42,7 @@ components.push({
 await mkdir(path.join(destination, 'licenses'), { recursive: true });
 await copyFile(path.join(root, 'desktop/fonts/OFL.txt'), path.join(destination, 'licenses/Pixelify-Sans-OFL.txt'));
 const sbom = { bomFormat: 'CycloneDX', specVersion: '1.6', version: 1,
-  metadata: { component: { type: 'application', 'bom-ref': 'rpf-forge', name: 'RPForge', version: pkg.version, licenses: [{ license: { id: 'MIT' } }] }, tools: { components: Object.entries(tools.tools).filter(([, tool]) => !tool.optional).map(([name, tool]) => ({ type: 'application', name, version: tool.version, hashes: [{ alg: 'SHA-256', content: tool.sha256 }], scope: 'excluded' })) } },
+  metadata: { component: { type: 'application', 'bom-ref': 'rpf-forge', name: 'RPForge', version: pkg.version, licenses: [{ license: { id: pkg.license } }] }, tools: { components: Object.entries(tools.tools).filter(([, tool]) => !tool.optional).map(([name, tool]) => ({ type: 'application', name, version: tool.version, hashes: [{ alg: 'SHA-256', content: tool.sha256 }], scope: 'excluded' })) } },
   components, dependencies: [{ ref: 'rpf-forge', dependsOn: components.map(c => c['bom-ref']) }],
 };
 const manifest = { schemaVersion: 1, product: 'RPForge', version: nativeVersion, packageVersion: pkg.version,

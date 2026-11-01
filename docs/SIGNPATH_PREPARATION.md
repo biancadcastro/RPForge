@@ -5,7 +5,7 @@ Estado: preparacao local; sem candidatura enviada e sem garantia de aprovacao.
 
 ## Ja disponivel
 
-- Codigo proprio sob MIT e repositorio Git com historico.
+- Codigo proprio sob GPLv3 (GPL-3.0-only) e repositorio Git com historico.
 - Documentacao do produto, testes do conversor e testes da janela.
 - Rascunho de [Code signing policy](CODE_SIGNING_POLICY.md) e descricao de [privacidade](PRIVACY.md).
 - [Compilacao verificavel preparada](SIGNPATH_BUILD.md), com toolchains fixadas por versao e SHA-256.
