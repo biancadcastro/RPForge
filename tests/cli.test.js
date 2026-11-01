@@ -28,5 +28,5 @@ test('interactive prompt accepts a new spawn and retries invalid names without l
   assert.match(result.stdout, /Responda s ou n/);
   assert.match(result.stdout, /Use um spawn/);
   assert.match(result.stdout, /ensure AITOM8/);
-  assert.match(await readFile(path.join(root, 'AITOM8/data/001/vehicles.meta'), 'utf8'), /<modelName>AITOM8<\/modelName>/);
+  assert.match(await readFile(path.join(root, 'AITOM8/data/vehicles.meta'), 'utf8'), /<modelName>AITOM8<\/modelName>/);
 });

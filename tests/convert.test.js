@@ -24,7 +24,9 @@ test('creates stream/data/manifest, preserves original, refuses overwrite', asyn
   assert.deepEqual(result.models, ['car']);
   const manifest = await readFile(path.join(result.output, 'fxmanifest.lua'), 'utf8');
   assert.match(manifest, /fx_version 'cerulean'/);
-  assert.match(manifest, /data_file 'VEHICLE_METADATA_FILE' 'data\/001\/vehicles.meta'/);
+  assert.match(manifest, /^-- Convertido com RPF Forge\n/);
+  assert.match(manifest, /data_file 'VEHICLE_METADATA_FILE' 'data\/vehicles.meta'/);
+  assert.deepEqual((await readdir(path.join(result.output, 'data'))).sort(), ['handling.meta', 'vehicles.meta']);
   assert.equal((await readFile(path.join(result.output, 'stream/car.ytd'))).toString('ascii', 0, 4), 'RSC7');
   assert.deepEqual(await readFile(source), original);
   assert.equal((await convertFolder(root))[0].ok, false);

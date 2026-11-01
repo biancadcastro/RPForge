@@ -28,11 +28,7 @@ async function setup(t, data) {
   return root;
 }
 async function meta(output, filename) {
-  for (const directory of await readdir(path.join(output, 'data'))) {
-    try { return await readFile(path.join(output, 'data', directory, filename), 'utf8'); }
-    catch (error) { if (error.code !== 'ENOENT') throw error; }
-  }
-  throw new Error(`Missing ${filename}`);
+  return readFile(path.join(output, 'data', filename), 'utf8');
 }
 
 test('renames spawn, dedicated dictionary, handling and tuning references, preserving liveries and audio', async t => {

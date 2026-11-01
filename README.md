@@ -51,8 +51,8 @@ meu_carro/
       carro_hi.yft
       carro.ytd
     data/
-      001/vehicles.meta
-      002/handling.meta
+      vehicles.meta
+      handling.meta
 ```
 
 Copie a pasta gerada para `resources` e adicione `ensure carro` ao seu `server.cfg`.
@@ -77,8 +77,9 @@ Um addon é criado por RPF externo. Vários veículos no mesmo RPF permanecem no
 Nesse caso, a pergunta é feita por veículo e a pasta usa `<primeiro_spawn>_pack`,
 considerando a ordem alfabética dos spawns finais. A execução sem `--interactive`
 mantém os spawns atuais; o menu do Explorer sempre usa o modo interativo.
-Metas são mantidos em subpastas numeradas para preservar múltiplas origens sem mesclar XMLs
-ou perder configurações. Este conversor não aplica regras particulares de servidores.
+Metas ficam diretamente em `data`, sem subpastas numeradas. Metas de mesmo nome com
+conteudos divergentes sao recusados para evitar sobrescrita e perda de configuracoes.
+O manifest inclui o comentario `-- Convertido com RPF Forge`.
 
 ## Compatibilidade e proteção dos arquivos
 

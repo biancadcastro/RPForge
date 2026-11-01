@@ -60,7 +60,7 @@ export async function convertArchive(archive, options = {}) {
           declaredModels.add(model);
         }
       }
-      const destination = `data/${String(metas.length + 1).padStart(3, '0')}/${basename}`;
+      const destination = `data/${basename}`;
       add(destination, entry.data);
       metas.push({ type, destination, basename, doc });
     } else if (!ADMIN.has(basename)) {
@@ -82,7 +82,7 @@ export async function convertArchive(archive, options = {}) {
   const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
   const output = path.join(path.dirname(archive), name);
   try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  const manifest = ["fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
+  const manifest = ['-- Convertido com RPF Forge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
   const stage = await mkdtemp(path.join(path.dirname(archive), '.rpf-to-fivem-'));
   try {
