@@ -14,6 +14,7 @@ namespace RPFForge {
     sealed class ForgeButton : Button {
         bool hovered, pressed;
         public bool Navigation { get; set; }
+        public bool FlatFrame { get; set; }
         protected override void OnMouseDown(MouseEventArgs e) { pressed = true; Invalidate(); base.OnMouseDown(e); }
         protected override void OnMouseUp(MouseEventArgs e) { pressed = false; Invalidate(); base.OnMouseUp(e); }
         protected override void OnKeyDown(KeyEventArgs e) { if (e.KeyCode == Keys.Space) { pressed = true; Invalidate(); } base.OnKeyDown(e); }
@@ -25,13 +26,13 @@ namespace RPFForge {
             bool primary = BackColor == ForgeTheme.Orange, selected = Navigation && ForeColor == ForgeTheme.Orange;
             Color fill = !Enabled ? ForgeTheme.Surface : primary ? (pressed ? Color.FromArgb(220, 92, 30) : hovered ? Color.FromArgb(255, 150, 83) : ForgeTheme.Orange) : selected ? Color.FromArgb(49, 34, 30) : hovered ? Color.FromArgb(49, 49, 64) : ForgeTheme.Surface;
             int down = pressed ? 2 : 0;
-            var body = new Rectangle(0, down, Width - 1, Height - 4);
+            var body = new Rectangle(0, down, Width - 1, Height - (FlatFrame ? 1 : 4));
             using (var brush = new SolidBrush(fill)) e.Graphics.FillRectangle(brush, body);
             using (var border = new Pen(Focused || selected ? ForgeTheme.Orange : primary && Enabled ? Color.FromArgb(255, 175, 118) : ForgeTheme.Border)) e.Graphics.DrawRectangle(border, body);
-            if (!pressed && Enabled && !Navigation) using (var shadow = new SolidBrush(primary ? Color.FromArgb(155, 65, 24) : Color.FromArgb(16, 16, 22))) e.Graphics.FillRectangle(shadow, 2, Height - 3, Width - 3, 3);
+            if (!pressed && Enabled && !Navigation && !FlatFrame) using (var shadow = new SolidBrush(primary ? Color.FromArgb(155, 65, 24) : Color.FromArgb(16, 16, 22))) e.Graphics.FillRectangle(shadow, 2, Height - 3, Width - 3, 3);
             if (selected) using (var marker = new SolidBrush(ForgeTheme.Orange)) e.Graphics.FillRectangle(marker, 0, 12, 4, Height - 28);
             if (Focused) { using (var pen = new Pen(primary ? ForgeTheme.Background : ForgeTheme.Orange)) e.Graphics.DrawRectangle(pen, 4, 4 + down, Width - 9, Height - 12); }
-            var textBounds = new Rectangle(Navigation ? 14 : 6, down, Width - (Navigation ? 20 : 12), Height - 4);
+            var textBounds = new Rectangle(Navigation ? 14 : 6, down, Width - (Navigation ? 20 : 12), Height - (FlatFrame ? 1 : 4));
             TextRenderer.DrawText(e.Graphics, Text, Font, textBounds, Enabled ? ForeColor : Color.FromArgb(110, 108, 125), (Navigation ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter) | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
     }

@@ -31,12 +31,15 @@ namespace RPFForge {
         readonly TextBox input;
         public ForgeInputFrame(TextBox textbox) {
             input = textbox; DoubleBuffered = true; BackColor = ForgeTheme.Raised;
-            Padding = new Padding(14, 10, 14, 8); input.BorderStyle = BorderStyle.None; input.BackColor = BackColor; input.Dock = DockStyle.Fill; input.Margin = Padding.Empty;
+            Padding = new Padding(14, 0, 14, 0); input.BorderStyle = BorderStyle.None; input.BackColor = BackColor; input.Dock = DockStyle.None; input.Margin = Padding.Empty;
             input.Enter += delegate { Invalidate(); }; input.Leave += delegate { Invalidate(); }; Controls.Add(input);
             var hint = new Label { Text = "Escolha a pasta que contém os arquivos .rpf", Dock = DockStyle.Fill, ForeColor = ForgeTheme.Muted, BackColor = BackColor, Font = input.Font, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, TabStop = false, AccessibleRole = AccessibleRole.None };
             Controls.Add(hint); hint.BringToFront();
             Action refresh = delegate { hint.Visible = input.TextLength == 0 && !input.Focused; };
             input.TextChanged += delegate { refresh(); }; input.Enter += delegate { refresh(); }; input.Leave += delegate { refresh(); }; hint.Click += delegate { input.Focus(); };
+        }
+        protected override void OnLayout(LayoutEventArgs e) {
+            base.OnLayout(e); if (input != null) input.SetBounds(Padding.Left, (ClientSize.Height - input.PreferredHeight) / 2, Math.Max(0, ClientSize.Width - Padding.Horizontal), input.PreferredHeight);
         }
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);

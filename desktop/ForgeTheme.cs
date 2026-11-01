@@ -107,7 +107,7 @@ namespace RPFForge {
             pathRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             pathRow.Controls.Add(new Label { Text = "Pasta com os RPFs", ForeColor = muted, AutoSize = true, Font = ForgeFonts.Pixel(11), Margin = Padding.Empty }, 0, 0);
             folder.Dock = DockStyle.Fill; folder.Margin = new Padding(0, 5, 12, 0); folder.BackColor = ForgeTheme.Raised; folder.ForeColor = foreground; folder.BorderStyle = BorderStyle.FixedSingle; folder.Font = new Font("Consolas", 10); folder.AccessibleName = "Pasta de origem com arquivos RPF";
-            ConfigureButton(browse, "Selecionar &pasta", false); browse.Dock = DockStyle.Fill; browse.Margin = Padding.Empty;
+            ((ForgeButton)browse).FlatFrame = true; ConfigureButton(browse, "Selecionar &pasta", false); browse.Dock = DockStyle.Fill; browse.Margin = Padding.Empty;
             var inputFrame = new ForgeInputFrame(folder) { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 12, 0) };
             pathRow.Controls.Add(inputFrame, 0, 1); pathRow.Controls.Add(browse, 1, 1); main.Controls.Add(pathRow, 0, 1);
             var stats = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = new Padding(0, 4, 0, 8) };
