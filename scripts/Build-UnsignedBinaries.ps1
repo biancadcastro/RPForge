@@ -32,7 +32,7 @@ try {
     $csharpReferences = @('mscorlib.dll','System.dll','System.Core.dll','System.Drawing.dll','System.Windows.Forms.dll','System.Web.Extensions.dll') | ForEach-Object { '/reference:' + (Join-Path $refDir $_) }
     $desktopSources = @(Get-ChildItem -LiteralPath (Join-Path $root 'desktop') -Filter '*.cs' -File | ForEach-Object FullName)
     if (!$desktopSources.Count) { throw 'Fontes da interface nao encontrados. Atualize o contrato do build ao alterar a tecnologia da interface.' }
-    & (Join-Path $roslyn 'tasks\net472\csc.exe') /nologo /noconfig /nostdlib+ /target:winexe /platform:x64 /optimize+ /deterministic+ "/pathmap:$root=/_/RPFForge" "/out:$Destination\RPFForge.exe" $csharpReferences $desktopSources (Join-Path $generated 'AssemblyInfo.cs')
+    & (Join-Path $roslyn 'tasks\net472\csc.exe') /nologo /noconfig /nostdlib+ /target:winexe /platform:x64 /optimize+ /deterministic+ "/pathmap:$root=/_/RPFForge" "/win32icon:$root\desktop\assets\rpforge.ico" "/out:$Destination\RPFForge.exe" $csharpReferences $desktopSources (Join-Path $generated 'AssemblyInfo.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Falha no build fixado da interface.' }
     $resource = Join-Path $generated 'ForgeShell.o'
     & (Join-Path $llvm 'bin\x86_64-w64-mingw32-windres.exe') -i (Join-Path $generated 'ForgeShell.rc') -O coff -o $resource

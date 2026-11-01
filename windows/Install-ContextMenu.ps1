@@ -12,8 +12,8 @@ $menus = @{
 }
 foreach ($baseKey in $menus.Keys) {
 New-Item -Path $baseKey -Force | Out-Null
-Set-Item -LiteralPath $baseKey -Value 'Converter RPF para FiveM'
-New-ItemProperty -LiteralPath $baseKey -Name 'Icon' -Value "$nodePath,0" -PropertyType String -Force | Out-Null
+Set-Item -LiteralPath $baseKey -Value 'Converter com RPForge'
+New-ItemProperty -LiteralPath $baseKey -Name 'Icon' -Value "$(Join-Path $projectRoot 'desktop\assets\rpforge.ico'),0" -PropertyType String -Force | Out-Null
 New-Item -Path "$baseKey\command" -Force | Out-Null
 # Launch Node directly: no cmd/PowerShell interpretation of the selected folder.
 $command = '"{0}" "{1}" --interactive "{2}"' -f $nodePath, $cliPath, $menus[$baseKey]

@@ -59,8 +59,11 @@ int wmain(int argc, wchar_t** argv) {
     if (FAILED(creation)) { printf("COM activation failed: %08lx\n",static_cast<unsigned long>(creation)); return 14; }
     factory->Release();
     PWSTR title = nullptr;
-    if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter RPF para FiveM")) return 15;
+    if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter com RPForge")) return 15;
     CoTaskMemFree(title);
+    PWSTR icon = nullptr;
+    if (FAILED(command->GetIcon(nullptr,&icon)) || !wcsstr(icon,L"\\RPFForge.exe,0")) return 16;
+    CoTaskMemFree(icon);
     for (int i = 2; i < 4; i++) {
         PIDLIST_ABSOLUTE pidl = nullptr;
         if (FAILED(SHParseDisplayName(argv[i],nullptr,&pidl,0,nullptr))) return 16;

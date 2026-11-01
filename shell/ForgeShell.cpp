@@ -94,9 +94,9 @@ public:
     ULONG STDMETHODCALLTYPE Release() override { ULONG n = --count; if (!n) delete this; return n; }
     HRESULT STDMETHODCALLTYPE SetSite(IUnknown* value) override { if (value) value->AddRef(); if (site) site->Release(); site = value; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetSite(REFIID id, void** output) override { if (!output) return E_POINTER; *output = nullptr; return site ? site->QueryInterface(id, output) : E_FAIL; }
-    HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"Converter RPF para FiveM", value); }
-    HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\runtime\\node.exe,0").c_str(), value); }
-    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPF Forge: extrair e montar addon FiveM", value); }
+    HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"Converter com RPForge", value); }
+    HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\RPFForge.exe,0").c_str(), value); }
+    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPForge: converter veiculos RPF para FiveM", value); }
     HRESULT STDMETHODCALLTYPE GetCanonicalName(GUID* value) override { if (!value) return E_POINTER; *value = ForgeClsid; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetState(IShellItemArray* items, BOOL slow, EXPCMDSTATE* value) override {
         if (!value) return E_POINTER;

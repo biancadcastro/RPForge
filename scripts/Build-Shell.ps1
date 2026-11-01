@@ -12,16 +12,7 @@ $makeappx = Join-Path $sdk 'makeappx.exe'
 $signtool = Join-Path $sdk 'signtool.exe'
 if (!(Test-Path -LiteralPath $makeappx)) { throw 'Windows SDK BuildTools necessario no cache .tools.' }
 New-Item -ItemType Directory -Path $Destination -Force | Out-Null
-Add-Type -AssemblyName System.Drawing
-$bitmap = New-Object Drawing.Bitmap 150,150
-$graphics = [Drawing.Graphics]::FromImage($bitmap)
-$font = New-Object Drawing.Font 'Segoe UI',48,([Drawing.FontStyle]::Bold)
-$brush = New-Object Drawing.SolidBrush ([Drawing.Color]::White)
-try {
-    $graphics.Clear([Drawing.Color]::FromArgb(155,27,37))
-    $graphics.DrawString('RF', $font, $brush, 19, 30)
-    $bitmap.Save((Join-Path $Destination 'logo.png'), [Drawing.Imaging.ImageFormat]::Png)
-} finally { $graphics.Dispose(); $bitmap.Dispose(); $font.Dispose(); $brush.Dispose() }
+Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.png') -Destination (Join-Path $Destination 'logo.png') -Force
 & $compiler -std=c++17 -O2 -shared -static -Wno-dll-attribute-on-redeclaration -o (Join-Path $Destination 'ForgeShell.dll') (Join-Path $root 'shell\ForgeShell.cpp') -lole32 -lshell32 -lshlwapi -luuid
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar extensao.' }
 $testExe = Join-Path $tools 'TestForgeShell.exe'
