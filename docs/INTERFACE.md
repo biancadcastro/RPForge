@@ -5,10 +5,10 @@ A janela desktop usa a identidade de bigorna e faísca, grafite e laranja, com a
 ## Fluxo
 
 1. **Pasta de origem:** selecione a pasta que contém os RPFs externos. O menu do Explorer pode fornecê-la automaticamente.
-   O seletor moderno do Windows permite digitar um caminho na barra de endereço, pesquisar e navegar pelo Explorer. **Usar esta pasta** confirma; cancelar mantém a origem atual.
+   O seletor moderno do Windows permite digitar um caminho na barra de endereço, pesquisar e navegar pelo Explorer. **Usar esta pasta** confirma e inicia a análise automaticamente; cancelar mantém a origem e a prévia atuais. Confirmar a mesma pasta analisa novamente, preservando as configurações de spawn e destino.
 2. **Veículos:** confira o spawn original. O campo vazio mantém o nome; `manter original` é apenas uma indicação visual, não um valor enviado ao conversor.
 3. **Destinos:** marque os RPFs a converter, edite o nome da pasta e escolha o tratamento de conflitos.
-4. **Analisar arquivos:** atualize a prévia depois de qualquer alteração. A conversão permanece bloqueada até essa atualização.
+4. **Analisar arquivos:** atualize a prévia depois de editar spawns/destinos ou digitar uma origem manualmente. Ao escolher a pasta pelo seletor, a análise é automática. A conversão permanece bloqueada até uma prévia válida.
 5. **Prévia e resultado:** confira os spawns finais, renomeações, metas, remoções previstas e diagnóstico.
 6. **Converter selecionados:** acompanhe o progresso. O resultado informa quais addons foram concluídos, cancelados ou falharam.
 7. **Abrir resultado:** abre o último addon concluído nessa operação. O botão é desabilitado durante operações e não conserva um resultado de outra pasta.

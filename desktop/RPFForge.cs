@@ -106,9 +106,11 @@ namespace RPFForge {
 
         public ForgeWindow(string appRoot, string initialFolder) {
             root = appRoot; BuildInterface();
-            browse.Click += delegate {
-                try { string selected = ForgeFolderPicker.Choose(Handle, folder.Text); if (selected != null) folder.Text = selected; }
-                catch (Exception error) { status.Text = "Não foi possível abrir a pasta. Você também pode digitar o caminho no campo de origem."; details.Text = error.Message; tabs.SelectedIndex = 2; }
+            browse.Click += async delegate {
+                string selected;
+                try { selected = ForgeFolderPicker.Choose(Handle, folder.Text); }
+                catch (Exception error) { status.Text = "Não foi possível abrir a pasta. Você também pode digitar o caminho no campo de origem."; details.Text = error.Message; tabs.SelectedIndex = 2; return; }
+                await SelectOrigin(selected);
             };
             folder.TextChanged += delegate { if (!busy) ResetOrigin(); };
             vehicles.CellValueChanged += delegate { if (!rendering) InvalidatePreview(); };
@@ -121,6 +123,13 @@ namespace RPFForge {
             FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; status.Text = "Aguarde a operação terminar antes de fechar, para preservar os arquivos."; } };
             folder.Text = initialFolder;
             Shown += async delegate { if (Directory.Exists(folder.Text)) await Analyze(); };
+        }
+
+        async Task SelectOrigin(string selected) {
+            if (busy || selected == null) return;
+            folder.Text = selected;
+            tabs.SelectedIndex = 0;
+            await Analyze();
         }
 
         void ConfigureButton(Button button, string label, bool primary) {
@@ -307,12 +316,14 @@ namespace RPFForge {
         }
         public void PrepareBackgroundTest() { renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000); }
         public async Task WorkflowTest(string fixtureFolder) {
-            folder.Text = fixtureFolder;
-            await Analyze();
+            await SelectOrigin(fixtureFolder);
             if (!previewValid || vehicles.Rows.Count != 1 || assets.Rows.Count == 0) throw new Exception("Initial GUI preview failed: " + details.Text);
+            string analyzedFolder = folder.Text;
+            await SelectOrigin(null);
+            if (!previewValid || folder.Text != analyzedFolder || vehicles.Rows.Count != 1) throw new Exception("Cancelling the picker must preserve the existing preview.");
             vehicles.Rows[0].Cells["target"].Value = "DESKTOPTEST";
             if (previewValid) throw new Exception("Edits must invalidate GUI preview.");
-            await Analyze();
+            await SelectOrigin(fixtureFolder);
             if (!previewValid || !details.Text.Contains("DESKTOPTEST")) throw new Exception("Renamed GUI preview failed: " + details.Text);
             await ConvertSelection();
             string output = Path.Combine(fixtureFolder, "DESKTOPTEST");
@@ -325,7 +336,7 @@ namespace RPFForge {
             string[] backups = Directory.GetDirectories(fixtureFolder, "DESKTOPTEST.backup-*");
             if (backups.Length != 1 || File.ReadAllText(Path.Combine(backups[0], "keep.txt")) != "preserve old output") throw new Exception("GUI backup failed: " + details.Text);
             if (!open.Enabled) throw new Exception("Successful GUI conversion must allow opening output.");
-            string empty = Path.Combine(fixtureFolder, "empty"); Directory.CreateDirectory(empty); folder.Text = empty; await Analyze();
+            string empty = Path.Combine(fixtureFolder, "empty"); Directory.CreateDirectory(empty); await SelectOrigin(empty);
             if (previewValid || convert.Enabled) throw new Exception("Empty-folder GUI state must not convert.");
         }
     }
