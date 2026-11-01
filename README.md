@@ -4,6 +4,10 @@ Converta addons de veículos GTA V em recursos FiveM pelo botão direito do Wind
 Ferramenta independente do RedHorn Studio e do RedHorn Garage. Licença MIT.
 O desenvolvimento atual permanece local, sem autorização para publicação.
 
+**Code signing policy:** [politica e status da preparacao para SignPath](docs/CODE_SIGNING_POLICY.md).
+Ainda nao ha aprovacao ou assinatura de distribuicao pela SignPath Foundation.
+Veja tambem [privacidade](docs/PRIVACY.md) e [roteiro da candidatura](docs/SIGNPATH_PREPARATION.md).
+
 Resumo do produto e dos recursos: [docs/RESUMO.md](docs/RESUMO.md).
 As melhorias recentes estao na versao de desenvolvimento; o instalador antigo 0.2.0
 nao as contem. Nao gerar outro instalador sem pedido explicito.
