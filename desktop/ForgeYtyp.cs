@@ -22,7 +22,7 @@ namespace RPFForge {
                 hasResults = true; lastOutput = ""; resultView.ClearDocument();
                 resultView.AddSection("Não foi possível gerar o YTYP", error.Message, false, ForgeTheme.Error);
                 summary.Text = "Confira os modelos e selecione a pasta novamente."; stage.Text = "YTYP / INTERROMPIDO";
-            } finally { tabs.SelectedIndex = 2; SetBusy(false, "Use Abrir resultado para localizar os arquivos."); }
+            } finally { tabs.SelectedIndex = 2; SetBusy(false, lastOutput.Length > 0 ? "Use Abrir resultado para localizar os arquivos." : "Confira o erro e escolha uma pasta com modelos YDR válidos."); }
         }
     }
 }

@@ -213,13 +213,16 @@ namespace RPFForge {
         }
         async Task Analyze() {
             if (busy) return;
-            if (Directory.Exists(folder.Text) && !Directory.EnumerateFiles(folder.Text, "*.rpf").Any() && Directory.EnumerateFiles(folder.Text, "*.ydr").Any()) { await GenerateYtyp(); return; }
             vehicles.EndEdit(); destinations.EndEdit();
             reviewed = false; hasResults = false; lastOutput = ""; open.Enabled = false; stage.Text = "ANALISANDO PASTA";
             var requests = Requests(false); SetBusy(true, "Preparando a prévia; os originais permanecem intactos.");
-            try { RenderPreview(await Execute("preview", requests), requests); }
+            try {
+                bool generateYtyp = Directory.Exists(folder.Text) && !Directory.EnumerateFiles(folder.Text, "*.rpf").Any() && Directory.EnumerateFiles(folder.Text, "*.ydr").Any();
+                if (generateYtyp) { SetBusy(false, "Preparando geração de YTYP."); await GenerateYtyp(); return; }
+                RenderPreview(await Execute("preview", requests), requests);
+            }
             catch (Exception error) { previewValid = false; details.Text = error.Message + "\r\n\r\nSelecione uma pasta válida ou tente analisar novamente."; reviewDetails.Text = details.Text; BuildReviewDocument(); tabs.SelectedIndex = 1; summary.Text = "A análise não foi concluída."; stage.Text = "ANÁLISE INTERROMPIDA"; stage.ForeColor = ForgeTheme.Error; }
-            finally { SetBusy(false, previewValid ? "Configure os nomes e as pastas; depois clique em Revisar conversão." : "Revise o diagnóstico ou escolha outra pasta."); }
+            finally { if (!hasResults) SetBusy(false, previewValid ? "Configure os nomes e as pastas; depois clique em Revisar conversão." : "Revise o diagnóstico ou escolha outra pasta."); }
         }
         void RenderPreview(object[] results, Dictionary<string, object> requests) {
             rendering = true;
@@ -374,8 +377,13 @@ namespace RPFForge {
             if (previewValid || convert.Enabled) throw new Exception("Empty-folder GUI state must not convert.");
             string props = Path.Combine(fixtureFolder, "props");
             if (Directory.Exists(props)) {
+                string badProps = Path.Combine(fixtureFolder, "bad-props"); Directory.CreateDirectory(badProps);
+                File.WriteAllText(Path.Combine(badProps, "invalid.ydr"), "invalid drawable");
+                await SelectOrigin(badProps);
+                if (!hasResults || open.Enabled || busy || !status.Text.Contains("Confira o erro")) throw new Exception("Failed YTYP generation must show recovery instructions without opening stale output.");
                 await SelectOrigin(props);
                 if (!hasResults || !open.Enabled || !File.Exists(Path.Combine(props, "rpforge_props.ytyp"))) throw new Exception("Choosing a YDR folder must generate the YTYP immediately.");
+                if (!status.Text.Contains("Abrir resultado")) throw new Exception("Successful YTYP instructions were overwritten by analysis cleanup.");
                 await SelectOrigin(props);
                 if (!File.Exists(Path.Combine(props, "rpforge_props_1.ytyp"))) throw new Exception("Generating again must preserve the existing YTYP.");
             }

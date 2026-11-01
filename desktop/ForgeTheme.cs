@@ -196,9 +196,9 @@ namespace RPFForge {
             foreach (var label in new[] { countCars, countArchives, countWarnings, countWeight }) { label.Text = "—"; label.ForeColor = foreground; }
             vehicles.Visible = false; empty.Visible = true; emptyTitle.Text = "Analise a pasta de origem";
             SetWorkspaceReady(false); tabs.SelectedIndex = 0; RefreshNavigation();
-            emptyHelp.Text = "Clique em Analisar arquivos para conferir os RPFs desta pasta.\nA análise não altera os arquivos originais.";
-            summary.Text = "Pasta alterada. Analise os arquivos para preparar uma nova prévia.";
-            details.Text = "Nenhuma prévia disponível para esta pasta.\r\nClique em Analisar arquivos para continuar.";
+            emptyHelp.Text = "Pressione Enter para analisar a pasta digitada ou use Selecionar pasta.\nVocê poderá revisar a conversão antes de gravar.";
+            summary.Text = "Pasta alterada. Pressione Enter ou selecione a pasta para continuar.";
+            details.Text = "Nenhuma prévia disponível para esta pasta.\r\nPressione Enter ou use Selecionar pasta para continuar.";
         }
         protected override void Dispose(bool disposing) { if (disposing) { hints.Dispose(); } base.Dispose(disposing); }
     }
