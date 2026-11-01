@@ -95,7 +95,8 @@ removido aparece somente no console, sem criar relatorio no addon.
 - GTA V **Legacy RPF7 OPEN/NONE**, sem necessidade de instalar GTA, OpenIV ou CodeWalker.
 - RPFs internos, binários DEFLATE e resources RSC7, incluindo entradas maiores que 16 MiB.
 - Stream de `.yft`, `.ytd`, `.ydr`, `.ydd`, `.ybn` e `.ycd`.
-- Metas: vehicles, handling, carcols, carvariations, vehiclelayouts, dlctext e caraddoncontentunlocks.
+- Metas: vehicles, handling, carcols, carvariations, vehiclelayouts e caraddoncontentunlocks.
+- `dlctext.meta`, `shopdata.meta` e `shop_vehicle.meta` sao ignorados: nao entram em `data` nem no manifest. A lista aparece apenas no console.
 - Validação de XML, presença dos YFTs declarados e conflitos de nomes.
 - Originais preservados, saída preparada em pasta temporária e recusada se já existir.
 - Falhas em um arquivo não impedem a análise dos demais RPFs da pasta.

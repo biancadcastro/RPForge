@@ -11,11 +11,11 @@ const META = {
   'carcols.meta': ['CARCOLS_FILE', 'CVehicleModelInfoVarGlobal'],
   'carvariations.meta': ['VEHICLE_VARIATION_FILE', 'CVehicleModelInfoVariation'],
   'vehiclelayouts.meta': ['VEHICLE_LAYOUTS_FILE', 'CVehicleMetadataMgr'],
-  'dlctext.meta': ['TEXTFILE_METAFILE', 'CExtraTextMetaFile'],
   'caraddoncontentunlocks.meta': ['CONTENT_UNLOCKING_META_FILE', 'SContentUnlocks'],
 };
 const STREAM = new Set(['.yft', '.ytd', '.ydr', '.ydd', '.ybn', '.ycd']);
 const ADMIN = new Set(['content.xml', 'setup2.xml']);
+const IGNORED = new Set(['dlctext.meta', 'shopdata.meta', 'shop_vehicle.meta']);
 
 export function resourceName(input) {
   return input.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'vehicle_addon';
@@ -40,6 +40,7 @@ export async function convertArchive(archive, options = {}) {
   for (const entry of readRpf(await readFile(archive))) {
     const basename = path.posix.basename(entry.path).toLowerCase();
     const ext = path.posix.extname(basename);
+    if (IGNORED.has(basename)) { skipped.push(entry.path); continue; }
     if (STREAM.has(ext)) {
       if (!entry.data.length) throw new Error(`Asset vazio: ${entry.path}`);
       add(`stream/${basename}`, entry.data);
@@ -74,7 +75,7 @@ export async function convertArchive(archive, options = {}) {
     if (!models.has(model)) throw new Error(`YFT base ausente para o modelo declarado: ${model}`);
   }
   // Unknown game data may require extra manifest declarations: never silently call that ready.
-  const blocking = skipped.filter(p => /\.(meta|ymt|rel|awc|ymap|ytyp)$/i.test(p));
+  const blocking = skipped.filter(p => !IGNORED.has(path.posix.basename(p).toLowerCase()) && /\.(meta|ymt|rel|awc|ymap|ytyp)$/i.test(p));
   if (blocking.length) throw new Error(`Pacote requer suporte adicional para: ${blocking.join(', ')}`);
   const requested = options.chooseSpawns ? await options.chooseSpawns({ archive: path.basename(archive), models: [...declaredModels].sort() }) : options.spawns;
   const renamed = renameSpawns(files, metas, declaredModels, requested);

@@ -78,3 +78,32 @@ test('conversion removes absent tuning after renaming while retaining performanc
   assert.match(converted, /modifier value="50"/);
   assert.deepEqual(await readFile(source), original);
 });
+
+test('ignores DLC text and shop data in any case without exporting or registering them', async t => {
+  const root = await folder(t);
+  await writeFile(path.join(root, 'dlc.rpf'), makeRpf([
+    { name: 'vehicles.rpf', data: vehicleArchive() },
+    ...['DLCTEXT.meta', 'shopdata.meta', 'shop_vehicle.meta'].map(name => ({ name, data: Buffer.from('ignored without XML parsing') })),
+  ]));
+  const [result] = await convertFolder(root);
+  assert.equal(result.ok, true, result.error);
+  assert.deepEqual(result.skipped.sort(), ['DLCTEXT.meta', 'shop_vehicle.meta', 'shopdata.meta'].sort());
+  assert.deepEqual((await readdir(path.join(result.output, 'data'))).sort(), ['handling.meta', 'vehicles.meta']);
+  const manifest = await readFile(path.join(result.output, 'fxmanifest.lua'), 'utf8');
+  assert.doesNotMatch(manifest, /dlctext|shopdata|shop_vehicle|TEXTFILE_METAFILE/i);
+  assert.deepEqual((await readdir(result.output)).sort(), ['data', 'fxmanifest.lua', 'stream']);
+});
+
+test('ignoring shop data does not silently ignore other unsupported game metadata', async t => {
+  const root = await folder(t);
+  await writeFile(path.join(root, 'dlc.rpf'), makeRpf([
+    { name: 'vehicles.rpf', data: vehicleArchive() },
+    { name: 'shopdata.meta', data: Buffer.from('ignored') },
+    { name: 'unsupported.meta', data: Buffer.from('unknown game data') },
+  ]));
+  const [result] = await convertFolder(root);
+  assert.equal(result.ok, false);
+  assert.match(result.error, /unsupported.meta/);
+  assert.doesNotMatch(result.error, /shopdata.meta/);
+  assert.deepEqual(await readdir(root), ['dlc.rpf']);
+});
