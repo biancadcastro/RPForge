@@ -1,6 +1,6 @@
 # Third-party components and notices
 
-RPF Forge source code is licensed under MIT. That license does not replace the terms
+RPForge source code is licensed under MIT. That license does not replace the terms
 of its dependencies, Windows system libraries or build tools.
 
 | Component | Role | Version source | License / notice |

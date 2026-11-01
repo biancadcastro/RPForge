@@ -34,7 +34,7 @@ export async function writePlan(plan, options = {}) {
   if (existing && choice.action === 'error') throw new Error(`Destino já existe: ${output}`);
   if (existing && (!existing.isDirectory() || existing.isSymbolicLink())) throw new Error('O destino existente precisa ser uma pasta real para criar backup.');
   if (path.dirname(output) !== root) throw new Error('Destino fora da pasta do RPF.');
-  const stage = await mkdtemp(path.join(root, '.rpf-to-fivem-'));
+  const stage = await mkdtemp(path.join(root, '.rpforge-'));
   let backup = null;
   let published = false;
   try {
@@ -69,7 +69,7 @@ export async function writePlan(plan, options = {}) {
       throw error;
     }
   } finally {
-    if (!published && path.dirname(stage) === root && path.basename(stage).startsWith('.rpf-to-fivem-')) await rm(stage, { recursive: true, force: true });
+    if (!published && path.dirname(stage) === root && path.basename(stage).startsWith('.rpforge-')) await rm(stage, { recursive: true, force: true });
   }
   return { output, resource: path.basename(output), backup };
 }

@@ -86,7 +86,7 @@ export async function prepareArchive(archive, options = {}) {
   const cleaned = cleanMissingTuning(files, metas);
   files = cleaned.files;
   const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
-  const manifest = ['-- Convertido com RPF Forge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
+  const manifest = ['-- Convertido com RPForge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
   const audit = auditAddon(files);
   options.onProgress?.({ phase: 'audit', current: 1, total: 1, label: path.basename(archive) });

@@ -4,7 +4,7 @@
 
 Logo, símbolo e ícone foram preparados a partir de uma única matriz vetorial aprovada no Recraft. A interface incorpora PNGs renderizados dessa matriz e o ICO correspondente no executável. Não depende do projeto Recraft, de arquivos no diretório pessoal ou de conexão para funcionar.
 
-O texto técnico `-- Convertido com RPF Forge` no manifest foi mantido conforme o contrato do conversor. Na janela, a marca é **RPForge**.
+O manifest gerado identifica a ferramenta com `-- Convertido com RPForge`. A janela, os metadados de produto e o nome padrão do instalador também usam **RPForge**.
 
 ## Paleta
 

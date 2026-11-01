@@ -43,7 +43,7 @@ namespace RPFForge {
             string root = AppDomain.CurrentDomain.BaseDirectory;
             while (!File.Exists(Path.Combine(root, "src", "cli.js"))) {
                 DirectoryInfo parent = Directory.GetParent(root.TrimEnd(Path.DirectorySeparatorChar));
-                if (parent == null) { MessageBox.Show("Os arquivos do RPF Forge não foram encontrados.", "RPF Forge"); return 1; }
+                if (parent == null) { MessageBox.Show("Os arquivos do RPForge não foram encontrados.", "RPForge"); return 1; }
                 root = parent.FullName;
             }
             if (args.Contains("--self-test")) {

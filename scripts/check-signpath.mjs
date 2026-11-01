@@ -20,7 +20,7 @@ const parserErrors = [];
 const xml = new DOMParser({ onError: (level, message) => parserErrors.push(message) }).parseFromString(await read('signpath/artifact-configuration.xml'), 'text/xml');
 if (parserErrors.length) throw new Error('XML de assinatura invalido.');
 const entries = Array.from(xml.getElementsByTagName('pe-file'));
-if (entries.length !== 2 || entries.some(entry => !config.ownBinaries.includes(entry.getAttribute('path')) || entry.getAttribute('product-name') !== 'RPF Forge' || entry.getAttribute('product-version') !== '${version}' || entry.getAttribute('file-version') !== '${version}')) throw new Error('Assinatura deve restringir exatamente os binarios proprios e sua versao.');
+if (entries.length !== 2 || entries.some(entry => !config.ownBinaries.includes(entry.getAttribute('path')) || entry.getAttribute('product-name') !== 'RPForge' || entry.getAttribute('product-version') !== '${version}' || entry.getAttribute('file-version') !== '${version}')) throw new Error('Assinatura deve restringir exatamente os binarios proprios e sua versao.');
 for (const filename of ['.github/workflows/test.yml', '.github/workflows/signpath-build.yml']) {
   const workflow = parse(await read(filename));
   if (workflow.on?.pull_request_target || workflow.permissions?.contents === 'write') throw new Error('Workflow com privilegios excessivos.');

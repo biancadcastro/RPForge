@@ -1,4 +1,4 @@
-# Privacidade — RPF Forge
+# Privacidade — RPForge
 
 Esta descricao corresponde ao codigo atual em desenvolvimento.
 

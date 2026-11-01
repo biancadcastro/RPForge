@@ -1,4 +1,4 @@
-# RPF Forge — resumo do aplicativo
+# RPForge — resumo do aplicativo
 
 O RPForge transforma RPFs de conteúdos GTA V Legacy em recursos FiveM organizados e gera YTYPs de YDRs em um clique.
 E um produto independente do RedHorn Studio e do RedHorn Garage, com processamento local.
@@ -23,7 +23,7 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 - Metas diretamente em `data`, sem subpastas numeradas.
 - Metas de mesmo nome de RPFs internos sao unificados quando suas definicoes sao compativeis.
 - Definicoes contraditorias, nomes duplicados e conflitos de modkits sao apontados.
-- `fxmanifest.lua` gerado com os registros necessarios e `-- Convertido com RPF Forge`.
+- `fxmanifest.lua` gerado com os registros necessarios e `-- Convertido com RPForge`.
 - Sem `conversion-report.json` no addon.
 
 ## Spawns e tuning

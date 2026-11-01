@@ -6,4 +6,4 @@ if (Test-Path -LiteralPath $menuKey) {
     if ($commandKey -and $commandKey.GetValue('').IndexOf(('"' + $ownerRoot + '\'), [StringComparison]::OrdinalIgnoreCase) -ge 0) { Remove-Item -LiteralPath $menuKey -Recurse -Force }
 }
 }
-Write-Host 'Menu RPF to FiveM removido.'
+Write-Host 'Entradas desta copia do RPForge removidas; outras instalacoes preservadas.'

@@ -33,7 +33,7 @@ test('signing stays disabled and is limited to manual reviewed first-party artif
   const entries = Array.from(xml.getElementsByTagName('pe-file'));
   assert.deepEqual(entries.map(n => n.getAttribute('path')).sort(), ['ForgeShell.dll', 'RPFForge.exe']);
   for (const node of entries) {
-    assert.equal(node.getAttribute('product-name'), 'RPF Forge');
+    assert.equal(node.getAttribute('product-name'), 'RPForge');
     assert.equal(node.getAttribute('product-version'), '${version}');
     assert.equal(node.getAttribute('file-version'), '${version}');
   }

@@ -23,7 +23,9 @@ Auditoria e ciclo de instalação: [validação da versão 0.3.0](docs/AUDITORIA
 
 ## Instalar no Windows pelo instalador
 
-Abra `RPF-Forge-Setup-0.3.0-x64.exe` e conclua a instalacao.
+O próximo empacotamento usará `RPForge-Setup-0.3.0-x64.exe` e a pasta padrão
+`%LOCALAPPDATA%\Programs\RPForge`. A padronização está preparada no código;
+o instalador já auditado conserva seu nome anterior. A pasta instalada não foi movida manualmente.
 O pacote inclui o runtime e as dependencias; o usuario nao precisa instalar Node.js,
 abrir terminal ou baixar outros programas. Nao requer administrador.
 O menu do botao direito e a opcao de desinstalacao sao registrados automaticamente.
@@ -102,7 +104,7 @@ mantém os spawns atuais. O menu do Explorer abre a janela quando ela esta insta
 Metas ficam diretamente em `data`, sem subpastas numeradas. Definicoes compativeis de
 metas do mesmo nome sao unificadas por identidade (modelo, handling, kit etc.).
 Definicoes contraditorias sao recusadas e conflitos de IDs de modkit sao detectados.
-O manifest inclui o comentario `-- Convertido com RPF Forge`.
+O manifest inclui o comentario `-- Convertido com RPForge`.
 Pecas de tuning e seus arquivos associados ficam em `stream/mods`.
 Modelos principais, seus `_hi` e dicionarios compartilhados permanecem em `stream`.
 Opcoes visuais e referencias vinculadas em `carcols.meta` cujo modelo nao veio no RPF

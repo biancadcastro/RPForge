@@ -6,7 +6,7 @@ $projectRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 if (Get-Process -Name RPFForge -ErrorAction SilentlyContinue) { throw 'Feche o RPForge antes do teste; nenhuma janela sera encerrada pelo teste.' }
 if (!$InstallerPath) {
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
-    $InstallerPath = Join-Path $projectRoot "release\RPF-Forge-Setup-$version-x64.exe"
+    $InstallerPath = Join-Path $projectRoot "release\RPForge-Setup-$version-x64.exe"
 }
 $InstallerPath = (Resolve-Path -LiteralPath $InstallerPath).Path
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ('rpf-installer-test-' + [guid]::NewGuid().ToString('N'))

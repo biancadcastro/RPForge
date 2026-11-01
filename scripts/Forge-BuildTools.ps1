@@ -14,7 +14,7 @@ function Get-ForgeBuildContext([string]$Root, [switch]$AllowDirty) {
     if ($LASTEXITCODE -ne 0 -or $revision -notmatch '^[a-f0-9]{40}$') { throw 'Revisao Git valida necessaria.' }
     $dirty = !!(& git -C $Root status --porcelain)
     if ($dirty -and !$AllowDirty) { throw 'Ha alteracoes locais. Commit antes do build de origem verificavel, ou use -AllowDirty apenas para diagnostico local.' }
-    return [pscustomobject]@{ Product='RPF Forge'; Company='RedHorn'; Version=($parts -join '.'); VersionComma=($parts -join ','); PackageVersion=$package.version; Revision=$revision; Dirty=$dirty; Root=$Root }
+    return [pscustomobject]@{ Product='RPForge'; Company='RedHorn'; Version=($parts -join '.'); VersionComma=($parts -join ','); PackageVersion=$package.version; Revision=$revision; Dirty=$dirty; Root=$Root }
 }
 
 function Initialize-ForgeTool([string]$Root, [string]$Name) {
@@ -58,8 +58,8 @@ function Write-ForgeMetadata([object]$Context, [string]$Destination) {
     New-Item -ItemType Directory -Path $Destination -Force | Out-Null
     $assembly = @"
 using System.Reflection;
-[assembly: AssemblyTitle("RPF Forge")]
-[assembly: AssemblyProduct("RPF Forge")]
+[assembly: AssemblyTitle("RPForge")]
+[assembly: AssemblyProduct("RPForge")]
 [assembly: AssemblyCompany("RedHorn")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Bianca de Castro")]
 [assembly: AssemblyVersion("$($Context.Version)")]
@@ -84,12 +84,12 @@ BEGIN
   BLOCK "040904b0"
   BEGIN
    VALUE "CompanyName", "RedHorn\0"
-   VALUE "FileDescription", "RPF Forge Explorer extension\0"
+   VALUE "FileDescription", "RPForge Explorer extension\0"
    VALUE "FileVersion", "$($Context.Version)\0"
    VALUE "InternalName", "ForgeShell\0"
    VALUE "LegalCopyright", "Copyright (c) 2026 Bianca de Castro\0"
    VALUE "OriginalFilename", "ForgeShell.dll\0"
-   VALUE "ProductName", "RPF Forge\0"
+   VALUE "ProductName", "RPForge\0"
    VALUE "ProductVersion", "$($Context.Version)\0"
   END
  END

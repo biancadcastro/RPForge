@@ -1,6 +1,6 @@
 # Code signing policy
 
-Status: preparacao para candidatura; o RPF Forge ainda nao foi aprovado pela SignPath Foundation.
+Status: preparacao para candidatura; o RPForge ainda nao foi aprovado pela SignPath Foundation.
 Os pacotes locais atuais usam certificado de desenvolvimento. Eles nao sao assinaturas
 de distribuicao da SignPath. O projeto nao deve apresentar selo de aprovacao ou atribuir
 assinaturas a SignPath antes de sua confirmacao.
@@ -22,7 +22,7 @@ identificada, com ferramentas e dependencias fixadas, verificacoes e testes pert
 Produto, versao, empresa e nomes originais dos binarios sao gerados e conferidos juntos.
 O manifesto de origem e o SBOM acompanham os binarios sem assinatura.
 Arquivos de terceiros, como o Node.js, manterao suas licencas e assinaturas originais;
-nao serao assinados como se fossem codigo proprio do RPF Forge.
+nao serao assinados como se fossem codigo proprio do RPForge.
 O workflow preparado e manual, usa runners GitHub e actions fixadas por SHA, exige
 opt-in, configuracao aprovada e ambiente com revisao humana para pedir assinatura.
 Ele nao publica releases e nao produz instaladores.

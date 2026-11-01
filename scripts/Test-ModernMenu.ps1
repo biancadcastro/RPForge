@@ -1,5 +1,9 @@
-param([string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'Programs\RPF to FiveM'))
+param([string]$InstallDir)
 $ErrorActionPreference = 'Stop'
+if (!$InstallDir) {
+    $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\RPForge'
+    if (!(Test-Path -LiteralPath $InstallDir)) { $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\RPF to FiveM' }
+}
 Import-Module (Join-Path $PSHOME 'Modules\Appx\Appx.psd1')
 $package = Get-AppxPackage -Name 'RedHorn.RPFForge.Local'
 if (!$package -or $package.Status -ne 'Ok') { throw 'Pacote moderno nao registrado ou com erro.' }

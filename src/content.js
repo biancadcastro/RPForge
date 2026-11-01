@@ -129,7 +129,7 @@ export function prepareContent(entries, archive, options, sourceHash, sourceByte
   const kind = [...types].sort().join('+');
   const base = path.basename(archive, path.extname(archive)).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 80) || 'addon';
   const name = outputName(options.spawns?.[base] || base);
-  const manifest = ['-- Convertido com RPF Forge', "fx_version 'cerulean'", "game 'gta5'", '', ...(types.has('map') ? ["this_is_a_map 'yes'"] : []), ...(clothing ? ["dependency '/policy:subdir_file_mapping'"] : []), '', 'files {', ...[...files.values()].map(f => `    '${f.destination}',`), '}', '', ...registrations.map(r => `data_file '${r.type}' '${r.destination}'`), ''].join('\n');
+  const manifest = ['-- Convertido com RPForge', "fx_version 'cerulean'", "game 'gta5'", '', ...(types.has('map') ? ["this_is_a_map 'yes'"] : []), ...(clothing ? ["dependency '/policy:subdir_file_mapping'"] : []), '', 'files {', ...[...files.values()].map(f => `    '${f.destination}',`), '}', '', ...registrations.map(r => `data_file '${r.type}' '${r.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
   issues.push({ severity: 'warning', code: 'GAME_VALIDATION', message: 'Estrutura preparada para FiveM. Teste no servidor para verificar dependências do jogo e referências internas dos arquivos binários.' });
   if (clothing) issues.push({ severity: 'warning', code: 'CLOTHING_COLLECTION', message: 'Coleções, IDs e texturas preservados. A disponibilidade das roupas depende da política de streaming e do menu de aparência do servidor.' });

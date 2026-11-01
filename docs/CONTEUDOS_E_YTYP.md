@@ -13,7 +13,7 @@ O app identifica o conteúdo sem exigir um modo manual. A busca considera arquiv
 | Armas com metas reconhecidos | Registros WEAPONINFO_FILE_PATCH, WEAPON_METADATA_FILE e WEAPONCOMPONENTSINFO_FILE |
 | Áudio | REL dat151/dat54 e wavepacks AWC com grupo identificado na estrutura original |
 
-Cada recurso recebe `fxmanifest.lua`, identificação `-- Convertido com RPF Forge` e organização de arquivos. Conteúdos desconhecidos, XML inválido, conflitos de destino e coleções incompletas interrompem o pacote antes de gravar. Documentos e imagens auxiliares são informados como ignorados. A validação de gravação usa SHA-256.
+Cada recurso recebe `fxmanifest.lua`, identificação `-- Convertido com RPForge` e organização de arquivos. Conteúdos desconhecidos, XML inválido, conflitos de destino e coleções incompletas interrompem o pacote antes de gravar. Documentos e imagens auxiliares são informados como ignorados. A validação de gravação usa SHA-256.
 
 Para veículos, o campo editável altera o spawn e as referências. Para outros conteúdos, altera somente o nome do recurso/pasta: coleções de roupas e nomes internos permanecem intactos. O app não executa scripts contidos nos pacotes.
 

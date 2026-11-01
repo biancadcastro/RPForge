@@ -92,7 +92,7 @@ Seus addons e arquivos originais nao sao apagados na desinstalacao.
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
     & $CompilerPath "/DAppVersion=$version" "/DPayloadDir=$stage" "/DReleaseDir=$release" (Join-Path $projectRoot 'installer\setup.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar instalador.' }
-    $installer = Join-Path $release "RPF-Forge-Setup-$version-x64.exe"
+    $installer = Join-Path $release "RPForge-Setup-$version-x64.exe"
     $hash = Get-Sha256 $installer
     Set-Content -LiteralPath "$installer.sha256" -Value "$hash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
     Write-Host "Instalador local: $installer"

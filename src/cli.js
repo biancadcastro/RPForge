@@ -20,7 +20,7 @@ if (interactive && process.platform === 'win32' && existsSync(gui) && process.en
 } else {
 const prompts = interactive ? createPrompts() : null;
 if (args.length !== 1 || args[0] === '--help') {
-  console.log('RPF Forge\nUso: node src/cli.js "pasta contendo .rpf"\nAceita GTA V Legacy RPF7 OPEN/NONE. Preserva os originais.');
+  console.log('RPForge\nUso: node src/cli.js "pasta contendo .rpf"\nAceita GTA V Legacy RPF7 OPEN/NONE. Preserva os originais.');
   process.exitCode = args[0] === '--help' ? 0 : 1;
 } else {
   try {

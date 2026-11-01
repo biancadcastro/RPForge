@@ -1,6 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
-$installed = Join-Path $env:LOCALAPPDATA 'Programs\RPF to FiveM'
+$installed = Join-Path $env:LOCALAPPDATA 'Programs\RPForge'
+# Compatibility with installations created before the RPForge directory name.
+if (!(Test-Path -LiteralPath $installed)) { $installed = Join-Path $env:LOCALAPPDATA 'Programs\RPF to FiveM' }
 if (!(Test-Path -LiteralPath (Join-Path $installed 'runtime\node.exe')) -or !(Test-Path -LiteralPath (Join-Path $installed 'src\cli.js'))) { throw 'Instalacao local existente nao encontrada.' }
 foreach ($directory in @($installed, (Join-Path $installed 'src'))) {
     if ((Get-Item -LiteralPath $directory).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Atualizacao local nao aceita diretorios redirecionados.' }

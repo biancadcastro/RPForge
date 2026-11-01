@@ -104,7 +104,7 @@ test('detects corruption after writing and removes only its own incomplete stagi
   let corrupted = false;
   const [result] = await convertFolder(root, { onProgress(event) {
     if (!corrupted && event.phase === 'write' && event.label.endsWith('.yft')) {
-      const stage = readdirSync(root).find(name => name.startsWith('.rpf-to-fivem-'));
+      const stage = readdirSync(root).find(name => name.startsWith('.rpforge-'));
       writeFileSync(path.join(root, stage, event.label), 'corrupt');
       corrupted = true;
     }
