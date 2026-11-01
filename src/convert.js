@@ -3,7 +3,7 @@ import path from 'node:path';
 import { DOMParser } from '@xmldom/xmldom';
 import { readRpf, LIMITS, safeName } from './rpf.js';
 import { renameSpawns } from './spawns.js';
-import { organizeTuning } from './tuning.js';
+import { organizeTuning, cleanMissingTuning } from './tuning.js';
 
 const META = {
   'handling.meta': ['HANDLING_FILE', 'CHandlingDataMgr'],
@@ -80,6 +80,8 @@ export async function convertArchive(archive, options = {}) {
   const renamed = renameSpawns(files, metas, declaredModels, requested);
   const finalModels = renamed.models;
   files = organizeTuning(renamed.files, metas, finalModels);
+  const cleaned = cleanMissingTuning(files, metas);
+  files = cleaned.files;
   const name = safeName(finalModels.length === 1 ? finalModels[0] : `${finalModels[0]}_pack`);
   const output = path.join(path.dirname(archive), name);
   try { await lstat(output); throw new Error(`Destino já existe: ${output}`); } catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -101,7 +103,7 @@ export async function convertArchive(archive, options = {}) {
     await rm(stage, { recursive: true, force: true });
     throw error;
   }
-  return { output, resource: path.basename(output), models: finalModels, skipped };
+  return { output, resource: path.basename(output), models: finalModels, skipped, removedTuning: cleaned.removed };
 }
 
 export async function convertFolder(folder, options = {}) {

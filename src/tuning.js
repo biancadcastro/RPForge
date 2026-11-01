@@ -1,4 +1,42 @@
 import path from 'node:path';
+import { XMLSerializer } from '@xmldom/xmldom';
+
+const childElements = node => Array.from(node.childNodes).filter(n => n.nodeType === 1);
+const direct = (node, tag) => childElements(node).find(n => n.tagName === tag);
+
+/** Drop only file-backed visual options whose geometry is absent from this archive. */
+export function cleanMissingTuning(files, metas) {
+  const available = new Set();
+  for (const file of files.values()) {
+    if (!file.destination.startsWith('stream/')) continue;
+    const extension = path.posix.extname(file.destination).toLowerCase();
+    if (['.yft', '.ydr'].includes(extension)) available.add(path.posix.basename(file.destination, extension).toLowerCase());
+  }
+  const removed = [];
+  for (const meta of metas.filter(meta => meta.basename === 'carcols.meta')) {
+    let dirty = false;
+    for (const tag of ['visibleMods', 'linkMods']) {
+      for (const list of Array.from(meta.doc.getElementsByTagName(tag))) {
+        for (const item of childElements(list).filter(n => n.tagName === 'Item')) {
+          const model = direct(item, 'modelName')?.textContent.trim();
+          if (model && !available.has(model.toLowerCase())) {
+            list.removeChild(item); removed.push(model); dirty = true;
+          }
+        }
+      }
+    }
+    for (const list of Array.from(meta.doc.getElementsByTagName('linkedModels'))) {
+      for (const item of childElements(list).filter(n => n.tagName === 'Item')) {
+        const model = direct(item, 'modelName')?.textContent.trim() ?? (childElements(item).length ? '' : item.textContent.trim());
+        if (model && !available.has(model.toLowerCase())) {
+          list.removeChild(item); removed.push(model); dirty = true;
+        }
+      }
+    }
+    if (dirty) files.set(meta.destination.toLowerCase(), { destination: meta.destination, data: Buffer.from(new XMLSerializer().serializeToString(meta.doc)) });
+  }
+  return { files, removed: [...new Set(removed)] };
+}
 
 /** Organize streamed tuning pieces by their filenames; do not change payloads or model references. */
 export function organizeTuning(files, metas, models) {

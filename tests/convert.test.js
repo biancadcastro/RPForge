@@ -61,3 +61,20 @@ test('requires vehicle metadata and rejects malformed XML', async t => {
   assert.ok(results.some(r => /XML/.test(r.error)));
   assert.equal((await readdir(root)).length, 2);
 });
+
+test('conversion removes absent tuning after renaming while retaining performance mods and original RPF', async t => {
+  const root = await folder(t);
+  const xml = '<CVehicleModelInfoVarGlobal><Kits><Item><kitName>7_car_modkit</kitName><visibleMods><Item><modelName>car_missing</modelName></Item></visibleMods><statMods><Item><type>VMT_ENGINE</type><modifier value="50"/></Item></statMods></Item></Kits></CVehicleModelInfoVarGlobal>';
+  const original = makeRpf([{ name: 'vehicles.rpf', data: vehicleArchive() }, { name: 'carcols.meta', data: Buffer.from(xml), compressed: true }]);
+  const source = path.join(root, 'dlc.rpf');
+  await writeFile(source, original);
+  const [result] = await convertFolder(root, { spawns: { car: 'NEWCAR' } });
+  assert.equal(result.ok, true, result.error);
+  assert.deepEqual(result.removedTuning, ['car_missing']);
+  const converted = await readFile(path.join(result.output, 'data/carcols.meta'), 'utf8');
+  assert.ok(!converted.includes('car_missing'));
+  assert.match(converted, /7_NEWCAR_modkit/);
+  assert.match(converted, /<type>VMT_ENGINE<\/type>/);
+  assert.match(converted, /modifier value="50"/);
+  assert.deepEqual(await readFile(source), original);
+});

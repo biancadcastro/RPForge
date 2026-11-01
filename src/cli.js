@@ -15,6 +15,7 @@ if (args.length !== 1 || args[0] === '--help') {
       if (result.ok) {
         console.log(`OK: ${result.archive}\nDestino: ${result.output}\nserver.cfg: ensure ${result.resource}\nModelos: ${result.models.join(', ')}`);
         if (result.skipped.length) console.log(`Arquivos auxiliares ignorados: ${result.skipped.join(', ')}`);
+        if (result.removedTuning.length) console.log(`Referências de tuning ausentes removidas: ${result.removedTuning.join(', ')}`);
       }
       else console.error(`ERRO: ${result.archive}: ${result.error}`);
     }

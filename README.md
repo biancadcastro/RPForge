@@ -84,6 +84,11 @@ conteudos divergentes sao recusados para evitar sobrescrita e perda de configura
 O manifest inclui o comentario `-- Convertido com RPF Forge`.
 Pecas de tuning e seus arquivos associados ficam em `stream/mods`.
 Modelos principais, seus `_hi` e dicionarios compartilhados permanecem em `stream`.
+Opcoes visuais e referencias vinculadas em `carcols.meta` cujo modelo nao veio no RPF
+sao removidas automaticamente. A verificacao considera arquivos YFT/YDR, incluindo
+subpastas, sem distinguir maiusculas. Melhorias de desempenho (`statMods`), liveries,
+IDs de modkit e configuracoes de sirene permanecem preservados. A lista do que foi
+removido aparece somente no console, sem criar relatorio no addon.
 
 ## Compatibilidade e proteção dos arquivos
 
