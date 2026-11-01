@@ -86,7 +86,7 @@ namespace RPFForge {
         readonly Button browse = new ForgeButton(), analyze = new ForgeButton(), convert = new ForgeButton(), open = new ForgeButton();
         readonly Label summary = new Label(), status = new Label();
         readonly ForgeProgress progress = new ForgeProgress();
-        readonly DataGridView vehicles = new DataGridView(), destinations = new DataGridView(), assets = new DataGridView();
+        readonly DataGridView vehicles = new DataGridView(), destinations = new DataGridView();
         readonly TextBox details = new TextBox();
         readonly ForgePages tabs = new ForgePages();
         readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 64 * 1024 * 1024 };
@@ -225,9 +225,9 @@ namespace RPFForge {
             rendering = true;
             try {
                 var previous = new Dictionary<string, Dictionary<string, object>>(preview, StringComparer.OrdinalIgnoreCase);
-                preview.Clear(); vehicles.Rows.Clear(); destinations.Rows.Clear(); assets.Rows.Clear(); boundFolder = folder.Text;
+                preview.Clear(); vehicles.Rows.Clear(); destinations.Rows.Clear(); boundFolder = folder.Text;
                 int cars = 0, errors = 0, warnings = 0; double weight = 0; var text = new StringBuilder();
-                var weighted = new List<Tuple<string, Dictionary<string, object>>>(); bool eligible = false, selectedError = false;
+                bool eligible = false, selectedError = false;
                 foreach (object item in results) {
                     var result = Map(item); string archive = TextValue(Get(result, "archive")); preview[archive] = result;
                     var requested = Map(Get(requests, archive)); bool selected = !requested.ContainsKey("selected") || Yes(Get(requested, "selected"));
@@ -264,10 +264,8 @@ namespace RPFForge {
                     foreach (object problem in ArrayValue(Get(audit, "issues"))) { var issue = Map(problem); text.AppendLine((TextValue(Get(issue, "severity")) == "error" ? "ERRO: " : "AVISO: ") + TextValue(Get(issue, "message"))); }
                     if (Number(Get(audit, "errors")) == 0 && Number(Get(audit, "warnings")) == 0) text.AppendLine("Validação estrutural aprovada, sem conflitos encontrados.");
                     text.AppendLine();
-                    foreach (object file in ArrayValue(Get(audit, "assets"))) weighted.Add(Tuple.Create(archive, Map(file)));
                 }
-                foreach (var file in weighted.OrderByDescending(p => Number(Get(p.Item2, "diskBytes"))).Take(200)) assets.Rows.Add(file.Item1, TextValue(Get(file.Item2, "path")), TextValue(Get(file.Item2, "kind")), FormatSize(Get(file.Item2, "diskBytes")));
-                text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS. A aba de peso apresenta até 200 arquivos, do maior para o menor.");
+                text.AppendLine("Peso = espaço em disco, sem estimativa de VRAM ou FPS.");
                 details.Text = text.ToString(); summary.Text = CountLabel(cars, "item", "itens") + "  ·  " + CountLabel(results.Length, "RPF", "RPFs") + "  ·  " + FormatSize(weight) + " em streaming  ·  " + CountLabel(errors, "erro", "erros") + "  ·  " + CountLabel(warnings, "aviso", "avisos");
                 reviewDetails.Text = details.Text;
                 UpdateContentLabels(); SimplifyConfiguration();
@@ -309,9 +307,9 @@ namespace RPFForge {
         public void SelfTest() {
             ForgeFolderPicker.SelfTest();
             if (convert.Enabled || open.Enabled) throw new Exception("Initial actions should be disabled.");
-            if (tabs.TabPages.Count != 5 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");
+            if (tabs.TabPages.Count != 4 || navigation.Length != 4 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");
             if (Font.FontFamily.Name != "Pixelify Sans" || convert.Font.FontFamily.Name != "Pixelify Sans") throw new Exception("Portfolio font was not loaded.");
-            tabs.SelectedIndex = 4;
+            tabs.SelectedIndex = 3;
             if (pageTitle.Text != "Ajuda") throw new Exception("Navigation did not update heading.");
             tabs.SelectedIndex = 0;
             folder.Text = Path.GetTempPath();
@@ -344,7 +342,7 @@ namespace RPFForge {
         public void PrepareBackgroundTest() { renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000); }
         public async Task WorkflowTest(string fixtureFolder) {
             await SelectOrigin(fixtureFolder);
-            if (!previewValid || vehicles.Rows.Count != 1 || assets.Rows.Count == 0) throw new Exception("Initial GUI preview failed: " + details.Text);
+            if (!previewValid || vehicles.Rows.Count != 1) throw new Exception("Initial GUI preview failed: " + details.Text);
             await ConvertSelection();
             if (Directory.Exists(Path.Combine(fixtureFolder, "car"))) throw new Exception("Conversion must not run before review.");
             string analyzedFolder = folder.Text;

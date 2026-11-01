@@ -44,8 +44,7 @@ namespace RPFForge {
             navigation[0].Enabled = !busy;
             navigation[1].Enabled = !busy && hasPreview;
             navigation[2].Enabled = !busy && hasResults;
-            navigation[3].Enabled = !busy && hasPreview;
-            navigation[4].Enabled = true;
+            navigation[3].Enabled = true;
             back.Visible = tabs.SelectedIndex == 1;
             back.Enabled = !busy;
             analyze.Visible = tabs.SelectedIndex != 1;

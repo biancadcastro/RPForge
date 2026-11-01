@@ -35,7 +35,7 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 
 ## Ações auxiliares
 
-**Espaço em disco** mostra até 200 arquivos de streaming, do maior para o menor. Não estima VRAM/FPS, não exclui arquivos e não otimiza texturas automaticamente. **Ajuda** contém instruções e limites; a licença da fonte abre em uma janela separada. Essas páginas não são etapas obrigatórias da conversão.
+**Ajuda** contém instruções e limites; a licença da fonte abre em uma janela separada. Essa página não é uma etapa obrigatória da conversão.
 
 ## Teclado e estados
 

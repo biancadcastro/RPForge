@@ -7,7 +7,7 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 
 - Comando **Converter com RPForge** no menu principal do Windows 11.
 - Funciona sobre a pasta e no espaco vazio dentro dela; a extensao detecta a presenca de RPF.
-- Janela RPForge com fluxo guiado **Configurar → Revisar → Resultado**, com **Espaço em disco** e **Ajuda** como ferramentas auxiliares.
+- Janela RPForge com fluxo guiado **Configurar → Revisar → Resultado**, com **Ajuda** como página auxiliar.
 - Identidade pixel art e fonte Pixelify Sans do portfólio, embutidas para uso offline.
 - Analise antes de converter; nenhuma extracao e gravada durante a previa.
 - Edicao de spawns por carro, com maiusculas e minusculas preservadas. Campo vazio mantem o nome atual.

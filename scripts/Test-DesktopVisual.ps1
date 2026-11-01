@@ -9,8 +9,8 @@ if (!$Destination.StartsWith($allowed, [StringComparison]::OrdinalIgnoreCase)) {
 New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 $process = Start-Process -FilePath $ExecutablePath -ArgumentList @('--render-suite', "`"$Destination`"") -WindowStyle Hidden -Wait -PassThru
 if ($process.ExitCode -ne 0) { throw 'Falha ao renderizar os estados da interface.' }
-foreach ($name in @('01-inicio','02-veiculos','03-destinos','04-previa','05-espaco','06-compacto','07-ajuda','08-erro','09-resultado')) {
+foreach ($name in @('01-inicio','02-veiculos','03-destinos','04-previa','06-compacto','07-ajuda','08-erro','09-resultado')) {
     $image = Join-Path $Destination ($name + '.png')
     if (!(Test-Path -LiteralPath $image) -or (Get-Item -LiteralPath $image).Length -lt 1000) { throw "Imagem ausente ou invalida: $name" }
 }
-Write-Host "PASS: 9 estados renderizados para revisao visual em $Destination."
+Write-Host "PASS: 8 estados renderizados para revisao visual em $Destination."
