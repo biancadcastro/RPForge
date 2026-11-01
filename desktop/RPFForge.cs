@@ -375,6 +375,8 @@ namespace RPFForge {
             if (!open.Enabled) throw new Exception("Successful GUI conversion must allow opening output.");
             string empty = Path.Combine(fixtureFolder, "empty"); Directory.CreateDirectory(empty); await SelectOrigin(empty);
             if (previewValid || convert.Enabled) throw new Exception("Empty-folder GUI state must not convert.");
+            tabs.SelectedIndex = 0;
+            if (configurationPage.Visible || !this.empty.Visible) throw new Exception("Empty state must hide configuration and destination controls.");
             string props = Path.Combine(fixtureFolder, "props");
             if (Directory.Exists(props)) {
                 string badProps = Path.Combine(fixtureFolder, "bad-props"); Directory.CreateDirectory(badProps);

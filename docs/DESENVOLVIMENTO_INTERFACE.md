@@ -27,7 +27,7 @@ O build local gera apenas `.tools/desktop/RPFForge.exe`; não instala, não assi
 
 `--self-test` verifica bloqueios de edição, prévia vazia e inválida, navegação, carregamento da fonte, limpeza de saída anterior e layout compacto das ações. `--workflow-test` usa um RPF sintético para verificar análise, renomeação, conversão, backup e pasta vazia.
 
-`--render-suite <pasta>` cria oito imagens com dados sintéticos: início, veículos, destinos, prévia, janela compacta, ajuda, erro e resultado. As imagens ficam em `.tools`, fora do versionamento. Não são capturas de acervo pessoal nem evidência de um teste em jogo.
+`--render-suite <pasta>` cria nove imagens com dados sintéticos: início, veículos, destinos, prévia, janela compacta, ajuda, erro, resultado e final da ajuda com acesso às licenças. As imagens ficam em `.tools`, fora do versionamento. Não são capturas de acervo pessoal nem evidência de um teste em jogo.
 
 ## Contratos de estado
 

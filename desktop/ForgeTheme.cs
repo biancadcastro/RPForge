@@ -58,6 +58,7 @@ namespace RPFForge {
         TableLayoutPanel mainLayout;
         ForgeSurface workspacePanel;
         TableLayoutPanel configurationLayout;
+        Panel configurationPage;
         readonly Label emptyTitle = new Label(), emptyHelp = new Label();
         readonly Button[] navigation = new Button[4];
         readonly ToolTip hints = new ToolTip();
@@ -146,6 +147,7 @@ namespace RPFForge {
             configuration.Controls.Add(destinations, 0, 3);
             reviewDetails.Multiline = true; reviewDetails.ReadOnly = true; reviewDetails.ScrollBars = ScrollBars.Both; reviewDetails.WordWrap = false; reviewDetails.Dock = DockStyle.Fill; reviewDetails.BackColor = surface; reviewDetails.ForeColor = foreground; reviewDetails.BorderStyle = BorderStyle.None; reviewDetails.Font = new Font("Consolas", 10); reviewDetails.AccessibleName = "Resumo da conversão a confirmar";
             var configurationScroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true }; configurationScroll.Controls.Add(configuration);
+            configurationPage = configurationScroll; configurationPage.Visible = false;
             AddTab(titles[0], configurationScroll); AddTab(titles[1], reviewView); AddTab(titles[2], resultView);
             AddTab(titles[3], BuildHelpDocument());
             BuildEmptyState(); tabs.TabPages[0].Controls.Add(empty); empty.BringToFront(); vehicles.Visible = false;
@@ -183,7 +185,7 @@ namespace RPFForge {
         void UpdateCounts(int cars, int archives, int warnings, int errors, double bytes) {
             SetWorkspaceReady(true);
             countCars.Text = cars.ToString(); countArchives.Text = archives.ToString(); countWarnings.Text = warnings + " / " + errors; countWarnings.ForeColor = errors > 0 ? ForgeTheme.Error : warnings > 0 ? ForgeTheme.Warning : foreground; countWeight.Text = FormatSize(bytes);
-            empty.Visible = cars == 0; vehicles.Visible = cars > 0; emptyTitle.Text = errors > 0 ? "Não foi possível ler os RPFs" : "Nenhum conteúdo encontrado"; emptyHelp.Text = errors > 0 ? "Veja o diagnóstico em Prévia e resultado.\nCorrija a origem e analise novamente." : "Confira se a pasta contém RPFs abertos de GTA V Legacy.\nA busca não percorre subpastas do Windows.";
+            empty.Visible = cars == 0; configurationPage.Visible = cars > 0; vehicles.Visible = cars > 0; emptyTitle.Text = errors > 0 ? "Não foi possível ler os RPFs" : "Nenhum conteúdo encontrado"; emptyHelp.Text = errors > 0 ? "Veja o diagnóstico em Revisar.\nCorrija a origem e analise novamente." : "Confira se a pasta contém RPFs abertos de GTA V Legacy.\nA busca não percorre subpastas do Windows.";
             RefreshNavigation();
         }
         void SetWorkspaceReady(bool ready) { if (mainLayout != null) { mainLayout.RowStyles[2].Height = ready ? 84 : 12; mainLayout.GetControlFromPosition(0, 2).Visible = ready; } }
@@ -194,7 +196,7 @@ namespace RPFForge {
             try { vehicles.Rows.Clear(); destinations.Rows.Clear(); } finally { rendering = false; }
             InvalidatePreview(); stage.Text = "01 / ORIGEM"; stage.ForeColor = red;
             foreach (var label in new[] { countCars, countArchives, countWarnings, countWeight }) { label.Text = "—"; label.ForeColor = foreground; }
-            vehicles.Visible = false; empty.Visible = true; emptyTitle.Text = "Analise a pasta de origem";
+            vehicles.Visible = false; configurationPage.Visible = false; empty.Visible = true; emptyTitle.Text = "Analise a pasta de origem";
             SetWorkspaceReady(false); tabs.SelectedIndex = 0; RefreshNavigation();
             emptyHelp.Text = "Pressione Enter para analisar a pasta digitada ou use Selecionar pasta.\nVocê poderá revisar a conversão antes de gravar.";
             summary.Text = "Pasta alterada. Pressione Enter ou selecione a pasta para continuar.";
