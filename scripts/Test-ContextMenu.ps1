@@ -5,7 +5,7 @@ $menus = @{
 }
 foreach ($keyPath in $menus.Keys) {
     $label = (Get-Item -LiteralPath $keyPath).GetValue('')
-    if ($label -ne 'Converter RPF para FiveM') { throw "Rotulo incorreto: $keyPath" }
+    if ($label -ne 'Converter com RPForge') { throw "Rotulo incorreto: $keyPath" }
     $command = (Get-Item -LiteralPath "$keyPath\command").GetValue('')
     if ($command -notmatch '^"([^"]+)" "([^"]+)" --interactive "(%1|%V)"$') { throw "Comando invalido: $keyPath" }
     if ($Matches[3] -ne $menus[$keyPath]) { throw "Argumento de pasta incorreto: $keyPath" }
