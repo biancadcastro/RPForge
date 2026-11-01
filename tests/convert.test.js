@@ -1,0 +1,60 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, writeFile, readdir, rm } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { convertFolder } from '../src/convert.js';
+import { makeRpf, vehicleArchive } from './fixture.js';
+
+async function folder(t) {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'rpf-to-fivem-test-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  return root;
+}
+
+test('creates stream/data/manifest, preserves original, refuses overwrite', async t => {
+  const root = await folder(t);
+  const original = makeRpf([{ name: 'vehicles.rpf', data: vehicleArchive() }]);
+  const source = path.join(root, 'Police Pack.rpf');
+  await writeFile(source, original);
+  const [result] = await convertFolder(root);
+  assert.equal(result.ok, true, result.error);
+  assert.equal(result.resource, 'police_pack_fivem');
+  assert.deepEqual(result.models, ['car']);
+  const manifest = await readFile(path.join(result.output, 'fxmanifest.lua'), 'utf8');
+  assert.match(manifest, /fx_version 'cerulean'/);
+  assert.match(manifest, /data_file 'VEHICLE_METADATA_FILE' 'data\/001\/vehicles.meta'/);
+  assert.equal((await readFile(path.join(result.output, 'stream/car.ytd'))).toString('ascii', 0, 4), 'RSC7');
+  assert.deepEqual(await readFile(source), original);
+  assert.equal((await convertFolder(root))[0].ok, false);
+});
+
+test('no partial addon on invalid archive; batch continues', async t => {
+  const root = await folder(t);
+  await writeFile(path.join(root, 'broken.rpf'), Buffer.from('broken'));
+  await writeFile(path.join(root, 'valid.rpf'), vehicleArchive());
+  const results = await convertFolder(root);
+  assert.equal(results.filter(r => r.ok).length, 1);
+  assert.equal(results.filter(r => !r.ok).length, 1);
+  assert.ok(!(await readdir(root)).some(name => name.startsWith('.rpf-to-fivem-') || name === 'broken_fivem'));
+});
+
+test('rejects conflicting stream names instead of replacing a vehicle', async t => {
+  const root = await folder(t);
+  const other = makeRpf([{ name: 'car.yft', data: Buffer.from('different') }]);
+  await writeFile(path.join(root, 'conflict.rpf'), makeRpf([{ name: 'a.rpf', data: vehicleArchive() }, { name: 'b.rpf', data: other }]));
+  const [result] = await convertFolder(root);
+  assert.equal(result.ok, false);
+  assert.match(result.error, /mesmo destino/);
+  assert.deepEqual(await readdir(root), ['conflict.rpf']);
+});
+
+test('requires vehicle metadata and rejects malformed XML', async t => {
+  const root = await folder(t);
+  await writeFile(path.join(root, 'missing.rpf'), makeRpf([{ name: 'car.yft', data: Buffer.from('model') }]));
+  await writeFile(path.join(root, 'badxml.rpf'), makeRpf([{ name: 'car.yft', data: Buffer.from('model') }, { name: 'vehicles.meta', data: Buffer.from('<CVehicleModelInfo__InitDataList><broken></CVehicleModelInfo__InitDataList>') }]));
+  const results = await convertFolder(root);
+  assert.ok(results.every(r => !r.ok));
+  assert.ok(results.some(r => /XML/.test(r.error)));
+  assert.equal((await readdir(root)).length, 2);
+});
