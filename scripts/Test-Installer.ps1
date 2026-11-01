@@ -53,6 +53,11 @@ try {
     if (!$command.Contains($runtime) -or !$command.Contains($cli)) { throw 'Menu aponta para outro programa.' }
     & (Join-Path $PSScriptRoot 'Test-ContextMenu.ps1') -RequireYtyp
     & (Join-Path $PSScriptRoot 'Test-ModernMenu.ps1') -InstallDir $installDir
+    # Uninstall commands from another copy must not remove this copy's integration.
+    & (Join-Path $projectRoot 'windows\Register-ModernMenu.ps1') -Unregister
+    & (Join-Path $projectRoot 'windows\Uninstall-ContextMenu.ps1')
+    if (!(Get-AppxPackage -Name 'RedHorn.RPFForge.Local')) { throw 'Outra copia removeu o pacote ativo.' }
+    & (Join-Path $PSScriptRoot 'Test-ContextMenu.ps1') -RequireYtyp
     foreach ($file in @('licenses\Pixelify-Sans-OFL.txt','THIRD_PARTY_NOTICES.md','sbom.cdx.json','build-manifest.json')) { if (!(Test-Path -LiteralPath (Join-Path $installDir $file))) { throw "Inventario ou aviso ausente: $file" } }
     & node.exe scripts/Create-DesktopFixtures.mjs (Join-Path $testRoot 'gui fixtures')
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar fixtures GUI.' }
