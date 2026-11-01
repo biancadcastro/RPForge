@@ -44,3 +44,6 @@ Alterações de layout não devem introduzir versões regeneradas da marca, font
 
 O ícone do Windows usa o símbolo vetorial aprovado sem fundo, com margens reduzidas e versões de 16, 20, 24, 32, 40, 48, 64, 128 e 256 pixels no ICO. A janela e o recurso do executável usam o mesmo arquivo; o texto Converter com RPForge foi preservado.
 
+
+O agrupamento do menu moderno usa a identidade RPForge e o executável RPFForge.exe. A imagem e o ICO são registrados como shell/rpforge-mark-v3.png e shell/rpforge-mark-v3.ico, evitando reutilizar o cadastro visual antigo do Node. O teste do menu verifica esses vínculos.
+

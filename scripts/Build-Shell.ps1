@@ -13,6 +13,8 @@ $signtool = Join-Path $sdk 'signtool.exe'
 if (!(Test-Path -LiteralPath $makeappx)) { throw 'Windows SDK BuildTools necessario no cache .tools.' }
 New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.png') -Destination (Join-Path $Destination 'logo.png') -Force
+Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.png') -Destination (Join-Path $Destination 'rpforge-mark-v3.png') -Force
+Copy-Item -LiteralPath (Join-Path $root 'desktop\assets\rpforge.ico') -Destination (Join-Path $Destination 'rpforge-mark-v3.ico') -Force
 & $compiler -std=c++17 -O2 -shared -static -Wno-dll-attribute-on-redeclaration -o (Join-Path $Destination 'ForgeShell.dll') (Join-Path $root 'shell\ForgeShell.cpp') -lole32 -lshell32 -lshlwapi -luuid
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar extensao.' }
 $testExe = Join-Path $tools 'TestForgeShell.exe'

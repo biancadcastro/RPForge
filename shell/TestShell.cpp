@@ -68,7 +68,7 @@ int wmain(int argc, wchar_t** argv) {
     if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter com RPForge")) return 15;
     CoTaskMemFree(title);
     PWSTR icon = nullptr;
-    if (FAILED(command->GetIcon(nullptr,&icon)) || !wcsstr(icon,L"\\RPFForge.exe,0")) return 16;
+    if (FAILED(command->GetIcon(nullptr,&icon)) || !wcsstr(icon,L"\\shell\\rpforge-mark-v3.ico,0")) return 16;
     CoTaskMemFree(icon);
     for (int i = 2; i < 4; i++) {
         PIDLIST_ABSOLUTE pidl = nullptr;

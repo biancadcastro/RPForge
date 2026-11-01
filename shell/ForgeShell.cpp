@@ -99,7 +99,7 @@ public:
     HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray* items, PWSTR* value) override {
         return SHStrDupW(ytyp ? L"Gerar YTYP com RPForge" : L"Converter com RPForge", value);
     }
-    HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\RPFForge.exe,0").c_str(), value); }
+    HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\shell\\rpforge-mark-v3.ico,0").c_str(), value); }
     HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPForge: converter RPFs ou gerar YTYPs de modelos YDR", value); }
     HRESULT STDMETHODCALLTYPE GetCanonicalName(GUID* value) override { if (!value) return E_POINTER; *value = ytyp ? YtypClsid : ForgeClsid; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetState(IShellItemArray* items, BOOL slow, EXPCMDSTATE* value) override {
