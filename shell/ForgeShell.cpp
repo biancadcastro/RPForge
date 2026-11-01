@@ -44,7 +44,11 @@ class ForgeCommand final : public IExplorerCommand, public IObjectWithSite {
     HRESULT folder(IShellItemArray* selection, std::wstring& result) {
         IShellItem* item = nullptr;
         DWORD size = 0;
-        if (selection && SUCCEEDED(selection->GetCount(&size)) && size == 1) selection->GetItemAt(0, &item);
+        if (selection) {
+            if (FAILED(selection->GetCount(&size)) || size != 1) return E_INVALIDARG;
+            HRESULT selected = selection->GetItemAt(0, &item);
+            if (FAILED(selected)) return selected;
+        }
         if (!item && site) {
             IServiceProvider* services = nullptr;
             if (SUCCEEDED(site->QueryInterface(IID_PPV_ARGS(&services)))) {

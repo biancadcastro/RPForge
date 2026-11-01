@@ -103,6 +103,14 @@ int wmain(int argc, wchar_t** argv) {
         background->Release();
         EXPCMDSTATE state;
         if (FAILED(command->GetState(nullptr,TRUE,&state)) || state != ECS_ENABLED) return 23;
+        PIDLIST_ABSOLUTE first = nullptr, second = nullptr;
+        if (FAILED(SHParseDisplayName(argv[2],nullptr,&first,0,nullptr)) || FAILED(SHParseDisplayName(argv[3],nullptr,&second,0,nullptr))) return 29;
+        PCIDLIST_ABSOLUTE paths[] = {first, second};
+        IShellItemArray* multiple = nullptr;
+        if (FAILED(SHCreateShellItemArrayFromIDLists(2,paths,&multiple))) return 30;
+        HRESULT multiState = command->GetState(multiple,TRUE,&state);
+        multiple->Release(); CoTaskMemFree(first); CoTaskMemFree(second);
+        if (FAILED(multiState) || state != ECS_HIDDEN) return 31;
     }
     site->SetSite(nullptr); site->Release(); command->Release(); generator->Release();
     if (canUnload() != S_OK) return 22;
