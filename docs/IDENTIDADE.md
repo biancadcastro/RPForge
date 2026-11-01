@@ -41,3 +41,6 @@ O botão laranja usa texto grafite. Estados têm mensagens além da cor.
 - Estado vazio: símbolo da marca e instrução da próxima ação.
 
 Alterações de layout não devem introduzir versões regeneradas da marca, fontes remotas, progresso fictício ou estados de sucesso sem resposta do conversor.
+
+O ícone do Windows usa o símbolo vetorial aprovado sem fundo, com margens reduzidas e versões de 16, 20, 24, 32, 40, 48, 64, 128 e 256 pixels no ICO. A janela e o recurso do executável usam o mesmo arquivo; o texto Converter com RPForge foi preservado.
+
