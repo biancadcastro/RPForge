@@ -10,5 +10,5 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar fixtures sinteticas.' }
     $process = Start-Process -FilePath $ExecutablePath -ArgumentList @('--workflow-test', "`"$fixture`"") -WindowStyle Hidden -Wait -PassThru
     if ($process.ExitCode -ne 0) { throw 'Fluxo da janela falhou. Consulte .tools\desktop-test-error.txt.' }
-    Write-Host "PASS: GUI -> bridge -> veiculos, roupas, mapas com YMF, backup e YTYP automatico sem sobrescrita. Fixture: $fixture"
+    Write-Host "PASS: GUI -> bridge -> veiculos, roupas, mapas com YMF, backup, YTYP. Fixture: $fixture"
 } finally { Pop-Location }

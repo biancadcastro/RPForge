@@ -6,9 +6,10 @@ using System.Runtime.InteropServices;
 namespace RPFForge {
     static class ForgeFonts {
         static readonly PrivateFontCollection collection = new PrivateFontCollection();
+        static readonly FontFamily family;
         [DllImport("gdi32.dll")] static extern IntPtr AddFontMemResourceEx(IntPtr p, uint size, IntPtr reserved, ref uint count);
-        static ForgeFonts() { foreach (string encoded in new[] { RegularData, BoldData }) { byte[] bytes=Convert.FromBase64String(encoded); IntPtr memory=Marshal.AllocHGlobal(bytes.Length); Marshal.Copy(bytes,0,memory,bytes.Length); collection.AddMemoryFont(memory,bytes.Length); uint count=0; AddFontMemResourceEx(memory,(uint)bytes.Length,IntPtr.Zero,ref count); } }
-        public static Font Pixel(float size, FontStyle style = FontStyle.Regular) { return new Font(collection.Families[0], size, style, GraphicsUnit.Point); }
+        static ForgeFonts() { foreach (string encoded in new[] { RegularData, BoldData }) { byte[] bytes=Convert.FromBase64String(encoded); IntPtr memory=Marshal.AllocHGlobal(bytes.Length); Marshal.Copy(bytes,0,memory,bytes.Length); collection.AddMemoryFont(memory,bytes.Length); uint count=0; AddFontMemResourceEx(memory,(uint)bytes.Length,IntPtr.Zero,ref count); } family = collection.Families[0]; }
+        public static Font Pixel(float size, FontStyle style = FontStyle.Regular) { return new Font(family, size, style, GraphicsUnit.Point); }
         public const string License = @"Copyright 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.

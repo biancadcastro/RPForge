@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 namespace RPFForge {
-    sealed partial class ForgeWindow {
+    sealed partial class ForgeConverter {
         void PaintEditableCell(object sender, DataGridViewCellPaintingEventArgs e) {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
             var grid = (DataGridView)sender; string column = grid.Columns[e.ColumnIndex].Name;
@@ -30,10 +30,10 @@ namespace RPFForge {
     sealed class ForgeInputFrame : Panel {
         readonly TextBox input;
         public ForgeInputFrame(TextBox textbox) {
-            input = textbox; DoubleBuffered = true; BackColor = ForgeTheme.Raised;
-            Padding = new Padding(14, 0, 14, 0); input.BorderStyle = BorderStyle.None; input.BackColor = BackColor; input.Dock = DockStyle.None; input.Margin = Padding.Empty;
+            input = textbox; DoubleBuffered = true; BackColor = ForgeTheme.Background;
+            Padding = new Padding(14, 2, 14, 2); input.BorderStyle = BorderStyle.None; input.BackColor = BackColor; input.Dock = DockStyle.None; input.Margin = Padding.Empty;
             input.Enter += delegate { Invalidate(); }; input.Leave += delegate { Invalidate(); }; Controls.Add(input);
-            var hint = new Label { Text = "Escolha a pasta que contém os arquivos .rpf", Dock = DockStyle.Fill, ForeColor = ForgeTheme.Muted, BackColor = BackColor, Font = input.Font, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, TabStop = false, AccessibleRole = AccessibleRole.None };
+            var hint = new ForgeLabel { Text = "Escolha a pasta que contém os arquivos .rpf", Dock = DockStyle.Fill, ForeColor = ForgeTheme.Muted, BackColor = BackColor, Font = input.Font, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, TabStop = false, AccessibleRole = AccessibleRole.None };
             Controls.Add(hint); hint.BringToFront();
             Action refresh = delegate { hint.Visible = input.TextLength == 0 && !input.Focused; };
             input.TextChanged += delegate { refresh(); }; input.Enter += delegate { refresh(); }; input.Leave += delegate { refresh(); }; hint.Click += delegate { input.Focus(); };
@@ -44,14 +44,12 @@ namespace RPFForge {
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);
             using (var pen = new Pen(input.Focused ? ForgeTheme.Orange : ForgeTheme.Border, input.Focused ? 2 : 1)) e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
-            using (var brush = new SolidBrush(input.Focused ? ForgeTheme.Orange : ForgeTheme.Border)) e.Graphics.FillRectangle(brush, 0, Height - 4, 4, 4);
         }
     }
     sealed class ForgeSurface : TableLayoutPanel {
         public ForgeSurface() { DoubleBuffered = true; }
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e); using (var pen = new Pen(ForgeTheme.Border)) e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
-            using (var brush = new SolidBrush(ForgeTheme.Orange)) { e.Graphics.FillRectangle(brush, 0, 0, 4, 16); e.Graphics.FillRectangle(brush, 4, 0, 12, 4); }
         }
     }
 }

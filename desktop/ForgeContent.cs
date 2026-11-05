@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 namespace RPFForge {
-    sealed partial class ForgeWindow {
+    sealed partial class ForgeConverter {
         static bool IsVehicle(System.Collections.Generic.Dictionary<string, object> item) {
             string kind = TextValue(Get(item, "kind")); return kind == "" || kind == "vehicle";
         }

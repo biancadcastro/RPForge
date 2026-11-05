@@ -3,7 +3,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RPFForge {
-    sealed partial class ForgeWindow {
+    sealed partial class ForgeConverter {
+        public async Task OpenInitial(string folderPath, bool ytyp) {
+            folder.Text = folderPath;
+            if (ytyp) await GenerateYtyp(); else await Analyze();
+        }
         async Task GenerateYtyp() {
             if (busy) return;
             previewValid = false; reviewed = false; hasResults = false;

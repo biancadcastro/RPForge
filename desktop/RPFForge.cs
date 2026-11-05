@@ -11,35 +11,10 @@ using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace RPFForge {
-    sealed class ForgeButton : Button {
-        bool hovered, pressed;
-        public bool Navigation { get; set; }
-        public bool FlatFrame { get; set; }
-        protected override void OnMouseDown(MouseEventArgs e) { pressed = true; Invalidate(); base.OnMouseDown(e); }
-        protected override void OnMouseUp(MouseEventArgs e) { pressed = false; Invalidate(); base.OnMouseUp(e); }
-        protected override void OnKeyDown(KeyEventArgs e) { if (e.KeyCode == Keys.Space) { pressed = true; Invalidate(); } base.OnKeyDown(e); }
-        protected override void OnKeyUp(KeyEventArgs e) { pressed = false; Invalidate(); base.OnKeyUp(e); }
-        protected override void OnMouseEnter(EventArgs e) { hovered = true; Invalidate(); base.OnMouseEnter(e); }
-        protected override void OnMouseLeave(EventArgs e) { hovered = false; Invalidate(); base.OnMouseLeave(e); }
-        protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.Clear(ForgeTheme.Background);
-            bool primary = BackColor == ForgeTheme.Orange, selected = Navigation && ForeColor == ForgeTheme.Orange;
-            Color fill = !Enabled ? ForgeTheme.Surface : primary ? (pressed ? Color.FromArgb(220, 92, 30) : hovered ? Color.FromArgb(255, 150, 83) : ForgeTheme.Orange) : selected ? Color.FromArgb(49, 34, 30) : hovered ? Color.FromArgb(49, 49, 64) : ForgeTheme.Surface;
-            int down = pressed ? 2 : 0;
-            var body = new Rectangle(0, down, Width - 1, Height - (FlatFrame ? 1 : 4));
-            using (var brush = new SolidBrush(fill)) e.Graphics.FillRectangle(brush, body);
-            using (var border = new Pen(Focused || selected ? ForgeTheme.Orange : primary && Enabled ? Color.FromArgb(255, 175, 118) : ForgeTheme.Border)) e.Graphics.DrawRectangle(border, body);
-            if (!pressed && Enabled && !Navigation && !FlatFrame) using (var shadow = new SolidBrush(primary ? Color.FromArgb(155, 65, 24) : Color.FromArgb(16, 16, 22))) e.Graphics.FillRectangle(shadow, 2, Height - 3, Width - 3, 3);
-            if (selected) using (var marker = new SolidBrush(ForgeTheme.Orange)) e.Graphics.FillRectangle(marker, 0, 12, 4, Height - 28);
-            if (Focused) { using (var pen = new Pen(primary ? ForgeTheme.Background : ForgeTheme.Orange)) e.Graphics.DrawRectangle(pen, 4, 4 + down, Width - 9, Height - 12); }
-            var textBounds = new Rectangle(Navigation ? 14 : 6, down, Width - (Navigation ? 20 : 12), Height - (FlatFrame ? 1 : 4));
-            TextRenderer.DrawText(e.Graphics, Text, Font, textBounds, Enabled ? ForeColor : Color.FromArgb(110, 108, 125), (Navigation ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter) | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-        }
-    }
     static class Program {
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
         [STAThread] static int Main(string[] args) {
-            SetProcessDPIAware(); Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
+            SetProcessDPIAware(); Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(true);
             string root = AppDomain.CurrentDomain.BaseDirectory;
             while (!File.Exists(Path.Combine(root, "src", "cli.js"))) {
                 DirectoryInfo parent = Directory.GetParent(root.TrimEnd(Path.DirectorySeparatorChar));
@@ -72,19 +47,18 @@ namespace RPFForge {
                 return code;
             }
             bool generateYtyp = args.Length == 2 && args[0] == "--ytyp";
+            if (ForgeWebLauncher.TryStart(root, args)) return 0;
             var window = new ForgeWindow(root, generateYtyp ? args[1] : args.Length > 0 && args[0] != "--preview" ? args[0] : "", generateYtyp);
             if (args.Contains("--preview")) window.Text = "RPForge — prévia de desenvolvimento";
             Application.Run(window); return 0;
         }
     }
 
-    sealed partial class ForgeWindow : Form {
-        [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr handle, int attribute, ref int value, int size);
-        protected override void OnHandleCreated(EventArgs e) { base.OnHandleCreated(e); int dark = 1; try { DwmSetWindowAttribute(Handle, 20, ref dark, 4); } catch (DllNotFoundException) { } catch (EntryPointNotFoundException) { } }
+    sealed partial class ForgeConverter : UserControl, IForgeTool {
         readonly string root;
         readonly TextBox folder = new TextBox();
         readonly Button browse = new ForgeButton(), analyze = new ForgeButton(), convert = new ForgeButton(), open = new ForgeButton();
-        readonly Label summary = new Label(), status = new Label();
+        readonly Label summary = new ForgeLabel(), status = new ForgeLabel();
         readonly ForgeProgress progress = new ForgeProgress();
         readonly DataGridView vehicles = new DataGridView(), destinations = new DataGridView();
         readonly TextBox details = new TextBox();
@@ -92,8 +66,14 @@ namespace RPFForge {
         readonly JavaScriptSerializer json = new JavaScriptSerializer { MaxJsonLength = 64 * 1024 * 1024 };
         readonly Color background = ForgeTheme.Background, surface = ForgeTheme.Surface, foreground = ForgeTheme.Text, muted = ForgeTheme.Muted, red = ForgeTheme.Orange;
         readonly Dictionary<string, Dictionary<string, object>> preview = new Dictionary<string, Dictionary<string, object>>(StringComparer.OrdinalIgnoreCase);
-        bool busy, rendering, previewValid, renderOnly;
-        protected override bool ShowWithoutActivation { get { return renderOnly; } }
+        bool busy, rendering, previewValid;
+        public Control View { get { return this; } }
+        public bool Busy { get { return busy; } }
+        public IButtonControl DefaultAction { get; private set; }
+        public event EventHandler StateChanged;
+        void NotifyState() { if (StateChanged != null) StateChanged(this, EventArgs.Empty); }
+        public void Activate() { }
+        public void VerifyBusyGuards(Action check) { SetBusy(true, "Test"); try { check(); } finally { SetBusy(false, ""); } }
         string boundFolder = "", lastOutput = "";
 
         static Dictionary<string, object> Map(object value) { return value as Dictionary<string, object> ?? new Dictionary<string, object>(); }
@@ -106,7 +86,7 @@ namespace RPFForge {
         static string CountLabel(int value, string singular, string plural) { return value + " " + (value == 1 ? singular : plural); }
         static string Quote(string value) { return "\"" + value.Replace("\"", "\\\"").TrimEnd('\\') + (value.EndsWith("\\") ? "\\\\" : "") + "\""; }
 
-        public ForgeWindow(string appRoot, string initialFolder, bool generateYtyp = false) {
+        public ForgeConverter(string appRoot) {
             root = appRoot; BuildInterface();
             browse.Click += async delegate {
                 string selected;
@@ -122,12 +102,11 @@ namespace RPFForge {
             analyze.Click += async delegate { await PrimaryAction(); };
             convert.Click += async delegate { await ConvertSelection(); };
             open.Click += delegate { if (!busy && Directory.Exists(lastOutput)) Process.Start("explorer.exe", Quote(lastOutput)); };
-            FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; status.Text = "Aguarde a operação terminar antes de fechar, para preservar os arquivos."; } };
-            folder.Text = initialFolder;
-            Shown += async delegate { if (Directory.Exists(folder.Text)) { if (generateYtyp) await GenerateYtyp(); else await Analyze(); } };
+
+
         }
 
-        async Task SelectOrigin(string selected) {
+        public async Task SelectOrigin(string selected) {
             if (busy || selected == null) return;
             folder.Text = selected;
             tabs.SelectedIndex = 0;
@@ -135,13 +114,13 @@ namespace RPFForge {
         }
 
         void ConfigureButton(Button button, string label, bool primary) {
-            button.Text = label; button.Height = 44; button.Font = ForgeFonts.Pixel(12); button.FlatStyle = FlatStyle.Flat; button.FlatAppearance.BorderColor = primary ? red : ForgeTheme.Border;
+            button.Text = label; button.Height = 50; button.Font = ForgeFonts.Pixel(13); button.FlatStyle = FlatStyle.Flat; button.FlatAppearance.BorderColor = primary ? red : ForgeTheme.Border;
             button.BackColor = primary ? red : surface; button.ForeColor = primary ? background : foreground; button.Margin = new Padding(8, 8, 0, 0); button.Cursor = Cursors.Hand;
         }
         void SetupGrid(DataGridView grid) {
             grid.Dock = DockStyle.Fill; grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; grid.AllowUserToAddRows = false; grid.AllowUserToDeleteRows = false; grid.AllowUserToResizeRows = false; grid.RowHeadersVisible = false;
             grid.BackgroundColor = surface; grid.BorderStyle = BorderStyle.None; grid.EnableHeadersVisualStyles = false; grid.ColumnHeadersHeight = 38; grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = ForgeTheme.Raised; grid.ColumnHeadersDefaultCellStyle.ForeColor = foreground; grid.ColumnHeadersDefaultCellStyle.Font = ForgeFonts.Pixel(12, FontStyle.Bold);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = ForgeTheme.Raised; grid.ColumnHeadersDefaultCellStyle.ForeColor = foreground; grid.ColumnHeadersDefaultCellStyle.Font = ForgeBodyFonts.Body(12, FontStyle.Bold);
             grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single; grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             grid.DefaultCellStyle.BackColor = surface; grid.DefaultCellStyle.ForeColor = foreground; grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(71, 45, 34); grid.DefaultCellStyle.SelectionForeColor = Color.White; grid.DefaultCellStyle.Padding = new Padding(8, 0, 4, 0); grid.RowTemplate.Height = 36; grid.DefaultCellStyle.Font = new Font("Consolas", 10); grid.StandardTab = true; grid.MultiSelect = false;
             grid.GridColor = ForgeTheme.Border; grid.SelectionMode = DataGridViewSelectionMode.CellSelect;
@@ -150,6 +129,7 @@ namespace RPFForge {
         void AddTab(string label, Control content) { tabs.AddPage(label, content); }
         void InvalidatePreview() { previewValid = false; reviewed = false; stage.Text = "01 / CONFIGURAR"; if (preview.Count > 0) status.Text = "Ao continuar, as alterações serão validadas automaticamente."; RefreshActions(); }
         void SetBusy(bool value, string message) {
+
             busy = value; open.Enabled = !value && Directory.Exists(lastOutput); browse.Enabled = !value; analyze.Enabled = !value; folder.Enabled = !value; vehicles.Enabled = !value; destinations.Enabled = !value; convert.Enabled = !value && previewValid;
             status.Text = message; progress.Style = value ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous; if (!value) progress.Value = 0; progress.AccessibleDescription = message; RefreshActions();
         }
@@ -175,30 +155,9 @@ namespace RPFForge {
             }
             return result;
         }
-        async Task<object[]> Execute(string action, Dictionary<string, object> requestArchives) {
-            string selectedFolder = folder.Text;
-            return await Task.Factory.StartNew(delegate {
-                string requestDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RPFForge", "requests");
-                Directory.CreateDirectory(requestDir); string requestPath = Path.Combine(requestDir, Guid.NewGuid().ToString("N") + ".json");
-                File.WriteAllText(requestPath, json.Serialize(new Dictionary<string, object> { { "action", action }, { "folder", selectedFolder }, { "archives", requestArchives } }), new UTF8Encoding(false));
-                try {
-                    string node = Path.Combine(root, "runtime", "node.exe"); if (!File.Exists(node)) node = "node.exe";
-                    var info = new ProcessStartInfo(node, Quote(Path.Combine(root, "src", "cli.js")) + " --bridge " + Quote(requestPath)) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8, WorkingDirectory = root };
-                    using (var process = new Process { StartInfo = info }) {
-                        var stderr = new StringBuilder(); process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs e) { if (e.Data != null) stderr.AppendLine(e.Data); };
-                        process.Start(); process.BeginErrorReadLine(); object[] result = null; string error = null; string line;
-                        while ((line = process.StandardOutput.ReadLine()) != null) {
-                            var message = Map(json.DeserializeObject(line)); string type = TextValue(Get(message, "type"));
-                            if (type == "result") result = ArrayValue(Get(message, "data"));
-                            else if (type == "error") error = TextValue(Get(message, "message"));
-                            else if (type == "progress") { var snapshot = message; BeginInvoke((Action)delegate { ShowProgress(snapshot); }); }
-                        }
-                        process.WaitForExit();
-                        if (error != null) throw new Exception(error);
-                        if (result == null || process.ExitCode != 0) throw new Exception("Não foi possível concluir a operação. Confira o acesso à pasta e tente analisar novamente.");
-                        return result;
-                    }
-                } finally { if (File.Exists(requestPath)) File.Delete(requestPath); }
+        Task<object[]> Execute(string action, Dictionary<string, object> requestArchives) {
+            return new ForgeBridgeClient(root).Execute(action, folder.Text, requestArchives, delegate(Dictionary<string, object> message) {
+                if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)delegate { if (!IsDisposed) ShowProgress(message); });
             });
         }
         void ShowProgress(Dictionary<string, object> message) {
@@ -308,11 +267,11 @@ namespace RPFForge {
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
         }
         public void SelfTest() {
-            if (!ProjectLicense().Contains("Version 3, 29 June 2007")) throw new Exception("Embedded GPLv3 license missing.");
+            if (!ProjectLicense().Contains("RPForge - Licenca de uso proprietaria")) throw new Exception("Embedded proprietary license missing.");
             ForgeFolderPicker.SelfTest();
             if (convert.Enabled || open.Enabled) throw new Exception("Initial actions should be disabled.");
-            if (tabs.TabPages.Count != 4 || navigation.Length != 4 || Text != "RPForge" || Icon == null) throw new Exception("Branded navigation missing.");
-            if (Font.FontFamily.Name != "Pixelify Sans" || convert.Font.FontFamily.Name != "Pixelify Sans") throw new Exception("Portfolio font was not loaded.");
+            if (tabs.TabPages.Count != 4 || navigation.Length != 4) throw new Exception("Branded navigation missing.");
+            if (Font.FontFamily.Name != "Atkinson Hyperlegible" || convert.Font.FontFamily.Name != "Pixelify Sans" || pageTitle.Font.FontFamily.Name != "Pixelify Sans") throw new Exception("Website fonts: body=" + Font.FontFamily.Name + ", action=" + convert.Font.FontFamily.Name + ", heading=" + pageTitle.Font.FontFamily.Name);
             tabs.SelectedIndex = 3;
             if (pageTitle.Text != "Ajuda") throw new Exception("Navigation did not update heading.");
             tabs.SelectedIndex = 0;
@@ -322,7 +281,8 @@ namespace RPFForge {
             if (!previewValid || vehicles.Rows.Count != 1 || destinations.Rows.Count != 1) throw new Exception("Valid preview not rendered.");
             vehicles.Rows[0].Cells["target"].Value = "AITOM8";
             if (previewValid || convert.Enabled) throw new Exception("Editing must invalidate preview.");
-            SetBusy(true, "test"); if (browse.Enabled || analyze.Enabled || vehicles.Enabled) throw new Exception("Busy actions not disabled."); SetBusy(false, "test");
+            SetBusy(true, "test"); if (browse.Enabled || analyze.Enabled || vehicles.Enabled) throw new Exception("Busy actions not disabled.");
+            SetBusy(false, "test");
             RenderPreview(ArrayValue(json.DeserializeObject(sample.Replace("\"errors\":0", "\"errors\":1").Replace("\"ok\":true,\"errors\"", "\"ok\":false,\"errors\""))), new Dictionary<string, object>());
             if (previewValid) throw new Exception("Audit error must block conversion.");
             RenderPreview(new object[0], new Dictionary<string, object>()); if (previewValid) throw new Exception("Empty preview must not convert.");
@@ -334,18 +294,11 @@ namespace RPFForge {
             lastOutput = Path.GetTempPath(); open.Enabled = true;
             folder.Text = Path.Combine(Path.GetTempPath(), "different-folder");
             if (open.Enabled || lastOutput.Length != 0) throw new Exception("Changing origin must clear the previous result.");
-            ClientSize = new Size(1024, 700); PerformLayout();
+            FindForm().ClientSize = new Size(1024, 700); PerformLayout();
             if (convert.Width <= 0 || analyze.Width <= 0 || convert.Parent.Width < convert.Right) throw new Exception("Actions overflow compact layout.");
         }
-        public void RenderBitmap(string destination) {
-            renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000);
-            Show(); PerformLayout(); Application.DoEvents();
-            // Render only the app content; Form.DrawToBitmap synthesizes legacy window chrome.
-            Control content = Controls[0];
-            using (var image = new Bitmap(content.Width, content.Height)) { content.DrawToBitmap(image, new Rectangle(Point.Empty, content.Size)); image.Save(destination, System.Drawing.Imaging.ImageFormat.Png); }
-            Hide();
-        }
-        public void PrepareBackgroundTest() { renderOnly = true; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; Location = new Point(-30000, -30000); }
+        public void RenderBitmap(string destination) { ((ForgeWindow)FindForm()).RenderBitmap(destination); }
+        public void PrepareBackgroundTest() { ((ForgeWindow)FindForm()).PrepareBackgroundTest(); }
         public async Task WorkflowTest(string fixtureFolder) {
             await SelectOrigin(fixtureFolder);
             if (!previewValid || vehicles.Rows.Count != 1) throw new Exception("Initial GUI preview failed: " + details.Text);
@@ -370,6 +323,13 @@ namespace RPFForge {
             File.WriteAllText(Path.Combine(output, "keep.txt"), "preserve old output");
             await SelectOrigin(fixtureFolder); await ReviewConfiguration();
             if (reviewed || tabs.SelectedIndex != 0 || convert.Enabled) throw new Exception("Existing destination must require an explicit choice.");
+            // Explicit cancellation must preserve the existing addon and show no stale success.
+            destinations.Rows[0].Cells["policy"].Value = "Cancelar";
+            await ReviewConfiguration();
+            await ConvertSelection();
+            if (File.ReadAllText(Path.Combine(output, "keep.txt")) != "preserve old output" || Directory.GetDirectories(fixtureFolder, "DESKTOPTEST.backup-*").Length != 0) throw new Exception("GUI cancellation changed existing output.");
+            if (open.Enabled || !summary.Text.Contains("1 cancelado")) throw new Exception("GUI cancellation kept a stale success: " + summary.Text);
+            await SelectOrigin(fixtureFolder);
             destinations.Rows[0].Cells["policy"].Value = "Backup e substituir";
             await ReviewConfiguration();
             await ConvertSelection();
@@ -408,6 +368,7 @@ namespace RPFForge {
                 if (kind == "map" && !File.Exists(Path.Combine(contentOutput, "stream", "_manifest.ymf"))) throw new Exception("Map manifest was not preserved.");
                 if (kind == "clothing" && !File.Exists(Path.Combine(contentOutput, "stream", "mp_f_freemode_01_ownfixture^jbib_000_u.ydd"))) throw new Exception("Clothing collection was renamed with its resource folder.");
             }
+
         }
     }
 }

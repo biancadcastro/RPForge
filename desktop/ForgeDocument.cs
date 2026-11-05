@@ -43,7 +43,7 @@ namespace RPFForge {
         }
         public void AddSection(string title, string body) { AddSection(title, body, false, ForgeTheme.Text); }
         public void AddAction(string title, Action action) {
-            var button = new ForgeButton { Text = title, Font = ForgeFonts.Pixel(12), Height = 44, Width = 240, ForeColor = ForgeTheme.Text, BackColor = ForgeTheme.Surface, Margin = new Padding(0, 4, 0, 12), Cursor = Cursors.Hand };
+            var button = new ForgeButton { Text = title, Font = ForgeFonts.Pixel(13), Height = 50, Width = 240, ForeColor = ForgeTheme.Text, BackColor = ForgeTheme.Surface, Margin = new Padding(0, 4, 0, 12), Cursor = Cursors.Hand };
             button.Click += delegate { action(); }; content.Controls.Add(button); Arrange();
         }
         void Arrange() {
@@ -60,11 +60,11 @@ namespace RPFForge {
     }
 
     sealed class ForgeTextCard : Panel {
-        readonly Label heading = new Label(), body = new Label();
+        readonly Label heading = new ForgeLabel(), body = new ForgeLabel();
         public ForgeTextCard(string title, string text, bool technical, Color color) {
             DoubleBuffered = true; BackColor = ForgeTheme.Surface; Margin = new Padding(0, 0, 0, 12);
             heading.Text = title; heading.Font = ForgeFonts.Pixel(15, FontStyle.Bold); heading.ForeColor = color; heading.AutoSize = true; heading.Location = new Point(16, 12);
-            body.Text = text; body.Font = technical ? new Font("Consolas", 11) : ForgeFonts.Pixel(12); body.ForeColor = ForgeTheme.Muted; body.AutoSize = true;
+            body.Text = text; body.Font = technical ? new Font("Consolas", 11) : ForgeBodyFonts.Body(12); body.ForeColor = ForgeTheme.Muted; body.AutoSize = true;
             Controls.Add(heading); Controls.Add(body);
         }
         public void SetWidth(int width) { Width = width; heading.MaximumSize = new Size(Math.Max(80, width - 32), 0); body.MaximumSize = heading.MaximumSize; body.Location = new Point(16, heading.Bottom + 8); Height = body.Bottom + 16; }

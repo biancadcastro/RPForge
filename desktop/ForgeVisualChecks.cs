@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 
 namespace RPFForge {
-    sealed partial class ForgeWindow {
+    sealed partial class ForgeConverter {
         public void RenderSuite(string directory) {
             Directory.CreateDirectory(directory); PrepareBackgroundTest();
             RenderBitmap(Path.Combine(directory, "01-inicio.png"));
@@ -22,7 +22,7 @@ namespace RPFForge {
             tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "02-veiculos.png"));
             tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "03-destinos.png"));
             reviewed = previewValid; tabs.SelectedIndex = 1; stage.Text = "02 / REVISAR"; RenderBitmap(Path.Combine(directory, "04-previa.png"));
-            ClientSize = new Size(1024, 700); tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "06-compacto.png"));
+            FindForm().ClientSize = new Size(1024, 700); tabs.SelectedIndex = 0; RenderBitmap(Path.Combine(directory, "06-compacto.png"));
             tabs.SelectedIndex = 3; RenderBitmap(Path.Combine(directory, "07-ajuda.png"));
             helpView.ScrollTo(Int32.MaxValue); RenderBitmap(Path.Combine(directory, "10-ajuda-final.png"));
             File.WriteAllText(Path.Combine(directory, "scroll-check.txt"), "extent=" + helpView.ContentExtent + ", view=" + helpView.Height + ", position=" + helpView.ScrollPosition);

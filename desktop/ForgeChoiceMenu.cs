@@ -14,10 +14,10 @@ namespace RPFForge {
         public override Color CheckBackground { get { return ForgeTheme.Orange; } }
         public override Color CheckSelectedBackground { get { return ForgeTheme.Orange; } }
     }
-    sealed partial class ForgeWindow {
+    sealed partial class ForgeConverter {
         void OpenPolicyMenu(int rowIndex) {
             if (busy || rowIndex < 0) return;
-            var row = destinations.Rows[rowIndex]; var menu = new ContextMenuStrip { BackColor = ForgeTheme.Raised, ForeColor = foreground, Font = ForgeFonts.Pixel(12), ShowImageMargin = false, Renderer = new ToolStripProfessionalRenderer(new ForgeMenuColors()), Padding = new Padding(4) };
+            var row = destinations.Rows[rowIndex]; var menu = new ContextMenuStrip { BackColor = ForgeTheme.Raised, ForeColor = foreground, Font = new Font("Segoe UI", 11), ShowImageMargin = false, Renderer = new ToolStripProfessionalRenderer(new ForgeMenuColors()), Padding = new Padding(4) };
             foreach (string choice in new[] { "Usar outro nome", "Backup e substituir", "Cancelar" }) {
                 string selected = choice; var option = new ToolStripMenuItem(choice) { BackColor = ForgeTheme.Raised, ForeColor = foreground, Padding = new Padding(12, 10, 12, 10), Checked = TextValue(row.Cells["policy"].Value) == choice };
                 option.Click += delegate { row.Cells["policy"].Value = selected; if (selected == "Usar outro nome") { destinations.CurrentCell = row.Cells["output"]; destinations.BeginEdit(true); } }; menu.Items.Add(option);
