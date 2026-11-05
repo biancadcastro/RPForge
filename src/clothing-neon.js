@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { engineFiles, inputFile } from './clothing.js';
+import {publication,recoverPublications} from './publication.js';
 const execute=promisify(execFile),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 
 export function neonIdentity(model, texture) {
@@ -27,8 +28,10 @@ export async function convertClothingNeon({model,texture='',destination,signal,o
  const naming=neonIdentity(model,texture),started=performance.now();
  const sources=[await inputFile(model,'.ydd',165)];if(texture)sources.push(await inputFile(texture,'.ytd',13));
  const dest=path.resolve(destination),info=await lstat(dest);if(!info.isDirectory()||info.isSymbolicLink())throw Error('Escolha uma pasta de destino real.');
+ await recoverPublications(dest);
  const engine=await engineFiles(['ClothingNeon.exe','SharpDX.dll','neon-shader.xml','skin-triangles.json']);
  const stage=await mkdtemp(path.join(dest,'.rpforge-neon-')),published=[];
+ let journal;
  try {
   const used=new Set([naming.sourceId]);
   for(const directory of new Set([dest,path.dirname(path.resolve(model))]))for(const file of await readdir(directory)){
@@ -46,19 +49,23 @@ export async function convertClothingNeon({model,texture='',destination,signal,o
    if(texture)await writeFile(path.join(stage,'texture.ytd'),await readFile(texture));
    for(const source of sources)if(hash(await readFile(source.file))!==source.sha256)throw Error('A origem mudou durante a conversão. Saída recusada.');
    signal?.throwIfAborted();
+   journal=await publication(dest,stage,[{source:path.join(stage,'model.ydd'),target:ydd},...(ytd?[{source:path.join(stage,'texture.ytd'),target:ytd}]:[])]);
    try {
     for(const [source,target] of [[path.join(stage,'model.ydd'),ydd],...(ytd?[[path.join(stage,'texture.ytd'),ytd]]:[])]){
      await link(source,target);published.push({target,identity:await lstat(target)});
     }
+    await journal.commit();journal=null;
     return {output:dest,model:ydd,texture:ytd,drawableId,files:published.map(p=>path.basename(p.target)),elapsedMs:Math.round(performance.now()-started),...validation};
    }catch(error){
     if(error.code!=='EEXIST')throw error;
     for(const {target,identity} of published.splice(0)){const current=await lstat(target).catch(()=>null);if(current?.ino===identity.ino&&current?.dev===identity.dev)await unlink(target);}
+    await journal.abort();journal=null;
    }
   }
   throw Error('Não existe ID livre entre 000 e 999 neste destino.');
  }catch(error){
   for(const {target,identity} of published){const current=await lstat(target).catch(()=>null);if(current?.ino===identity.ino&&current?.dev===identity.dev)await unlink(target);}
+  if(journal){await journal.abort();journal=null;}
   throw error;
- }finally{await rm(stage,{recursive:true,force:true});}
+ }finally{if(!journal)await rm(stage,{recursive:true,force:true});}
 }

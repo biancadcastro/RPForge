@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import {publication,recoverPublications} from './publication.js';
 
 const execute = promisify(execFile);
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -76,10 +77,11 @@ export async function exportClothingObj({ model, texture = '', destination, lod 
   if (texture) inputs.push(await inputFile(texture, '.ytd', 13));
   const dest = path.resolve(destination), info = await lstat(dest);
   if (!info.isDirectory() || info.isSymbolicLink()) throw Error('Escolha uma pasta de destino real.');
+  await recoverPublications(dest);
   const engine = await engineFiles();
   const stage = await mkdtemp(path.join(dest, '.rpforge-obj-'));
   const published = [];
-  let output;
+  let output,journal;
   try {
     onProgress({ phase: 'read', label: 'Lendo malha, UVs e materiais…' });
     await execute(path.join(engine, 'ClothingDecoder.exe'), [model, texture, stage, lod], { windowsHide: true, timeout: 60000, signal, maxBuffer: 1024 * 1024, encoding: 'utf8' }).catch(error => { throw Error(error.code === 'ABORT_ERR' ? 'Exportação cancelada.' : error.stderr?.trim() || 'Não foi possível ler esta peça.'); });
@@ -97,14 +99,17 @@ export async function exportClothingObj({ model, texture = '', destination, lod 
       const objFile=path.join(dest,name+'.obj'),mtlFile=path.join(dest,name+'.mtl');
       await writeFile(path.join(stage,'modelo.obj'),files.obj.replace('mtllib modelo.mtl',`mtllib ${name}.mtl`));
       signal?.throwIfAborted();
+      journal=await publication(dest,stage,[{source:path.join(stage,'modelo.obj'),target:objFile},{source:path.join(stage,'modelo.mtl'),target:mtlFile}]);
       try {
         for(const [source,target] of [['modelo.obj',objFile],['modelo.mtl',mtlFile]]){
           await link(path.join(stage,source),target);published.push({target,identity:await lstat(target)});
         }
+        await journal.commit();journal=null;
         return {output:dest,objFile,mtlFile,...report,files:[path.basename(objFile),path.basename(mtlFile)]};
       } catch(error) {
         if(error.code!=='EEXIST')throw error;
         for(const {target,identity} of published.splice(0)){const current=await lstat(target).catch(()=>null);if(current?.ino===identity.ino&&current?.dev===identity.dev)await unlink(target);}
+        await journal.abort();journal=null;
       }
     }
   } catch (error) {
@@ -112,6 +117,7 @@ export async function exportClothingObj({ model, texture = '', destination, lod 
       const current = await lstat(target).catch(() => null);
       if (current?.ino === identity.ino && current?.dev === identity.dev) await unlink(target);
     }
+    if(journal){await journal.abort();journal=null;}
     throw error;
-  } finally { await rm(stage, { recursive: true, force: true }); }
+  } finally { if(!journal)await rm(stage, { recursive: true, force: true }); }
 }

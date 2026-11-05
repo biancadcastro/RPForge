@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs';
 import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { safeName } from './rpf.js';
+import {publication,recoverPublications} from './publication.js';
 
 async function exists(file) { try { return await lstat(file); } catch (error) { if (error.code === 'ENOENT') return null; throw error; } }
 export function outputName(name) {
@@ -13,6 +14,7 @@ export function outputName(name) {
 
 export async function writePlan(plan, options = {}) {
   const root = await realpath(path.dirname(plan.archive));
+  await recoverPublications(root);
   let output = path.join(root, outputName(options.outputName || plan.defaultName));
   let existing = await exists(output);
   let choice = { action: options.existing || 'error', name: options.outputName };
@@ -37,6 +39,7 @@ export async function writePlan(plan, options = {}) {
   const stage = await mkdtemp(path.join(root, '.rpforge-'));
   let backup = null;
   let published = false;
+  let journal;
   try {
     const all = [...plan.files.values()];
     for (let index = 0; index < all.length; index++) {
@@ -61,15 +64,21 @@ export async function writePlan(plan, options = {}) {
       if (path.dirname(actual).toLowerCase() !== root.toLowerCase()) throw new Error('A pasta existente foi redirecionada; backup recusado.');
       backup = `${output}.backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID().slice(0, 8)}`;
       if (path.dirname(backup) !== root || await exists(backup)) throw new Error('Caminho de backup inválido.');
-      await rename(output, backup);
     }
+    journal=await publication(root,stage,[],{output,backup,previous:current});
+    if(backup)await rename(output, backup);
     try { await rename(stage, output); published = true; }
     catch (error) {
       if (backup && !await exists(output)) await rename(backup, output);
       throw error;
     }
+    await journal.commit();journal=null;
   } finally {
-    if (!published && path.dirname(stage) === root && path.basename(stage).startsWith('.rpforge-')) await rm(stage, { recursive: true, force: true });
+    const recoverable=journal&&backup&&!await exists(output);
+    if(!recoverable){
+      if (!published && path.dirname(stage) === root && path.basename(stage).startsWith('.rpforge-')) await rm(stage, { recursive: true, force: true });
+      if(journal)await journal.abort();
+    }
   }
   return { output, resource: path.basename(output), backup };
 }

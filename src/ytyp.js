@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { inflateRawSync, deflateRawSync } from 'node:zlib';
 import path from 'node:path';
 import { LIMITS, safeName } from './rpf.js';
+import {publication,recoverPublications} from './publication.js';
 
 // Empty schema fixture generated from our own archetypes; no game models or runtime DLLs.
 const schema = JSON.parse(readFileSync(new URL('./ytyp-template.json', import.meta.url), 'utf8').replace(/^\uFEFF/, ''));
@@ -51,6 +52,7 @@ export function buildYtyp(models, name, siblings = new Set()) {
 export async function generateFolderYtyp(folder, options = {}) {
   const root = path.resolve(folder), stat = await lstat(root);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error('Selecione uma pasta real com modelos YDR.');
+  await recoverPublications(root);
   const entries = await readdir(root, { withFileTypes: true });
   const sources = entries.filter(e => e.isFile() && /\.ydr$/i.test(e.name)).sort((a, b) => a.name.localeCompare(b.name));
   if (!sources.length) throw new Error('Nenhum arquivo .ydr diretamente nesta pasta.');
@@ -70,7 +72,8 @@ export async function generateFolderYtyp(folder, options = {}) {
   }
   // Parse every model before writing anything. Publish each completed file without overwriting.
   const stage = await mkdtemp(path.join(root, '.rpforge-ytyp-'));
-  const generated = [], published = [];
+  const generated = [], published = [], planned = [];
+  let journal, preserve=false;
   try {
     for (let index = 0; index < models.length; index += schema.capacity) {
       const name = 'rpforge_props' + (index ? '_' + (index / schema.capacity + 1) : '');
@@ -82,22 +85,29 @@ export async function generateFolderYtyp(folder, options = {}) {
         if (siblings.has(path.basename(target).toLowerCase())) { suffix++; continue; }
         const bytes = buildYtyp(models.slice(index, index + schema.capacity), path.basename(target, '.ytyp'), siblings);
         await writeFile(temporary, bytes);
-        try { await link(temporary, target); break; } catch (error) { if (error.code !== 'EEXIST') throw error; suffix++; }
+        break;
       }
-      const identity = await lstat(target);
-      published.push({ target, identity, bytes: await readFile(temporary) });
+      planned.push({source:temporary,target});
       siblings.add(path.basename(target).toLowerCase()); generated.push(target);
-      options.onProgress?.({ phase: 'write', current: generated.length, total: Math.ceil(models.length / schema.capacity), label: path.basename(target) });
+
     }
+    journal=await publication(root,stage,planned);
+    for(const {source,target} of planned){
+      await link(source,target);
+      published.push({target,identity:await lstat(target),bytes:await readFile(source)});
+      options.onProgress?.({phase:'write',current:published.length,total:planned.length,label:path.basename(target)});
+    }
+    await journal.commit();
   } catch (error) {
     // Roll back only files created by this operation; preserve replacements or edits.
     for (const { target, identity, bytes } of published.reverse()) {
       try {
         const current = await lstat(target);
         if (current.dev === identity.dev && current.ino === identity.ino && !current.isSymbolicLink() && bytes.equals(await readFile(target))) await rm(target);
-      } catch (cleanupError) { if (cleanupError.code !== 'ENOENT') error.message += ` Não foi possível limpar ${path.basename(target)}: ${cleanupError.message}`; }
+      } catch (cleanupError) { if (cleanupError.code !== 'ENOENT') {preserve=true;error.message += ` Não foi possível limpar ${path.basename(target)}: ${cleanupError.message}`;} }
     }
+    if(!preserve)await journal?.abort();
     throw error;
-  } finally { await rm(stage, { recursive: true, force: true }); }
+  } finally { if(!preserve)await rm(stage, { recursive: true, force: true }); }
   return [{ ok: true, kind: 'ytyp', archive: path.basename(root), output: root, generated, models: models.map(m => m.name), audit: { issues: [{ severity: 'warning', message: 'YTYP binário criado com os limites dos modelos. Texturas compartilhadas e configurações especiais de MLO não são inferidas; confira esses casos no jogo.' }] } }];
 }

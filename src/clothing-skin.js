@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {engineFiles,inputFile} from './clothing.js';
+import {publication,recoverPublications} from './publication.js';
 const execute=promisify(execFile),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const required=['ClothingSkin.exe','SharpDX.dll','skin-triangles.json'];
 export function skinIdentity(model,texture=''){
@@ -36,7 +37,9 @@ export async function separateClothingSkin({model,texture='',destination,expecte
  const naming=skinIdentity(model,texture),sources=await inputs(model,texture);skinOverrides(overrides);
  if(!expectedSource||sources.length!==expectedSource.length||sources.some((s,i)=>s.sha256!==expectedSource[i].sha256||s.name!==expectedSource[i].name))throw Error('A peça ou a textura mudou. Refaça a análise antes de separar.');
  const dest=path.resolve(destination),info=await lstat(dest);if(!info.isDirectory()||info.isSymbolicLink())throw Error('Escolha uma pasta de destino real.');
+ await recoverPublications(dest);
  const engine=await engineFiles(required),stage=await mkdtemp(path.join(dest,'.rpforge-skin-')),published=[],created=[],started=performance.now();let completed=false;
+ let journal;
  try{
   const folders={cloth:path.join(dest,'Roupa'),skin:path.join(dest,'Pele')};
   for(const folder of Object.values(folders)){
@@ -57,11 +60,15 @@ export async function separateClothingSkin({model,texture='',destination,expecte
    if(texture)await writeFile(path.join(stage,'original.ytd'),await readFile(texture));
    for(const source of sources)if(hash(await readFile(source.file))!==source.sha256)throw Error('A origem mudou. Nenhum resultado foi publicado.');
    signal?.throwIfAborted();
+   const targets=[];
+   for(const role of ['cloth','skin'])targets.push({source:path.join(stage,role+'.ydd'),target:roles[role].model},...(texture?[{source:path.join(stage,'original.ytd'),target:roles[role].texture}]:[]));
+   journal=await publication(dest,stage,targets);
    try{
     for(const role of ['cloth','skin'])for(const [source,target] of [[path.join(stage,role+'.ydd'),roles[role].model],...(texture?[[path.join(stage,'original.ytd'),roles[role].texture]]:[])]){await link(source,target);published.push({target,identity:await lstat(target)});}
+    await journal.commit();journal=null;
     completed=true;return {output:dest,roles,files:published.map(p=>path.relative(dest,p.target)),elapsedMs:Math.round(performance.now()-started),...validation};
-   }catch(e){if(e.code!=='EEXIST')throw e;for(const {target,identity} of published.splice(0)){const now=await lstat(target).catch(()=>null);if(now?.ino===identity.ino&&now?.dev===identity.dev)await unlink(target);}}
+   }catch(e){if(e.code!=='EEXIST')throw e;for(const {target,identity} of published.splice(0)){const now=await lstat(target).catch(()=>null);if(now?.ino===identity.ino&&now?.dev===identity.dev)await unlink(target);}await journal.abort();journal=null;}
   }throw Error('Não foi possível reservar os arquivos de saída.');
- }catch(e){for(const {target,identity} of published){const now=await lstat(target).catch(()=>null);if(now?.ino===identity.ino&&now?.dev===identity.dev)await unlink(target);}throw e;}
- finally{await rm(stage,{recursive:true,force:true});if(!completed)for(const folder of created)await rmdir(folder).catch(()=>{});}
+ }catch(e){for(const {target,identity} of published){const now=await lstat(target).catch(()=>null);if(now?.ino===identity.ino&&now?.dev===identity.dev)await unlink(target);}if(journal){await journal.abort();journal=null;}throw e;}
+ finally{if(!journal)await rm(stage,{recursive:true,force:true});if(!completed)for(const folder of created)await rmdir(folder).catch(()=>{});}
 }
