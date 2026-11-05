@@ -60,6 +60,7 @@ public:
 };
 int wmain(int argc, wchar_t** argv) {
     if (argc != 4 && argc != 5) return 10;
+    const bool legacy = argc == 5 && !wcscmp(argv[4],L"--registered-legacy");
     CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     IsolatedAccess access(argv[1],argc==4);if(argc==4&&!access.enabled)return 43;
     if(access.enabled)access.set(7,access.now+3600,access.root);
@@ -80,6 +81,7 @@ int wmain(int argc, wchar_t** argv) {
     HRESULT generated = argc == 5 ? CoCreateInstance(ytypId,nullptr,CLSCTX_LOCAL_SERVER,IID_PPV_ARGS(&generator)) : factory->CreateInstance(nullptr,IID_PPV_ARGS(&generator));
     factory->Release();
     if (FAILED(generated)) return 27;
+    if (!legacy) {
     const CLSID objId = {0x3c9ee5a7,0x895c,0x46e2,{0x93,0x1b,0x13,0xa5,0x1e,0xa7,0xa8,0x42}};
     IExplorerCommand* clothing = nullptr;
     if (FAILED(getFactory(objId,IID_PPV_ARGS(&factory)))) return 32;
@@ -131,6 +133,7 @@ int wmain(int argc, wchar_t** argv) {
         clothingSite->SetSite(nullptr);clothingSite->Release();
     }
     clothing->Release();
+    }
     PWSTR title = nullptr;
     if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter com RPForge")) return 15;
     CoTaskMemFree(title);

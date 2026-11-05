@@ -154,6 +154,6 @@ if ($previousEntry.Present) {
     & reg.exe export $originalUninstall.Replace('HKCU:\','HKCU\') $afterFile /y | Out-Null
     if ($LASTEXITCODE -ne 0 -or (Get-ForgeSha256 $afterFile) -ne (Get-ForgeSha256 $previousEntry.File)) { throw 'Entrada de desinstalacao original foi alterada.' }
 } elseif (Test-Path -LiteralPath $originalUninstall) { throw 'Entrada original criada pelo teste.' }
-if ($originalPackage) { & (Join-Path $PSScriptRoot 'Test-ModernMenu.ps1') -InstallDir $originalRoot }
+if ($originalPackage) { & (Join-Path $PSScriptRoot 'Test-ModernMenu.ps1') -InstallDir $originalRoot -LegacyShell }
 if ($testFailure) { throw $testFailure }
 Write-Host "PASS: instalacao, reinstalacao, menus RPF/YTYP, GUI e CLI sem PATH, desinstalacao, dados preservados e integracao original restaurada. Logs: $testRoot"
