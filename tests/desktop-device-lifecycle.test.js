@@ -118,3 +118,22 @@ test('disconnect releases the session but preserves the key for future reauthori
   assert.equal((await store.read()).installationId, original.installationId);
   assert.equal((await store.read()).refreshToken, undefined);
 });
+test('closing the app suspends MFA without deleting its pending authorization; explicit cancellation deletes it', async () => {
+  const store=storage();let grants=0;
+  const options={storage:store,fetcher:async url=>{
+    if(url.endsWith('/authorizations')){grants++;return response(grant(),201);}
+    if(url.endsWith('/login'))return response({mfaRequired:true,challengeToken:'b'.repeat(64)},202);
+    return response({refreshToken:'mfa-completed',profile});
+  }};
+  const client=new NativeAuth(options);await client.signIn('person@example.invalid','private-password');
+  const saved=structuredClone(await store.read()),controller=client.pending.controller;
+  client.suspend();assert.equal(controller.signal.aborted,true);assert.equal(client.pending,null);
+  assert.deepEqual(await store.read(),saved);
+  const restarted=new NativeAuth(options);
+  assert.equal((await restarted.resume()).challengeToken,'b'.repeat(64));
+  await restarted.verifyMfa('b'.repeat(64),'123456');assert.equal(grants,1);
+  assert.equal((await store.read()).refreshToken,'mfa-completed');
+  await restarted.signIn('person@example.invalid','private-password');await restarted.cancel();
+  assert.equal((await store.read()).pendingAuthorization,undefined);
+  assert.equal((await store.read()).installationId,saved.installationId);
+});

@@ -495,7 +495,7 @@ ipcMain.handle('forge:license-info',async event=>{
   fullAccount(event);const account=desktopAccount(),license=await account.license();
   return {plan:license?.plan||null,validUntil:license?.exp?license.exp*1000:null,issue:license?null:account.lastLicenseIssue,installationId:account.record?.installationId||null};
 });
-ipcMain.handle('forge:cancel-browser-auth',event=>{fullAccount(event);nativeAccount?.cancel();});
+ipcMain.handle('forge:cancel-browser-auth',event=>{fullAccount(event);return nativeAccount?.cancel();});
 ipcMain.handle("forge:close", (event) => {
   const context = owner(event);
   if (!context.workflow.busy) context.window.close();
@@ -547,7 +547,7 @@ else {
     createWindow(launchFromArgv(process.argv));
   });
   app.on("window-all-closed", () => {
-    nativeAccount?.cancel();
+    nativeAccount?.suspend();
     if (!workers.size) app.quit();
   });
   app.on("before-quit", (event) => {

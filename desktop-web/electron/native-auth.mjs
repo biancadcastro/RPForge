@@ -244,11 +244,14 @@ export class NativeAuth {
     }
     const forget=()=>this.forgetSession(record);await (this.storage.withLock?this.storage.withLock(forget):forget());
   }
-  async cancel(){
+  suspend(){
     this.generation=(this.generation||0)+1;
     const pending=this.pending;this.pending=null;
     if(pending){pending.controller.abort();if(pending.timer)this.clearDelay(pending.timer);}
     this.update({status:'idle'});
+  }
+  async cancel(){
+    this.suspend();
     const record=await this.load();
     if(record?.pendingAuthorization){const {pendingAuthorization,...identity}=record;this.record=identity;await this.storage.write(identity);}
   }
