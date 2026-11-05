@@ -6,6 +6,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {_electron} from 'playwright';
 import {clothingTestDestination} from '../../scripts/lib/clothing-test-fixtures.mjs';
+import {testProAccess} from './lib/test-pro-access.mjs';
 const [model,destination]=process.argv.slice(2);
 const project=process.env.RPF_DESKTOP_PROJECT||path.resolve(fileURLToPath(new URL('../',import.meta.url)));
 await clothingTestDestination(destination);const before=await readdir(destination),temporary=await mkdtemp(path.join(os.tmpdir(),'rpforge-mixed-neon-'));
@@ -14,6 +15,7 @@ const env={...process.env,RPF_TEST_USER_DATA:path.join(temporary,'profile'),RPF_
 let app;
 try{
  app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode','--neon',input],env});
+ await testProAccess(app,project);
  const page=await app.firstWindow();await page.getByRole('heading',{name:'Converter roupa para Neon'}).waitFor();
  assert.equal(await page.getByRole('checkbox').count(),0);
  await app.evaluate(({dialog},folder)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[folder]});},path.resolve(destination));

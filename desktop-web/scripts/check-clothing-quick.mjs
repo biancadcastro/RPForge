@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { _electron } from 'playwright';
 import {isolateClothingSpec,clothingTestDestination} from '../../scripts/lib/clothing-test-fixtures.mjs';
+import {testProAccess} from './lib/test-pro-access.mjs';
 const source=path.resolve(fileURLToPath(new URL('../',import.meta.url)));
 const project=process.env.RPF_DESKTOP_PROJECT ? path.resolve(process.env.RPF_DESKTOP_PROJECT) : source;
 const [spec,destination]=process.argv.slice(2);
@@ -18,6 +19,7 @@ try {
  for(const specimen of specimens) {
   const env={...process.env,RPF_TEST_USER_DATA:path.join(temporary,specimen.gender),RPF_TEST_OUTPUT_ROOT:path.resolve(destination)};delete env.ELECTRON_RUN_AS_NODE;
   app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode',...(process.env.RPF_TEST_OBJ_FOLDER ? ['--obj-folder',path.dirname(specimen.model)] : ['--obj',specimen.model])],env,timeout:25000});
+  await testProAccess(app,project);
   const page=await app.firstWindow();page.setDefaultTimeout(20000);
   await page.getByRole('heading',{name:'Exportar roupa para OBJ'}).waitFor();
   assert.equal(await page.locator('header.header').count(),0,'No full app navigation');
@@ -31,6 +33,7 @@ try {
   await page.locator('.clothing-config .clothing-file').nth(2).click();
   await page.getByRole('button',{name:'Exportar para OBJ',exact:false}).click();
   await page.getByRole('heading',{name:'Pronta para texturizar.'}).waitFor();
+  await page.locator('.pixel-result-preview summary').click();
   await page.waitForFunction(()=>document.querySelector('.clothing-canvas canvas')?.width>100);
   await page.waitForTimeout(200);
   assert.equal(await page.locator('main.clothing-workspace').evaluate(el=>el.scrollWidth>el.clientWidth),false);
@@ -47,6 +50,7 @@ try {
  await copyFile(s.texture,texture.replace('_a_uni.ytd','_b_uni.ytd'));
  const env={...process.env,RPF_TEST_USER_DATA:path.join(temporary,'ambiguous-profile'),RPF_TEST_OUTPUT_ROOT:path.resolve(destination)};delete env.ELECTRON_RUN_AS_NODE;
  app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode','--obj',model],env});
+ await testProAccess(app,project);
  const page=await app.firstWindow();
  await page.getByLabel('Variação encontrada na pasta').waitFor();
  assert.equal(await page.getByLabel('Variação encontrada na pasta').inputValue(),'');
