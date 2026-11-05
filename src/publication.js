@@ -9,8 +9,18 @@ const exists = async file => lstat(file).catch(error => {if(error.code==='ENOENT
 function within(root, relative) {
   if(typeof relative!=='string'||!relative||path.isAbsolute(relative))throw Error('Registro de recuperação inválido.');
   const file=path.resolve(root,relative);
-  if(!file.startsWith(root+path.sep))throw Error('Caminho de recuperação fora do destino.');
+  const offset=path.relative(root,file);
+  if(!offset||offset==='..'||offset.startsWith('..'+path.sep)||path.isAbsolute(offset))throw Error('Caminho de recuperação fora do destino.');
   return file;
+}
+// Canonicalize existing parents too: Windows TEMP may use an 8.3 alias while
+// realpath returns the long name. Missing output paths still need that identity.
+async function canonical(file) {
+  try{return await realpath(file);}catch(error){
+    if(error.code!=='ENOENT')throw error;
+    const parent=path.dirname(file);if(parent===file)throw error;
+    return path.join(await canonical(parent),path.basename(file));
+  }
 }
 async function digest(file) {
   const hash=createHash('sha256');
@@ -89,10 +99,11 @@ export async function publication(destination, stage, targets=[], directory=null
   if(path.dirname(resolved)!==root||!path.basename(resolved).startsWith('.rpforge-'))throw Error('Temporário de publicação inválido.');
   const data={schema:1,root,stage:path.basename(resolved),stageIdentity:identity(await lstat(resolved)),
     pid:process.pid,state:'prepared',files:await inventory(resolved),
-    targets:targets.map(({source,target})=>({source:path.relative(resolved,source),target:path.relative(root,target)})),
-    directory:directory?{output:path.relative(root,directory.output),backup:directory.backup?path.relative(root,directory.backup):null,
+    targets:await Promise.all(targets.map(async({source,target})=>({source:path.relative(resolved,await canonical(path.resolve(source))),target:path.relative(root,await canonical(path.resolve(target)))}))),
+    directory:directory?{output:path.relative(root,await canonical(path.resolve(directory.output))),backup:directory.backup?path.relative(root,await canonical(path.resolve(directory.backup))):null,
       previousIdentity:directory.previous?identity(directory.previous):null}:null};
   for(const target of data.targets){within(root,target.target);within(resolved,target.source);}
+  if(data.directory){within(root,data.directory.output);if(data.directory.backup)within(root,data.directory.backup);}
   const journal=path.join(root,prefix+randomUUID()+'.json');
   await durable(journal,data);
   return {

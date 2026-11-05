@@ -1,13 +1,34 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fork} from 'node:child_process';
-import {mkdtemp,mkdir,writeFile,readdir,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readdir,readFile,rm,symlink,link} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {pathToFileURL} from 'node:url';
-import {recoverPublications} from '../src/publication.js';
+import {publication,recoverPublications} from '../src/publication.js';
 
 const moduleUrl=pathToFileURL(path.resolve('src/publication.js')).href;
+test('publishes through a directory alias without confusing canonical and input paths',async()=>{
+  const parent=await mkdtemp(path.join(os.tmpdir(),'rpforge-alias-'));
+  const root=path.join(parent,'long-directory-name'),alias=path.join(parent,'alias');
+  try{
+    await mkdir(root);await symlink(root,alias,process.platform==='win32'?'junction':'dir');
+    const stage=path.join(alias,'.rpforge-stage');await mkdir(stage);await writeFile(path.join(stage,'model.obj'),'complete');
+    const journal=await publication(alias,stage,[{source:path.join(stage,'model.obj'),target:path.join(alias,'model.obj')}]);
+    await link(path.join(stage,'model.obj'),path.join(alias,'model.obj'));await journal.commit();
+    assert.equal(await readFile(path.join(root,'model.obj'),'utf8'),'complete');
+    assert.equal((await readdir(root)).some(name=>name.startsWith('.rpforge-')),false);
+  }finally{await rm(parent,{recursive:true,force:true});}
+});
+test('refuses an output that resolves outside the recorded publication root',async()=>{
+  const root=await mkdtemp(path.join(os.tmpdir(),'rpforge-boundary-'));
+  try{
+    const stage=path.join(root,'.rpforge-stage');await mkdir(stage);await writeFile(path.join(stage,'model.obj'),'safe');
+    await assert.rejects(publication(root,stage,[{source:path.join(stage,'model.obj'),target:path.join(root,'../outside.obj')}]),/fora do destino/);
+    assert.equal(await readFile(path.join(stage,'model.obj'),'utf8'),'safe');
+    assert.equal((await readdir(root)).some(name=>name.startsWith('.rpforge-journal-')),false);
+  }finally{await rm(root,{recursive:true,force:true});}
+});
 async function interrupt(root,kind){
   const script=path.join(root,'child.mjs');
   await writeFile(script,`import {publication} from ${JSON.stringify(moduleUrl)};
