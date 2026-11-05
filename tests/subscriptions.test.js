@@ -76,7 +76,7 @@ test('two independent processes serialize rotation and reread the latest encrypt
 
 test('a failed save never causes the consumed refresh token to be sent again',async()=>{
  let saved={refreshToken:'old',installationId:'device',privateKey:privateKey.export({format:'pem',type:'pkcs8'}),checkedAt:now-61000,profile:{displayName:'Test'},license:token(),licenseKeys:keys},fail=true,renewals=0;
- const storage={read:async()=>saved,write:async value=>{if(fail){fail=false;throw Error('disk busy');}saved=value;}};
+ const storage={read:async()=>saved,write:async value=>{if(fail&&value.refreshToken==='new'){fail=false;throw Error('disk busy');}saved=value;}};
  const client=new NativeAuth({now:()=>now,storage,fetcher:async()=>{renewals++;return new Response(JSON.stringify({license:token(),refreshToken:'new',profile:{displayName:'Test'}}));}});
  await assert.rejects(client.license(),/salvar/);assert.equal(client.record.refreshToken,'new');assert.equal(saved.refreshToken,'old');
  assert.equal((await client.license()).plan,'pro');assert.equal(renewals,1);assert.equal(saved.refreshToken,'new');
@@ -84,8 +84,8 @@ test('a failed save never causes the consumed refresh token to be sent again',as
 
 test('revocation invalidates even a signed cached Pro license, while outages do not claim Free',async()=>{
  let cleared=0;const record={refreshToken:'refresh',installationId:'device',privateKey:privateKey.export({format:'pem',type:'pkcs8'}),checkedAt:now-61000,profile:{displayName:'Test'},license:token(),licenseKeys:keys};
- const revoked=new NativeAuth({now:()=>now,storage:{read:async()=>record,clear:async()=>{cleared++;}},fetcher:async()=>new Response(JSON.stringify({code:'DESKTOP_AUTHENTICATION_REQUIRED'}),{status:401})});
- assert.equal(await revoked.license(),null);assert.equal(cleared,1);assert.equal(revoked.lastLicenseIssue,'revoked');
+ const revoked=new NativeAuth({now:()=>now,storage:{read:async()=>record,write:async value=>{if(!value.refreshToken)cleared++;}},fetcher:async()=>new Response(JSON.stringify({code:'DESKTOP_AUTHENTICATION_REQUIRED'}),{status:401})});
+ assert.equal(await revoked.license(),null);assert.equal(cleared,1);assert.equal(revoked.record.installationId,'device');assert.equal(revoked.lastLicenseIssue,'revoked');
  await assert.rejects(requireToolAccess('skin-inspect',revoked),/sessão|autorização/);
  const outage=new NativeAuth({now:()=>now,storage:{read:async()=>({...record,checkedAt:now,licenseKeys:undefined})},fetcher:async()=>{throw Error('offline');}});
  await assert.rejects(requireToolAccess('skin-inspect',outage),/validar sua licença/);

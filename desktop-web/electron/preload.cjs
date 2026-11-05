@@ -40,6 +40,11 @@ contextBridge.exposeInMainWorld("rpforge", {
   openFolder: (folder) => invoke("forge:open-folder", folder),
   openFull: () => invoke("forge:open-full"),
   profile: () => invoke("forge:profile"),
+  signOut: () => invoke('forge:sign-out'),
+  openAccount: () => invoke('forge:open-account'),
+  appInfo: () => invoke('forge:app-info'),
+  openDownloads: () => invoke('forge:open-downloads'),
+  licenseInfo: () => invoke('forge:license-info'),
   authOptions: () => invoke("forge:auth-options"),
   signIn: (email, password) => invoke("forge:sign-in", { email, password }),
   verifyMfa: (challengeToken, code) =>

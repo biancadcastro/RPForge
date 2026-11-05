@@ -1,4 +1,5 @@
-import { createHash, generateKeyPair, randomBytes, randomUUID, sign } from 'node:crypto';
+import { createHash, createPublicKey, generateKeyPair, randomBytes, randomUUID, sign } from 'node:crypto';
+import {hostname} from 'node:os';
 import { promisify } from 'node:util';
 import { publicProfile } from './profile.mjs';
 import { verifyLicense } from './license.mjs';
@@ -6,13 +7,18 @@ const keyPair = promisify(generateKeyPair);
 const API = 'https://api.rpforge.dev';
 const providers = new Set(['discord','google','github']);
 const messages = {
+  DEVICE_CLOCK_SKEW:'Sincronize o relógio do Windows e tente novamente. A identidade deste computador foi preservada.',
+  INVALID_DEVICE_PROOF:'Não foi possível confirmar este computador. Tente novamente ou reconecte a conta; sua identidade foi preservada.',
+  INVALID_CREDENTIALS:'Confira o e-mail e a senha. O e-mail precisa estar confirmado.',
+  MFA_CODE_INVALID:'Confira o código do autenticador ou use um código de recuperação.',
+  MFA_CHALLENGE_INVALID:'Este acesso expirou. Entre novamente.',
   DEVICE_LIMIT_OR_ALREADY_REGISTERED:'A conta já atingiu o limite de computadores. Revise as autorizações no navegador.',
   AUTHORIZATION_EXPIRED:'A autorização expirou. Tente conectar novamente.',
   LICENSING_NOT_CONFIGURED:'A conexão do aplicativo ainda não está disponível no servidor.',
   TOO_MANY_ATTEMPTS:'Muitas tentativas. Aguarde antes de conectar novamente.',
 };
 export class NativeAuth {
-  constructor({fetcher,openExternal,storage,onState,onProfile,onDiagnostic,deviceName='RPForge no Windows',now=Date.now,delay=setTimeout,clearDelay=clearTimeout}) {
+  constructor({fetcher,openExternal,storage,onState,onProfile,onDiagnostic,deviceName=hostname().replace(/[\p{C}<>]/gu,'').slice(0,60)||'Computador Windows',now=Date.now,delay=setTimeout,clearDelay=clearTimeout}) {
     Object.assign(this,{fetcher,openExternal,storage,onState,onProfile,deviceName,now,delay,clearDelay});
     this.pending=null;this.record=null;this.loaded=false;this.state={status:'idle'};
     this.onDiagnostic=onDiagnostic;
@@ -57,16 +63,25 @@ export class NativeAuth {
     if(this.pendingSave){await this.storage.write(this.record);this.pendingSave=false;record=this.record;}
     if(record?.migrateStorage){const {migrateStorage,...migrated}=record;await this.storage.write(migrated);record=migrated;this.record=migrated;}
     if(!record?.refreshToken)return null;
-    if(record.license&&record.checkedAt>this.now()-60000)return publicProfile(record.profile);
-    const nonce=randomBytes(32).toString('hex'),timestamp=this.now();
+    if(record.license&&!record.pendingRenewal&&record.checkedAt>this.now()-60000)return publicProfile(record.profile);
     try{
-      const signature=sign('sha256',Buffer.from(`rpforge-renew-v1\n${record.refreshToken}\n${nonce}\n${timestamp}`),record.privateKey).toString('base64url');
-      const {data}=await this.request('/v1/desktop/licenses/renew',{refreshToken:record.refreshToken,nonce,timestamp,signature});
-      const next={...record,refreshToken:data.refreshToken,license:data.license,profile:publicProfile(data.profile),checkedAt:this.now()};
+      // Save the exact signed request before sending so a lost response can be retried.
+      const proof=record.pendingRenewal||this.proof(record,'renew');
+      record={...record,pendingRenewal:proof};this.record=record;await this.storage.write(record);
+      const {data}=await this.request('/v1/desktop/licenses/renew',proof);
+      const {pendingRenewal,...previous}=record;
+      const next={...previous,refreshToken:data.refreshToken,license:data.license,profile:publicProfile(data.profile),checkedAt:this.now()};
       this.record=next;this.pendingSave=true;await this.storage.write(next);this.pendingSave=false;this.onDiagnostic?.({event:'session_renewed'});return next.profile;
     }catch(error){
       if(this.pendingSave){this.onDiagnostic?.({event:'session_save_failed'});throw new Error('Não foi possível salvar a renovação da conta neste computador. Tente novamente.');}
-      if(error.status===401){this.lastLicenseIssue='revoked';this.record=null;await this.storage.clear();this.onDiagnostic?.({event:'session_cleared'});return null;}
+      if(error.status===401&&['DESKTOP_AUTHENTICATION_REQUIRED','DESKTOP_TOKEN_REUSED'].includes(error.code)){
+        this.lastLicenseIssue='revoked';await this.forgetSession(record);return null;
+      }
+      if(['DEVICE_CLOCK_SKEW','INVALID_DEVICE_PROOF'].includes(error.code)){
+        const {pendingRenewal,...preserved}=record;this.record=preserved;await this.storage.write(preserved);
+        this.lastLicenseIssue='clock';this.lastLicenseMessage=error.message;
+        return record.checkedAt>this.now()-72*3600000?publicProfile(record.profile):null;
+      }
       this.onDiagnostic?.({event:'renew_unavailable',status:error.status||0});
       this.lastLicenseIssue='unavailable';
       return record.checkedAt>this.now()-72*60*60*1000?publicProfile(record.profile):null;
@@ -97,46 +112,144 @@ export class NativeAuth {
     }
     this.onDiagnostic?.({event:'license_verified',valid:true,plan:license.plan});return license;
   }
+  proof(record,purpose){
+    const nonce=randomBytes(32).toString('hex'),timestamp=this.now();
+    const signature=sign('sha256',Buffer.from(`rpforge-${purpose}-v1\n${record.refreshToken}\n${nonce}\n${timestamp}`),record.privateKey).toString('base64url');
+    return {refreshToken:record.refreshToken,nonce,timestamp,signature};
+  }
+  async forgetSession(record=this.record){
+    // A revoked session must not erase the durable identity and consume a new seat on login.
+    if(record?.installationId&&record.privateKey){
+      this.record={installationId:record.installationId,privateKey:record.privateKey,publicKey:record.publicKey,profile:null};
+      this.loaded=true;await this.storage.write(this.record);
+    }else{this.record=null;this.loaded=false;await this.storage.clear();}
+    this.licenseKeys=null;this.onProfile?.(null);
+  }
+  async identity(){
+    const operation=async()=>{
+      const record=await this.storage.read()||await this.load()||{};
+      if(record.privateKey&&record.installationId){
+        this.record={...record,publicKey:createPublicKey(record.privateKey).export({format:'jwk'})};
+      }else{
+        const keys=await keyPair('rsa',{modulusLength:3072});
+        this.record={installationId:randomUUID(),privateKey:keys.privateKey.export({type:'pkcs8',format:'pem'}),publicKey:keys.publicKey.export({format:'jwk'}),profile:null};
+      }
+      await this.storage.write(this.record);this.loaded=true;return this.record;
+    };
+    return this.storage.withLock?this.storage.withLock(operation):operation();
+  }
+  async grant(provider){
+    const identity=await this.identity(),saved=identity.pendingAuthorization;
+    if(saved?.provider===provider&&saved.expiresAt>this.now())return {...saved,controller:new AbortController(),timer:null,attempts:0};
+    const verifier=randomBytes(32).toString('base64url');
+    const {data}=await this.request('/v1/desktop/authorizations',{installationId:identity.installationId,publicKey:identity.publicKey,deviceName:this.deviceName,challenge:createHash('sha256').update(verifier).digest('base64url')});
+    if(!/^[a-f0-9-]{36}$/i.test(data.id)||typeof data.deviceCode!=='string')throw Error('Resposta de autorização inválida.');
+    const savedGrant={provider,id:data.id,deviceCode:data.deviceCode,verifier,expiresAt:this.now()+Math.min(600,data.expiresIn||600)*1000,interval:Math.max(5,data.interval||5)*1000};
+    this.record={...identity,pendingAuthorization:savedGrant};await this.storage.write(this.record);
+    return {...savedGrant,controller:new AbortController(),timer:null,attempts:0};
+  }
+  activation(pending){
+    const signature=sign('sha256',Buffer.from(`rpforge-activate-v1\n${pending.deviceCode}\n${pending.verifier}`),this.record.privateKey).toString('base64url');
+    return {deviceCode:pending.deviceCode,verifier:pending.verifier,signature};
+  }
+  async accept(data,pending){
+    const profile=publicProfile(data.profile);
+    if(!profile||typeof data.refreshToken!=='string'||!data.refreshToken)throw Error('Resposta de sessão inválida.');
+    const {pendingAuthorization,pendingRenewal,...identity}=this.record;
+    const record={...identity,refreshToken:data.refreshToken,profile,checkedAt:0};
+    const save=()=>this.storage.write(record);await (this.storage.withLock?this.storage.withLock(save):save());
+    this.record=record;this.loaded=true;this.pendingSave=false;this.pending=null;
+    this.update({status:'connected',provider:pending.provider});this.onProfile?.(profile);
+  }
   async begin(provider){
     if(!providers.has(provider))throw new Error('Provedor inválido.');
+    if(this.starting)return this.starting;
     if(this.pending)return this.state;
-    const pending={provider,controller:new AbortController(),timer:null};this.pending=pending;
+    const generation=this.generation=(this.generation||0)+1;
+    this.starting=this.beginBrowser(provider,generation);
+    try{return await this.starting;}finally{this.starting=null;}
+  }
+  async beginBrowser(provider,generation){
     this.update({status:'starting',provider});
     try{
-      const keys=await keyPair('rsa',{modulusLength:3072});
-      if(this.pending!==pending)return this.state;
-      pending.privateKey=keys.privateKey.export({type:'pkcs8',format:'pem'});
-      pending.verifier=randomBytes(32).toString('base64url');
-      pending.installationId=randomUUID();
-      const {data}=await this.request('/v1/desktop/authorizations',{
-        installationId:pending.installationId,publicKey:keys.publicKey.export({format:'jwk'}),deviceName:this.deviceName,
-        challenge:createHash('sha256').update(pending.verifier).digest('base64url'),
-      },pending.controller.signal);
-      if(!/^[a-f0-9-]{36}$/i.test(data.id)||typeof data.deviceCode!=='string')throw new Error('Resposta de autorização inválida.');
-      pending.deviceCode=data.deviceCode;pending.expiresAt=this.now()+Math.min(600,data.expiresIn||600)*1000;
-      pending.interval=Math.max(5,data.interval||5)*1000;
-      if(this.pending!==pending)return this.state;
-      await this.openExternal(`${API}/v1/auth/oauth/${provider}/start?desktop=${encodeURIComponent(data.id)}`);
+      const pending=await this.grant(provider);
+      if(generation!==this.generation){await this.cancel();return this.state;}
+      this.pending=pending;
+      await this.openExternal(`${API}/v1/auth/oauth/${provider}/start?desktop=${encodeURIComponent(pending.id)}`);
       if(this.pending!==pending)return this.state;
       this.update({status:'waiting',provider,message:'Conclua a autorização no navegador. O app se conecta automaticamente depois.'});
       pending.timer=this.delay(()=>void this.poll(pending),pending.interval);
       return this.state;
-    }catch(error){if(this.pending===pending){this.pending=null;this.update({status:'error',provider,message:error.message||'Não foi possível abrir a autorização.'});}throw error;}
+    }catch(error){this.pending=null;this.update({status:'error',provider,message:error.message||'Não foi possível abrir a autorização.'});throw error;}
   }
   async poll(pending){
     if(this.pending!==pending)return;
     if(this.now()>=pending.expiresAt){this.cancel();this.update({status:'error',provider:pending.provider,message:'A autorização expirou. Tente novamente.'});return;}
     try{
-      const result=await this.request('/v1/desktop/token',{deviceCode:pending.deviceCode,verifier:pending.verifier},pending.controller.signal);
+      const result=await this.request('/v1/desktop/token',this.activation(pending),pending.controller.signal);
       if(this.pending!==pending)return;
       if(result.pending){pending.timer=this.delay(()=>void this.poll(pending),pending.interval);return;}
-      const profile=publicProfile(result.data.profile);
-      const record={installationId:pending.installationId,privateKey:pending.privateKey,refreshToken:result.data.refreshToken,profile,checkedAt:this.now()};
-      if(typeof record.refreshToken!=='string'||!record.refreshToken)throw new Error('Resposta de sessão inválida.');
-      const save=()=>this.storage.write(record);await (this.storage.withLock?this.storage.withLock(save):save());this.record=record;this.pendingSave=false;this.loaded=true;this.pending=null;
-      if(!profile)throw new Error('A conta foi autorizada, mas o servidor ainda precisa disponibilizar o perfil do aplicativo.');
-      this.update({status:'connected',provider:pending.provider});this.onProfile?.(profile);
-    }catch(error){if(this.pending===pending||this.record?.installationId===pending.installationId){this.pending=null;this.update({status:'error',provider:pending.provider,message:error.message||'Não foi possível concluir a autorização.'});}}
+      await this.accept(result.data,pending);
+    }catch(error){if(this.pending===pending){
+      if(!error.status||error.status>=500||error.status===429){
+        pending.attempts=(pending.attempts||0)+1;
+        this.update({status:'waiting',provider:pending.provider,message:'A conexão está instável. Tentando novamente; você pode cancelar.'});
+        pending.timer=this.delay(()=>void this.poll(pending),Math.min(30000,pending.interval*2**Math.min(pending.attempts,3)));
+      }else{await this.cancel();this.update({status:'error',provider:pending.provider,message:error.message||'Não foi possível concluir a autorização.'});}
+    }}
   }
-  cancel(){const pending=this.pending;this.pending=null;if(pending){pending.controller.abort();if(pending.timer)this.clearDelay(pending.timer);}this.update({status:'idle'});}
+  async resume(){
+    if(this.pending||this.starting)return this.state;
+    const record=await this.load(),saved=record?.pendingAuthorization;
+    if(saved&&saved.expiresAt>this.now()){
+      this.pending={...saved,controller:new AbortController(),timer:null,attempts:0};
+      if(saved.challengeToken)return {status:'idle',challengeToken:saved.challengeToken};
+      await this.poll(this.pending);
+    }
+    return this.state;
+  }
+  async signIn(email,password){
+    if(typeof email!=='string'||email.length>254||typeof password!=='string'||!password||password.length>512)throw Error('Confira o e-mail e a senha.');
+    await this.cancel();
+    const pending=await this.grant('password');this.pending=pending;
+    try{
+      const {data}=await this.request('/v1/desktop/login',{...this.activation(pending),email:email.trim(),password});
+      if(data.mfaRequired){
+        this.record={...this.record,pendingAuthorization:{...this.record.pendingAuthorization,challengeToken:data.challengeToken}};
+        await this.storage.write(this.record);return data;
+      }
+      await this.accept(data,pending);return {mfaRequired:false};
+    }catch(error){
+      if(!error.status||error.status>=500){pending.timer=this.delay(()=>void this.poll(pending),pending.interval);}
+      else await this.cancel();
+      throw error;
+    }
+  }
+  async verifyMfa(challengeToken,code){
+    const pending=this.pending;
+    if(!pending||pending.provider!=='password')throw Error('Entre novamente para confirmar o acesso.');
+    try{
+      const {data}=await this.request('/v1/desktop/login/mfa',{...this.activation(pending),challengeToken,code});
+      await this.accept(data,pending);
+    }catch(error){
+      if(!error.status||error.status>=500)pending.timer=this.delay(()=>void this.poll(pending),pending.interval);
+      throw error;
+    }
+  }
+  async disconnect(){
+    await this.cancel();const record=await this.load();
+    if(record?.refreshToken){
+      try{await this.request('/v1/desktop/disconnect',this.proof(record,'disconnect'));}
+      catch(error){if(!['DESKTOP_AUTHENTICATION_REQUIRED','DESKTOP_TOKEN_REUSED'].includes(error.code))throw error;}
+    }
+    const forget=()=>this.forgetSession(record);await (this.storage.withLock?this.storage.withLock(forget):forget());
+  }
+  async cancel(){
+    this.generation=(this.generation||0)+1;
+    const pending=this.pending;this.pending=null;
+    if(pending){pending.controller.abort();if(pending.timer)this.clearDelay(pending.timer);}
+    this.update({status:'idle'});
+    const record=await this.load();
+    if(record?.pendingAuthorization){const {pendingAuthorization,...identity}=record;this.record=identity;await this.storage.write(identity);}
+  }
 }

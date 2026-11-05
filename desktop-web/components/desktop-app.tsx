@@ -143,7 +143,7 @@ export function DesktopApp() {
     const unsubscribe = bridge.onProgress(setProgress),
       unlaunch = bridge.onLaunch(open),
       unprofile=bridge.onProfile(profile=>{
-        if(!profile){loginRequiredRef.current=true;setLoginRequired(true);setScreen('account');}
+        if(!profile&&loginRequiredRef.current){setScreen('account');}
         else if(loginRequiredRef.current)void bridge.bootstrap().then(open);
       });
     return () => {
@@ -205,7 +205,7 @@ export function DesktopApp() {
       ) : screen === "account" && !quick ? (
         <AccountScreen api={api} />
       ) : screen === "help" && !quick ? (
-        <HelpScreen />
+        <HelpScreen api={api} />
       ) : (
         <ToolWorkspace
           id={id}

@@ -46,7 +46,7 @@ for (const provider of ['discord', 'google', 'github']) {
 test('cancel during browser opening does not restart polling',async()=>{
   let opened, release, timers=0;
   const opening=new Promise(resolve=>{release=resolve;});
-  const client=new NativeAuth({fetcher:async()=>json(grant,201),openExternal:async()=>{opened=true;await opening;},storage:{read:async()=>null},delay:()=>{timers++;},clearDelay:()=>{}});
+  const client=new NativeAuth({fetcher:async()=>json(grant,201),openExternal:async()=>{opened=true;await opening;},storage:{read:async()=>null,write:async()=>{}},delay:()=>{timers++;},clearDelay:()=>{}});
   const start=client.begin('google');
   while(!opened)await new Promise(resolve=>setImmediate(resolve));
   client.cancel();release();await start;
@@ -57,7 +57,7 @@ test('concurrent profile reads share renewal and revoked sessions are cleared',a
   let calls=0,cleared=0;
   const {generateKeyPairSync}=await import('node:crypto');
   const keys=generateKeyPairSync('rsa',{modulusLength:3072});
-  const client=new NativeAuth({fetcher:async()=>{calls++;return json({code:'DESKTOP_AUTHENTICATION_REQUIRED'},401);},storage:{read:async()=>({refreshToken:'old-token',privateKey:keys.privateKey.export({type:'pkcs8',format:'pem'}),profile,checkedAt:1}),clear:async()=>{cleared++;}},openExternal:async()=>{}});
+  const client=new NativeAuth({fetcher:async()=>{calls++;return json({code:'DESKTOP_AUTHENTICATION_REQUIRED'},401);},storage:{read:async()=>({refreshToken:'old-token',privateKey:keys.privateKey.export({type:'pkcs8',format:'pem'}),profile,checkedAt:1}),write:async()=>{},clear:async()=>{cleared++;}},openExternal:async()=>{}});
   assert.deepEqual(await Promise.all([client.profile(),client.profile()]),[null,null]);
   assert.equal(calls,1);assert.equal(cleared,1);
   assert.equal(await client.profile(),null);

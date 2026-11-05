@@ -43,7 +43,7 @@ export type Progress = {
 };
 export type Response = { data: Archive[]; reviewId: string | null };
 export type AccountProfile = { displayName: string; avatarUrl: string | null };
-export type BrowserAuthState = {status:'idle'|'starting'|'waiting'|'connected'|'error';provider?:string;message?:string};
+export type BrowserAuthState = {status:'idle'|'starting'|'waiting'|'connected'|'error';provider?:string;message?:string;challengeToken?:string};
 export type ToolId = "converter" | "ytyp";
 export type Screen = "home" | "help" | "account" | "clothing" | "neon" | "skin" | ToolId;
 export type SkinRole='skin'|'cloth'|'uncertain';
@@ -95,6 +95,11 @@ export interface DesktopBridge {
   openFolder(folder: string): Promise<void>;
   openFull(): Promise<void>;
   profile(): Promise<AccountProfile | null>;
+  signOut(): Promise<void>;
+  openAccount(): Promise<void>;
+  appInfo(): Promise<{version:string;development:boolean;electron:string;platform:string}>;
+  openDownloads(): Promise<void>;
+  licenseInfo(): Promise<{plan:string|null;validUntil:number|null;issue:string|null;installationId:string|null}>;
   authOptions(): Promise<AuthOptions>;
   signIn(
     email: string,

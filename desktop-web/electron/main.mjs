@@ -68,7 +68,10 @@ let nativeAccount,
   profileRequests = 0;
 function desktopAccount() {
   if(!nativeAccount)nativeAccount=new NativeAuth({
-    fetcher:(...args)=>fetch(...args),openExternal:url=>shell.openExternal(url),
+    fetcher:(...args)=>{
+      if(testMode){if(!globalThis.__forgeTestFetch)throw Error('Configure uma API isolada para o teste de autenticação.');return globalThis.__forgeTestFetch(...args);}
+      return fetch(...args);
+    },openExternal:url=>shell.openExternal(url),
     storage:testMode?encryptedSessionStorage(app.getPath('userData'),safeStorage):desktopAccountStorage(app.getPath('userData'),process.env.LOCALAPPDATA,safeStorage,logAuth),
     onDiagnostic:event=>{console.info('[RPForge auth]',JSON.stringify(event));logAuth(event);},
     onState:state=>{for(const context of contexts.values())if(!context.window.isDestroyed())context.window.webContents.send('forge:browser-auth',state);},
@@ -77,23 +80,9 @@ function desktopAccount() {
   return nativeAccount;
 }
 async function accountProfile(force = false) {
-  if (testMode) return typeof globalThis.__forgeTestProfile==='function'?globalThis.__forgeTestProfile():process.env.RPF_TEST_SIGNED_OUT==='1'?null:{ displayName: "Pessoa de teste", avatarUrl: null };
+  if (testMode) return typeof globalThis.__forgeTestProfile==='function'?globalThis.__forgeTestProfile():process.env.RPF_TEST_SIGNED_OUT==='1'?publicProfile(nativeAccount?.record?.profile):{ displayName: "Pessoa de teste", avatarUrl: null };
   const connected = await desktopAccount().profile();
-  if(connected)return connected;
-  if (!force && Date.now() - profileFetchedAt < 30000) return profileCache;
-  profileFetchedAt = Date.now();
-  profileRequests++;
-  try {
-    const response = await net.fetch("https://api.rpforge.dev/v1/me", {
-      credentials: "include",
-      cache: "no-store",
-      signal: AbortSignal.timeout(4000),
-    });
-    profileCache = response.ok ? publicProfile(await response.json()) : null;
-  } catch {
-    profileCache = null;
-  }
-  return profileCache;
+  return connected;
 }
 async function refreshAccount() {
   const profile = await accountProfile(true);
@@ -138,7 +127,7 @@ async function requireSession(context){
   }
 }
 async function run(context, action, folder, archives) {
-  await requireSession(context);
+  if(['clothing','neon','skin-inspect','skin-split'].includes(action))await requireSession(context);
   await requireToolAccess(action, desktopAccount(),license=>writeMenuAccess(license).catch(()=>{}));
   return new Promise((resolve, reject) => {
     const child = utilityProcess.fork(path.join(here, "worker.mjs"), [], {
@@ -235,6 +224,10 @@ function createWindow(launch) {
   win.on('maximize',publishWindowState);win.on('unmaximize',publishWindowState);
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event) => event.preventDefault());
+  win.webContents.on('will-prevent-unload',event=>{
+    const choice=dialog.showMessageBoxSync(win,{type:'question',buttons:['Continuar editando','Descartar e fechar'],defaultId:0,cancelId:0,title:'Revisão não exportada',message:'Esta revisão contém alterações não exportadas.',detail:'Fechar descarta a revisão. Os arquivos originais permanecem preservados.'});
+    if(choice===1)event.preventDefault();
+  });
   win.webContents.session.setPermissionRequestHandler(
     (_contents, _permission, callback) => callback(false),
   );
@@ -280,7 +273,7 @@ async function initializeClothingLaunch(context) {
 }
 async function prepareAuthorizedLaunch(context,fresh=false){
   const wasLoginRequired=context.loginRequired;
-  context.loginRequired=!await accountProfile();
+  context.loginRequired=['obj','neon','skin'].includes(context.launch.action)&&!await accountProfile();
   logAuth({event:'launch_ready',loggedIn:!context.loginRequired,action:context.launch.action,mode:context.launch.mode,packaged:!!process.windowsStore});
   if(context.loginRequired){
     if(!testMode)await writeMenuAccess(null).catch(()=>{});
@@ -400,7 +393,6 @@ ipcMain.handle('forge:clothing-preview', async event => {
 });
 ipcMain.handle("forge:select-folder", async (event) => {
   const context = owner(event);
-  await requireSession(context);
   if (context.workflow.busy) throw new Error("Aguarde a operação terminar.");
   const selected = await dialog.showOpenDialog(context.window, {
     title: "Selecione a pasta de origem",
@@ -414,7 +406,6 @@ ipcMain.handle("forge:select-folder", async (event) => {
 });
 ipcMain.handle("forge:operation", async (event, request) => {
   const context = owner(event);
-  await requireSession(context);
   if (
     !request ||
     !["preview", "convert", "ytyp"].includes(request.action) ||
@@ -459,6 +450,11 @@ ipcMain.handle("forge:open-folder", async (event, folder) => {
 ipcMain.handle("forge:open-full", (event) => {
   const context = owner(event);
   if (context.workflow.busy) throw new Error("Aguarde a operação terminar.");
+  if(context.launch.mode==='full'){
+    context.launch={mode:'full',action:'preview',folder:''};
+    context.window.webContents.send('forge:launch',context.launch);
+    return;
+  }
   createWindow({ ...context.launch, mode: "full" });
   context.window.close();
 });
@@ -475,20 +471,30 @@ ipcMain.handle("forge:auth-options", async (event) => {
 });
 ipcMain.handle("forge:sign-in", async (event, input) => {
   fullAccount(event);
-  const result = await auth.login(input);
+  const result = await desktopAccount().signIn(input?.email,input?.password);
   if (!result.mfaRequired) await refreshAccount();
   return result;
 });
 ipcMain.handle("forge:mfa", async (event, input) => {
   fullAccount(event);
-  await auth.verify(input);
+  await desktopAccount().verifyMfa(input?.challengeToken,input?.code);
   await refreshAccount();
 });
 ipcMain.handle("forge:oauth", async (event, provider) => {
   const context = fullAccount(event);
   await startOAuth(context, provider);
 });
-ipcMain.handle('forge:browser-auth-state',event=>{fullAccount(event);return nativeAccount?.state||{status:'idle'};});
+ipcMain.handle('forge:browser-auth-state',event=>{fullAccount(event);return desktopAccount().resume();});
+ipcMain.handle('forge:sign-out',async event=>{
+  fullAccount(event);await desktopAccount().disconnect();await refreshAccount();
+});
+ipcMain.handle('forge:open-account',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/dashboard/');});
+ipcMain.handle('forge:app-info',event=>{fullAccount(event);return {version:app.getVersion(),development:!app.isPackaged,electron:process.versions.electron,platform:process.platform+'-'+process.arch};});
+ipcMain.handle('forge:open-downloads',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/docs/instalar/');});
+ipcMain.handle('forge:license-info',async event=>{
+  fullAccount(event);const account=desktopAccount(),license=await account.license();
+  return {plan:license?.plan||null,validUntil:license?.exp?license.exp*1000:null,issue:license?null:account.lastLicenseIssue,installationId:account.record?.installationId||null};
+});
 ipcMain.handle('forge:cancel-browser-auth',event=>{fullAccount(event);nativeAccount?.cancel();});
 ipcMain.handle("forge:close", (event) => {
   const context = owner(event);

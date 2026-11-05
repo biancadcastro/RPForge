@@ -8,6 +8,8 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [browserAuth,setBrowserAuth]=useState<BrowserAuthState>({status:'idle'});
   const [options, setOptions] = useState<AuthOptions>();
+  const [license,setLicense]=useState<Awaited<ReturnType<DesktopBridge['licenseInfo']>>>();
+  useEffect(()=>{if(api&&profile)void api.licenseInfo().then(setLicense).catch(error=>setError(error.message));},[api,profile]);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [showPassword, setShowPassword] = useState(false);
@@ -46,7 +48,7 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
         setBusy(false);
       }
     });
-    const updateBrowser=(value:BrowserAuthState)=>{if(active){setBrowserAuth(value);setBusy(value.status==='starting'||value.status==='waiting');if(value.status==='error')setError(value.message||'Não foi possível conectar.');}};
+    const updateBrowser=(value:BrowserAuthState)=>{if(active){setBrowserAuth(value);if(value.challengeToken)setChallenge(value.challengeToken);setBusy(value.status==='starting'||value.status==='waiting');if(value.status==='error')setError(value.message||'Não foi possível conectar.');}};
     void api.browserAuthState().then(updateBrowser).catch(()=>{});
     const unsubBrowser=api.onBrowserAuth(updateBrowser);
     return () => {
@@ -139,6 +141,15 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
               Seu avatar e nick aparecem na barra lateral. As ações rápidas
               usam a sua sessão conectada.
             </p>
+            <p>{license?.issue==='clock'?'Ajuste a data e a hora do Windows e tente validar novamente.':license?.plan==='pro'?'Plano Pro ativo':license?.plan==='free'?'Plano Free':license?.issue==='missing'?'Conecte novamente para autorizar esta instalação.':'Não foi possível validar a autorização agora. Tente novamente.'}
+              {license?.installationId&&<small> · Instalação {license.installationId.slice(0,8)}</small>}</p>
+            <button className="button secondary" disabled={busy} onClick={()=>{setBusy(true);setError('');void api?.licenseInfo().then(setLicense).catch(error=>setError(error.message)).finally(()=>setBusy(false));}}>Atualizar autorização</button>
+            <button className="button secondary" disabled={busy} onClick={()=>void api?.openAccount().catch(error=>setError(error.message))}>Gerenciar conta e computadores</button>
+            <button className="button secondary" disabled={busy} onClick={()=>{
+              setBusy(true);setError('');
+              void api?.signOut().then(()=>setProfile(null)).catch(error=>setError(error.message)).finally(()=>setBusy(false));
+            }}>Desconectar este computador</button>
+            {error&&<p role="alert" className="account-form-error">{error}</p>}
           </>
         ) : (
           <>
@@ -155,6 +166,7 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
                 Carregando opções de entrada…
               </p>
             )}
+            {!options&&error&&<button className="button secondary" disabled={busy} onClick={()=>{setBusy(true);setError('');void api?.authOptions().then(setOptions).catch(error=>setError(error.message)).finally(()=>setBusy(false));}}>Tentar carregar opções novamente</button>}
             <div className="account-entry-columns">
             {(challenge||options?.passwordAuthEnabled)&&<form onSubmit={submit}>
               {challenge ? (

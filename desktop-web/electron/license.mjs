@@ -29,6 +29,7 @@ export async function requireToolAccess(action, account, onLicense) {
   // The Explorer presentation must reflect the very snapshot enforcing access.
   await onLicense?.(license);
   if(!license&&account.lastLicenseIssue){
+    if(account.lastLicenseIssue==='clock')throw new Error(account.lastLicenseMessage||'Sincronize o relógio do Windows e tente novamente.');
     const reasons={missing:'Não foi possível carregar a sessão da sua conta. Abra Conta no aplicativo e conecte novamente.',revoked:'A autorização deste computador não está mais válida. Conecte novamente sua conta no aplicativo.',unavailable:'Não foi possível validar sua licença agora. Verifique a conexão e tente novamente.',invalid:'A licença deste computador não pôde ser validada. Abra Conta no aplicativo para renovar a autorização.'};
     throw new Error(reasons[account.lastLicenseIssue]||'Não foi possível validar a licença deste computador.');
   }
