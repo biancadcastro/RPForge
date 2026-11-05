@@ -1,0 +1,37 @@
+/* The website's raised controls, shared by configuration, results and editor. */
+.desktop :is(.button, .pixel-result-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: var(--control-gap);
+  min-height: var(--control-height);
+  padding: 8px 16px;
+  border: 2px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--surface-raised);
+  color: var(--text);
+  box-shadow: 0 3px 0 #121118, 0 5px 0 var(--control-border), inset 0 2px 0 #ffffff10;
+  font: 500 18px/1.3 var(--font-display);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .15s, transform .12s, box-shadow .12s;
+}
+.desktop :is(.button, .pixel-result-button).primary {
+  background: var(--primary);
+  border-color: var(--primary-border);
+  color: var(--primary-ink);
+  box-shadow: 0 3px 0 #884421, 0 5px 0 var(--primary-border), inset 0 2px 0 #ffddbb70;
+}
+.desktop :is(.button, .pixel-result-button):hover:not(:disabled) { background: var(--surface-hover); border-color: #c6bccb; }
+.desktop :is(.button, .pixel-result-button).primary:hover:not(:disabled) { background: var(--primary-hover); border-color: #ffe0c3; }
+.desktop :is(.button, .pixel-result-button):active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #121118, 0 2px 0 var(--control-border); }
+.desktop :is(.button, .pixel-result-button).primary:active:not(:disabled) { box-shadow: 0 1px 0 #884421, 0 2px 0 var(--primary-border); }
+.desktop :is(.button, .pixel-result-button):disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.desktop :is(.button, .pixel-result-button)::after { display: none; }
+.desktop :is(.button, .pixel-result-button) > svg { display: block; width: 18px; height: 18px; flex-shrink: 0; align-self: center; }
+:is(button, a, input, select, textarea, summary):focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.desktop :is(.button, .pixel-result-button):focus-visible { outline-color: #fff1d9; outline-offset: 7px; }
+@media (prefers-reduced-motion: reduce) { .desktop :is(.button, .pixel-result-button) { transition: none; } }

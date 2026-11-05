@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import {useEffect,useMemo,useState} from 'react';
 import type {DesktopBridge,Launch,SkinReview,SkinResult} from '../lib/desktop';
 import {skinPreview,skinCounts,uncertainRegion} from '../lib/skin-review';
@@ -42,7 +43,7 @@ export function SkinWorkspace({api,active,busy,launch,onBusy,onEditorState}:{api
  function undo(){if(!history.length||busy)return;setOverrides(history[history.length-1]);setHistory(h=>h.slice(0,-1));}
  useEffect(()=>{if(!active||!review||busy)return;const shortcuts=(event:KeyboardEvent)=>{if(event.defaultPrevented||event.target instanceof HTMLElement&&event.target.closest('input,select,textarea'))return;const key=event.key.toLowerCase();if((event.ctrlKey||event.metaKey)&&key==='z'){event.preventDefault();undo();return;}if(event.ctrlKey||event.metaKey||event.altKey)return;if(key==='b')setTool('box');else if(key==='c')setTool('brush');else if(key==='v')setTool('face');else if(key==='escape')setTool('navigate');else if(key==='[')setRadius(r=>Math.max(8,r-4));else if(key===']')setRadius(r=>Math.min(120,r+4));};document.addEventListener('keydown',shortcuts);return()=>document.removeEventListener('keydown',shortcuts);},[active,review,busy,history]);
  return <main className={`clothing-workspace wrap skin-workspace${quick?' clothing-quick':''}${review?' skin-editing':''}${result?' skin-result-active':''}`} hidden={!active} aria-busy={busy}>
-  {!result&&<div className="clothing-heading"><div>{!quick&&<p className="kicker">Roupas e geometria</p>}<h1>Separar pele</h1><p>Revise as faces e gere a roupa e a pele em arquivos separados. Exclusivo do plano Pro.</p></div></div>}
+{!result&&<PageHeading className="clothing-heading" eyebrow={quick?undefined:"Roupas e geometria"} title="Separar pele" description="Revise as faces e gere a roupa e a pele em arquivos separados. Exclusivo do plano Pro."/>}
   {!review&&!result&&<section className="clothing-config skin-config" aria-label="Configuração da separação">
    <label>Peça de roupa <span>YDD com roupa e pele</span></label><button className="clothing-file" title={model} disabled={!api||busy} onClick={()=>void choose('model')}><Folder/><span>{model?basename(model):'Selecionar peça YDD'}</span></button>
    {model&&<p className="clothing-source-path">Origem: {model}</p>}

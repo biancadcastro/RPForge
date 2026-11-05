@@ -26,6 +26,7 @@ try{
   await page.getByRole('button',{name:'Enquadrar',exact:true}).click();
   const canvasBox=await canvas.boundingBox();assert.ok(canvasBox.height>=300,'Editor must have a usable viewport');
   const button=page.getByRole('button',{name:'Separar arquivos',exact:true});
+  assert.match(await button.evaluate(element=>getComputedStyle(element).fontFamily),/Pixelify/,'The editor primary action must use the website control font');
   await page.waitForFunction(()=>Array.from(document.querySelectorAll('.atelier-output-preview img')).filter(img=>img.complete&&img.naturalWidth>0).length===2);
   assert.equal(await page.locator('.atelier-source').count(),1);assert.equal(await page.locator('.atelier-inspector').count(),1);
   if(s.gender==='female'){
@@ -80,8 +81,8 @@ try{
    assert.equal(await page.locator('.pixel-result img').count(),0);
    assert.equal(await page.locator('.pixel-output').count(),2);
    assert.equal(await page.locator('.pixel-output li').count(),4);
-   assert.match(await page.locator('.pixel-result-heading h1').evaluate(e=>getComputedStyle(e).fontFamily),/Segoe UI/);
-   assert.match(await page.getByRole('button',{name:'Abrir pasta',exact:true}).evaluate(e=>getComputedStyle(e).fontFamily),/Segoe UI/);
+   assert.match(await page.locator('.pixel-result-heading h1').evaluate(e=>getComputedStyle(e).fontFamily),/Pixelify/);
+   assert.match(await page.getByRole('button',{name:'Abrir pasta',exact:true}).evaluate(e=>getComputedStyle(e).fontFamily),/Pixelify/);
    assert.equal(await page.locator('.pixel-result-heading svg[shape-rendering="crispEdges"]').count(),1);
    const cards=await page.locator('.pixel-output').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};}));assert.equal(cards[0].y,cards[1].y);assert.ok(Math.abs(cards[0].width-cards[1].width)<1);
    const heading=await page.locator('.pixel-result-heading').boundingBox();assert.equal(cards[0].x,heading.x);

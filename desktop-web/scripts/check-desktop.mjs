@@ -96,9 +96,9 @@ try {
   await cdp.send("CSS.enable");
   const { root: dom } = await cdp.send("DOM.getDocument");
   for (const [selector, family] of [
-    ["h1", /Segoe UI/],
-    [".sidebar-link", /Segoe UI/],
-    [".account-name", /Segoe UI/],
+    ["h1", /Pixelify/],
+    [".sidebar-link", /Atkinson/],
+    [".account-name", /Atkinson/],
   ]) {
     const { nodeId } = await cdp.send("DOM.querySelector", {
       nodeId: dom.nodeId,

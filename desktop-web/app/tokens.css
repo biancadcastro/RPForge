@@ -1,0 +1,31 @@
+/* RPForge website palette and bundled font roles. Desktop density is intentional. */
+:root {
+  color-scheme: dark;
+  --bg: #121218;
+  --surface: #1d1d27;
+  --surface-raised: #25232d;
+  --surface-hover: #34303d;
+  --line: #343444;
+  --control-border: #8c8792;
+  --field-border: #42424f;
+  --text: #f5f1e8;
+  --muted: #aaa9b7;
+  --muted-strong: #c4becc;
+  --orange: #ff7b25;
+  --yellow: #ffc857;
+  --primary: #e9843d;
+  --primary-hover: #f59852;
+  --primary-border: #ffd0a5;
+  --primary-ink: #20150d;
+  --selection-bg: #ff7b251a;
+  --selection-border: #a26841;
+  --danger: #f5b5a7;
+  --viewport: #18181f;
+  --font-body: Atkinson, Arial, sans-serif;
+  --font-display: Pixelify, monospace;
+  --control-height: 44px;
+  --control-gap: 8px;
+  --control-radius: 3px;
+  --window-bar-height: 40px;
+  --page-gap: 24px;
+}

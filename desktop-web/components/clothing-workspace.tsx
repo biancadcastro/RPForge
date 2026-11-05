@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import {OperationResult} from './operation-result';
 import { useEffect, useState } from 'react';
 import type { ClothingPreview, ClothingResult, DesktopBridge, Progress, Launch } from '../lib/desktop';
@@ -44,7 +45,7 @@ export function ClothingWorkspace({ api, active, busy, launch, onBusy }: { api?:
   }
   if(result)return <main className="clothing-workspace wrap result-workspace" hidden={!active}><OperationResult context="Roupas / Exportar OBJ" title="Pronta para texturizar." description="A peça foi exportada com UVs, normais e materiais." cards={[{title:'Arquivos OBJ e MTL',badge:'LOD '+result.lod,detail:'Somente OBJ e MTL · sem subpasta',files:[result.objFile,result.mtlFile]}]} destination={result.output} onOpen={()=>void api?.openFolder(result.output).catch(e=>setError(String(e)))} onReset={()=>{setResult(undefined);setPreview(undefined);setError('');}} resetLabel="Exportar outra peça"><p className="pixel-result-detail">{result.vertices.toLocaleString('pt-BR')} vértices · {result.triangles.toLocaleString('pt-BR')} triângulos · OBJ para pintura, sem rig.</p>{preview&&active&&<ResultPreview data={preview}/>}{error&&<p className="error-note" role="alert">{error}</p>}</OperationResult></main>;
   return <main className={`clothing-workspace wrap${quick ? ' clothing-quick' : ''}`} hidden={!active}>
-    <div className="clothing-heading"><div>{!quick && <p className="kicker">Roupas e texturização</p>}<h1>Exportar roupa para OBJ</h1><p>Exporte a peça com UVs, normais e materiais para texturização. Exclusivo do plano Pro.</p></div>{!quick && <span className="file-badge">.ydd → .obj</span>}</div>
+<PageHeading className="clothing-heading" eyebrow={quick?undefined:"Roupas e texturização"} title="Exportar roupa para OBJ" description="Exporte a peça com UVs, normais e materiais para texturização. Exclusivo do plano Pro." aside={!quick&&<span className="file-badge">.ydd → .obj</span>}/>
     <div className="clothing-layout"><section className="clothing-config" aria-label="Configuração da exportação OBJ" hidden={quick && !!result}>
       <h2>Prepare sua peça</h2>
       {quick && !model && <p className="clothing-note">Selecione uma peça YDD desta pasta ou de uma subpasta para continuar.</p>}

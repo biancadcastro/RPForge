@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import {OperationResult} from "./operation-result";
 import { Arrow, Folder } from "./icons";
 import {
@@ -97,19 +98,7 @@ export function ToolWorkspace({
           {id === "converter" ? "Converter RPFs" : "Gerar YTYP"}
         </p>
       )}
-      <div className="tool-heading">
-        <div>
-          <h1>{id === "converter" ? "Converter RPFs" : "Gerar YTYP"}</h1>
-          {!quick && (
-            <p>
-              {id === "converter"
-                ? "Confira os nomes e a saída antes de levar seus recursos ao servidor."
-                : "Registre os modelos YDR da sua pasta. Os originais ficam como estão."}
-            </p>
-          )}
-        </div>
-        {!quick && <span className="local-label">Processamento local</span>}
-      </div>
+<PageHeading className="tool-heading" title={id==='converter'?'Converter RPFs':'Gerar YTYP'} description={quick?undefined:id==='converter'?'Confira os nomes e a saída antes de levar seus recursos ao servidor.':'Registre os modelos YDR da sua pasta. Os originais ficam como estão.'} aside={!quick&&<span className="local-label">Processamento local</span>}/>
       {!quick && id === "converter" && draft.items.length > 0 && (
         <div className="stepper" aria-label="Etapas da conversão">
           {(["configure", "review", "result"] as const).map((step, index) => (

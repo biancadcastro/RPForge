@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import {OperationResult} from './operation-result';
 import { useEffect,useState } from 'react';
 import type {DesktopBridge,Launch,NeonResult,Progress} from '../lib/desktop';
@@ -20,7 +21,7 @@ export function NeonWorkspace({api,active,busy,launch,onBusy}:{api?:DesktopBridg
  }
  if(result)return <main className="clothing-workspace wrap result-workspace" hidden={!active}><OperationResult context="Roupas / Converter para Neon" title="Versão Neon criada." description="Uma nova versão emissiva da roupa foi salva." cards={[{title:'Roupa Neon',badge:'ID '+result.drawableId,detail:'Material ped_emissive',files:result.files}]} destination={result.output} onOpen={()=>void api?.openFolder(result.output).catch(e=>setError(String(e)))} onReset={()=>{setResult(undefined);setError('');}} resetLabel="Converter outra peça"><p className="pixel-result-detail">Geometria, UVs, pesos, esqueleto e texturas embutidas conferidos após reabrir o YDD. Confira a aparência no FiveM antes de usar no servidor.</p><details className="pixel-result-diagnostics"><summary>Detalhes dos LODs</summary>{result.lods.filter(l=>l.vertices>0).map(l=><p key={l.lod}>{l.lod}: {l.vertices.toLocaleString('pt-BR')} vértices · {l.triangles.toLocaleString('pt-BR')} triângulos</p>)}</details>{error&&<p className="error-note" role="alert">{error}</p>}</OperationResult></main>;
  return <main className={`clothing-workspace wrap${quick?' clothing-quick':''}`} hidden={!active}>
-  <div className="clothing-heading"><div>{!quick&&<p className="kicker">Roupas e materiais</p>}<h1>Converter roupa para Neon</h1><p>Uma nova versão emissiva, com geometria e rig preservados. Exclusivo do plano Pro.</p></div></div>
+<PageHeading className="clothing-heading" eyebrow={quick?undefined:"Roupas e materiais"} title="Converter roupa para Neon" description="Uma nova versão emissiva, com geometria e rig preservados. Exclusivo do plano Pro."/>
   <div className="clothing-layout"><section className="clothing-config" hidden={quick&&!!result} aria-label="Configuração Neon">
    <h2>Configurar Neon</h2>
    <label>Peça de roupa <span>YDD</span></label><button className="clothing-file" title={model} disabled={!api||busy} onClick={()=>void choose('model')}><Folder/><span>{model?basename(model):'Selecionar peça YDD'}</span></button>

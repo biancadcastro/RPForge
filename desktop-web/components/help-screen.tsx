@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import { Arrow, Folder } from "./icons";
 import {useEffect,useState} from 'react';
 import type {DesktopBridge} from "../lib/desktop";
@@ -7,10 +8,7 @@ export function HelpScreen({api}:{api?:DesktopBridge}) {
   useEffect(()=>{void api?.appInfo().then(setInfo).catch(e=>setError(e.message));},[api]);
   return (
     <main className="help-page wrap">
-      <p className="breadcrumb">RPForge / Como usar</p>
-      <h1>
-        Como usar o RPForge
-      </h1>
+<PageHeading eyebrow="RPForge / Como usar" title="Como usar o RPForge" description="Escolha, revise e crie. Seus arquivos originais ficam preservados."/>
       <div className="help-grid">
         <section><h2>Versão e suporte</h2><p>{info?`RPForge ${info.version}${info.development?' · ambiente de desenvolvimento':''} · ${info.platform} · Electron ${info.electron}`:'Carregando versão…'}</p><p>Para suporte, informe a versão, a ferramenta e a mensagem de erro. Nunca envie senha, códigos de recuperação ou arquivos de sessão.</p><button className="button secondary" onClick={()=>void api?.openDownloads().catch(e=>setError(e.message))}>Instalação e atualização manual</button>{error&&<p role="alert">{error}</p>}</section>
         <section>

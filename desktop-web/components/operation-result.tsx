@@ -1,6 +1,6 @@
 "use client";
 import type {ReactNode} from 'react';
-import {PixelSymbol} from './skin-result';
+import {PixelSymbol} from './result-icons';
 export type OutputCard={title:string;badge?:string;folder?:string;files?:string[];detail?:string;error?:string;onOpen?:()=>void};
 const basename=(value:string)=>value.split(/[\\/]/).pop()||value;
 export function OperationResult({context,title,description,cards,destination,onOpen,onReset,resetLabel='Nova operação',openLabel='Abrir pasta',note='Originais preservados',diagnostics,children}:{context:string;title:string;description:string;cards:OutputCard[];destination:string;onOpen?:()=>void;onReset:()=>void;resetLabel?:string;openLabel?:string;note?:string;diagnostics?:ReactNode;children?:ReactNode}){

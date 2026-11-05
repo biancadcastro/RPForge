@@ -20,6 +20,7 @@ jobs:
       - run: npm run desktop:build
       - run: npm run desktop:test
       - run: node desktop-web/scripts/check-login-gate.mjs
+      - run: node desktop-web/scripts/check-visual.mjs
   test:
     strategy:
       matrix:

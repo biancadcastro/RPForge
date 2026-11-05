@@ -1,4 +1,5 @@
 "use client";
+import {PageHeading} from './page-heading';
 import { FormEvent, useEffect, useState } from "react";
 import { AccountProfile, AuthOptions, BrowserAuthState, DesktopBridge } from "../lib/desktop";
 import { Arrow, UserIcon } from "./icons";
@@ -108,11 +109,7 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
   }
   return (
     <main className="account-page wrap">
-      <div className="account-intro">
-        <p className="breadcrumb">RPForge / Conta</p>
-        <h1>Sua conta no RPForge</h1>
-        <p>O mesmo perfil para suas ferramentas.</p>
-      </div>
+<PageHeading className="account-intro" eyebrow="RPForge / Conta" title="Sua conta no RPForge" description="O mesmo perfil para suas ferramentas."/>
       <section
         className={`account-panel ${profile || !options?.passwordAuthEnabled || !options?.providers.some(item=>item.enabled) || challenge ? "single-column" : ""}`}
         aria-labelledby="account-heading"
