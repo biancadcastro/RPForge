@@ -1,4 +1,4 @@
-param([string]$CompilerPath, [string]$SignedBinaryDirectory, [string]$UnsignedBinaryDirectory, [switch]$ValidateSignedInputsOnly)
+param([string]$CompilerPath, [string]$SignedBinaryDirectory, [string]$UnsignedBinaryDirectory, [switch]$ValidateSignedInputsOnly, [switch]$LocalTest, [string]$ClothingEngineDirectory)
 $ErrorActionPreference = 'Stop'
 if ($SignedBinaryDirectory -or $UnsignedBinaryDirectory -or $ValidateSignedInputsOnly) {
     if (!$SignedBinaryDirectory -or !$UnsignedBinaryDirectory) { throw 'Informe os diretorios assinado e original sem assinatura.' }
@@ -28,8 +28,12 @@ Push-Location $projectRoot
 try {
     & npm.cmd test
     if ($LASTEXITCODE -ne 0) { throw 'Testes falharam; instalador nao sera gerado.' }
+    & npm.cmd run desktop:build
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar a interface Electron.' }
+    & npm.cmd run desktop:test
+    if ($LASTEXITCODE -ne 0) { throw 'Falha nos testes da interface Electron.' }
     $binaryDirectory = Join-Path $tools ('installer-binaries\' + [guid]::NewGuid().ToString('N'))
-    & (Join-Path $PSScriptRoot 'Build-UnsignedBinaries.ps1') -Destination $binaryDirectory
+    & (Join-Path $PSScriptRoot 'Build-UnsignedBinaries.ps1') -Destination $binaryDirectory -AllowDirty:$LocalTest
     if (!$CompilerPath) {
         $CompilerPath = Join-Path $tools 'inno-6.7.3\ISCC.exe'
         if (!(Test-Path -LiteralPath $CompilerPath)) {
@@ -51,11 +55,26 @@ try {
         Remove-Item -LiteralPath $stage -Recurse -Force
     }
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
+    & (Join-Path $PSScriptRoot 'Prepare-DesktopPayload.ps1') -Destination (Join-Path $stage 'desktop-web')
     Copy-Item -LiteralPath (Join-Path $projectRoot 'src') -Destination $stage -Recurse
+    if (!$ClothingEngineDirectory) { $ClothingEngineDirectory = Join-Path $tools 'clothing-engine' }
+    New-Item -ItemType Directory -Path (Join-Path $stage 'engines') -Force | Out-Null
+    & $nodePath (Join-Path $PSScriptRoot 'distribution-engine.mjs') $ClothingEngineDirectory (Join-Path $stage 'engines\clothing')
+    if ($LASTEXITCODE -ne 0) { throw 'Motor de roupas incompleto ou alterado; instalador bloqueado.' }
     Copy-Item -LiteralPath (Join-Path $binaryDirectory 'RPFForge.exe') -Destination (Join-Path $stage 'RPFForge.exe')
     & (Join-Path $PSScriptRoot 'Build-Shell.ps1') -Destination (Join-Path $stage 'shell') -NativeBinaryPath (Join-Path $binaryDirectory 'ForgeShell.dll')
     Copy-Item -LiteralPath (Join-Path $stage 'shell\Assets') -Destination (Join-Path $stage 'Assets') -Recurse
     Copy-Item -LiteralPath (Join-Path $stage 'shell\resources.pri') -Destination (Join-Path $stage 'resources.pri')
+    if ($LocalTest) {
+        $publicCertificate = New-Object Security.Cryptography.X509Certificates.X509Certificate2((Join-Path $stage 'shell\RPFForge.LocalTest.cer'))
+        try {
+            $signTool = Join-Path (Initialize-ForgeTool $projectRoot 'sdk') 'bin\10.0.28000.0\x64\signtool.exe'
+            foreach ($localBinary in @((Join-Path $stage 'RPFForge.exe'), (Join-Path $stage 'shell\ForgeShell.dll'))) {
+                & $signTool sign /fd SHA256 /sha1 $publicCertificate.Thumbprint /s My $localBinary
+                if ($LASTEXITCODE -ne 0) { throw 'Falha ao assinar binario com certificado local.' }
+            }
+        } finally { $publicCertificate.Dispose() }
+    }
     Copy-Item -LiteralPath (Join-Path $binaryDirectory 'licenses') -Destination $stage -Recurse
     foreach ($name in @('sbom.cdx.json','build-manifest.json')) { Copy-Item -LiteralPath (Join-Path $binaryDirectory $name) -Destination $stage }
     Copy-Item -LiteralPath (Join-Path $projectRoot 'THIRD_PARTY_NOTICES.md') -Destination $stage
@@ -63,13 +82,6 @@ try {
     foreach ($name in @('package.json', 'package-lock.json', 'LICENSE', 'NOTICE')) {
         Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
     }
-    # Bundle the corresponding source locally instead of requiring a public download.
-    $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
-    $sourceDirectory = Join-Path $stage 'source'
-    New-Item -ItemType Directory -Path $sourceDirectory -Force | Out-Null
-    $sourceArchive = Join-Path $sourceDirectory "RPForge-source-$version.zip"
-    & git -C $projectRoot archive --format=zip --prefix=RPForge/ "--output=$sourceArchive" HEAD
-    if ($LASTEXITCODE -ne 0) { throw 'Falha ao preparar o codigo-fonte correspondente.' }
     Push-Location $stage
     try {
         & npm.cmd ci --omit=dev --ignore-scripts --no-audit --no-fund
@@ -102,19 +114,30 @@ Valide o resultado no FiveM antes de usar em producao.
 Para remover, use Configuracoes > Aplicativos > RPForge.
 Seus addons e arquivos originais nao sao apagados na desinstalacao.
 
-Codigo proprio sob GNU GPL versao 3. Veja LICENSE e NOTICE.
-O codigo-fonte correspondente, incluindo os scripts de compilacao e instalacao,
-esta no arquivo ZIP da pasta source. As dependencias mantem suas licencas proprias.
+Codigo proprio sob licenca proprietaria. Veja LICENSE e NOTICE.
+As dependencias mantem suas licencas proprias.
+Versao de testes com certificado local. A confianca requer autorizacao explicita.
+A primeira instalacao em maquina limpa ainda nao foi validada.
 '@
     Set-Content -LiteralPath (Join-Path $stage 'LEIA-ME.txt') -Value $instructions -Encoding UTF8
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version
-    & $CompilerPath "/DAppVersion=$version" "/DPayloadDir=$stage" "/DReleaseDir=$release" (Join-Path $projectRoot 'installer\setup.iss')
+    $localCertificate = Join-Path $stage 'shell\RPFForge.LocalTest.cer'
+    $localCertificateHash = Get-Sha256 $localCertificate
+    & (Join-Path $projectRoot 'windows\Trust-InstallerCertificate.ps1') -CertificatePath $localCertificate -ExpectedSha256 $localCertificateHash -ValidateOnly
+    & $nodePath (Join-Path $PSScriptRoot 'Prepare-InstallerPresentation.mjs')
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao preparar os documentos e a identidade do instalador.' }
+    $presentation = Join-Path $projectRoot '.tools\installer-presentation'
+    $presentationFlags = @()
+    if ($LocalTest) { $presentationFlags += '/DLocalInstallerTest=1' }
+    & $CompilerPath "/DAppVersion=$version" "/DPayloadDir=$stage" "/DReleaseDir=$release" "/DLocalCertificateHash=$localCertificateHash" "/DPresentationDir=$presentation" @presentationFlags (Join-Path $projectRoot 'installer\setup.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar instalador.' }
     $installer = Join-Path $release "RPForge-Setup-$version-x64.exe"
+    if ($LocalTest) {
+        $publicCertificate = New-Object Security.Cryptography.X509Certificates.X509Certificate2($localCertificate)
+        try { & $signTool sign /fd SHA256 /sha1 $publicCertificate.Thumbprint /s My $installer; if ($LASTEXITCODE -ne 0) { throw 'Falha na assinatura local do instalador.' } }
+        finally { $publicCertificate.Dispose() }
+    }
     $hash = Get-Sha256 $installer
     Set-Content -LiteralPath "$installer.sha256" -Value "$hash  $([IO.Path]::GetFileName($installer))" -Encoding ASCII
-    $sourceCopy = Join-Path $release ([IO.Path]::GetFileName($sourceArchive))
-    Copy-Item -LiteralPath $sourceArchive -Destination $sourceCopy -Force
-    Set-Content -LiteralPath "$sourceCopy.sha256" -Value "$(Get-Sha256 $sourceCopy)  $([IO.Path]::GetFileName($sourceCopy))" -Encoding ASCII
     Write-Host "Instalador local: $installer"
 } finally { Pop-Location }

@@ -1,0 +1,29 @@
+RPForge — Privacidade no aplicativo
+
+Processamento dos seus arquivos
+
+A leitura, a extração, a verificação e a conversão acontecem no seu computador. As ferramentas de conversão e geração de YTYP não enviam modelos, texturas, nomes de arquivos ou caminhos para a API. Seus arquivos originais e os resultados ficam sob seu controle.
+
+Conta opcional
+
+Ao entrar na sua conta, o aplicativo se comunica com a API do RPForge. Os dados necessários à autenticação incluem a identidade da conta, o nome informado para o computador, um identificador de instalação e uma chave pública. O app recebe o nome de exibição e, quando disponível, o avatar para mostrar a conta conectada.
+
+Discord, Google e GitHub são autorizados no navegador padrão do Windows. O provedor escolhido trata os dados segundo suas próprias políticas. A confirmação de conexão acontece no site rpforge.dev. O aplicativo não copia os cookies do navegador e não pede a senha do provedor numa janela interna.
+
+A sessão do aplicativo e a chave privada da instalação são armazenadas localmente com a proteção do Windows, por meio do armazenamento seguro do Electron. O login por e-mail e senha usa a API; a senha não é salva pelo aplicativo. Os cookies de sessão são protegidos no processo principal e não ficam disponíveis para a interface.
+
+As ações rápidas de conversão e geração de YTYP não carregam o perfil da conta nem consultam atualização de versão. As validações locais dos arquivos continuam ativas.
+
+Comunicação com o site e a API
+
+A hospedagem na Cloudflare pode tratar dados técnicos de acesso, como endereço IP, horário, URL e informações do navegador, para entrega e segurança dos serviços. O site e a API usam os dados da conta e os registros de segurança necessários aos fluxos de autenticação e às autorizações de computadores.
+
+Instalação e remoção
+
+A instalação registra o aplicativo e sua integração com o Explorer. A autorização opcional de confiança em certificado local é explicada em uma etapa separada e não é pré-selecionada. Instalações silenciosas não concedem essa confiança.
+
+A desinstalação remove os arquivos do aplicativo e sua integração, preservando os arquivos de trabalho e os resultados das ferramentas. A confiança no certificado local não é removida automaticamente. Perfis locais e dados da conta exigem tratamento separado; desinstalar não deve ser interpretado como exclusão da conta no serviço.
+
+Informações e suporte
+
+A documentação de privacidade e os canais oficiais estão em https://rpforge.dev/docs/privacidade/ e https://github.com/biancadcastro/RPForge. Não envie senhas, códigos de autenticação, chaves, sessões ou mods pagos em relatos públicos.

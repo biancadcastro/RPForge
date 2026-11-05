@@ -1,6 +1,6 @@
 {
   "name": "rpforge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "RPForge: convert open GTA V vehicle archives into FiveM resources from the Windows 11 context menu",

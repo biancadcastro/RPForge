@@ -1,0 +1,19 @@
+RPForge — Termos de uso
+
+Estes termos acompanham a licença de uso apresentada a seguir. A licença proprietária aplica-se ao código próprio das versões 0.3.2 e posteriores. Os direitos das versões anteriores permanecem sujeitos às licenças originais.
+
+Use apenas arquivos seus ou autorizados. O RPForge não concede direitos sobre modelos, texturas, marcas ou conteúdos de terceiros. Não utilize a ferramenta para contornar proteção ou redistribuir conteúdo sem autorização.
+
+Mantenha cópias de segurança e teste os recursos antes de usá-los em produção. Confira nomes, destinos, avisos e a escolha para pastas existentes antes de iniciar. O aplicativo não publica conteúdo no servidor nem altera seu server.cfg automaticamente.
+
+Baixe somente de canais oficiais do projeto e confira a origem dos arquivos. Certificados locais de desenvolvimento não equivalem a uma assinatura pública aprovada. A autorização de confiança no certificado, quando oferecida, é separada do aceite destes termos e pode ser recusada.
+
+As condições de uso, garantia e responsabilidade constam na licença abaixo, nos limites da legislação aplicável. Componentes de terceiros mantêm suas próprias licenças. Nada aqui pretende afastar direitos legais que não possam ser excluídos.
+
+RPForge é um projeto independente, sem afiliação à Rockstar Games ou à Cfx.re. As marcas citadas pertencem aos respectivos titulares.
+
+Canais oficiais: https://rpforge.dev e https://github.com/biancadcastro/RPForge.
+
+------------------------------------------------------------
+LICENÇA DE USO DO APLICATIVO
+------------------------------------------------------------
