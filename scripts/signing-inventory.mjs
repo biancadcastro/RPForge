@@ -12,7 +12,7 @@ const checksum = data => createHash('sha256').update(data).digest('hex');
 const pkg = JSON.parse(await readFile(path.join(root, 'package.json')));
 const lock = JSON.parse(await readFile(path.join(root, 'package-lock.json')));
 const tools = JSON.parse(await readFile(path.join(root, 'build/toolchains.json')));
-const sourceFiles = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean).sort();
+const sourceFiles = [...new Set(execFileSync('git', ['-C', root, 'ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean))].sort();
 const source = [];
 for (const name of sourceFiles) {
   if (isForbiddenTrackedPath(name)) throw new Error(`Arquivo privado ou gerado versionado: ${name}`);
@@ -26,6 +26,16 @@ const components = Object.entries(lock.packages).filter(([name, item]) => name &
   purl: `pkg:npm/${name.replace(/^node_modules\//, '').replace('@', '%40')}@${item.version}`,
   licenses: [{ license: { id: item.license } }], externalReferences: [{ type: 'distribution', url: item.resolved }],
 }));
+const desktopLockBytes=await readFile(path.join(root,'desktop-web/package-lock.json'));
+const desktopLock=JSON.parse(desktopLockBytes);
+for(const [name,item] of Object.entries(desktopLock.packages)){
+  if(!name||item.dev&&!/^node_modules\/electron$/.test(name))continue;
+  const packageName=name.replace(/^node_modules\//,'');
+  components.push({type:packageName==='electron'?'framework':'library',name:packageName,version:item.version,
+    'bom-ref':`desktop:${packageName}@${item.version}`,scope:'required',
+    ...(item.license?{licenses:[{license:{id:item.license}}]}:{}),
+    properties:[{name:'rpforge:component',value:'desktop-web'},{name:'rpforge:dependency-lock-sha256',value:checksum(desktopLockBytes)}]});
+}
 components.push({ type: 'application', 'bom-ref': 'node-runtime', name: 'Node.js', version: tools.nodeVersion, licenses: [{ license: { id: 'MIT' } }], properties: [{ name: 'rpf-forge:upstream-signature', value: 'Preserve OpenJS Foundation signature; do not sign with project certificate' }], externalReferences: [{ type: 'distribution', url: tools.tools.node.url }] });
 components.push({ type: 'library', 'bom-ref': 'native-runtime', name: 'LLVM-MinGW runtime libraries', version: tools.tools.llvm.version, licenses: [{ license: { name: 'See licenses/llvm-mingw-LICENSE.txt for aggregate upstream terms' } }], properties: [{ name: 'rpf-forge:linkage', value: 'static' }] });
 components.push({ type: 'framework', 'bom-ref': 'system-dotnet', name: 'Microsoft .NET Framework', version: '4.8', scope: 'required', properties: [{ name: 'rpf-forge:redistribution', value: 'Windows system library, not included in signing artifact' }] });

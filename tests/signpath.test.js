@@ -62,6 +62,8 @@ test('inventory excludes dev dependencies, secrets and machine paths, and binds 
   assert.equal(manifest.binaries[0].sha256, createHash('sha256').update('synthetic exe').digest('hex'));
   assert.ok(!raw.includes(root)); assert.ok(!raw.includes(os.homedir()));
   const sbom = JSON.parse(await readFile(path.join(destination, 'sbom.cdx.json')));
+  assert.ok(manifest.sources.some(source=>source.path==='desktop-web/electron/main.mjs'));
+  for(const name of ['electron','next','react','react-dom','three'])assert.ok(sbom.components.some(component=>component.name===name),`Desktop dependency missing: ${name}`);
   assert.equal(sbom.bomFormat, 'CycloneDX');
   assert.equal(sbom.metadata.component.licenses[0].license.name, 'RPForge Proprietary License');
   assert.equal(sbom.components.find(c => c.name === '@xmldom/xmldom').licenses[0].license.id, 'MIT');
