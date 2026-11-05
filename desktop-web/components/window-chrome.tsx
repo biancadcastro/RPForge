@@ -1,0 +1,8 @@
+"use client";
+import {useEffect,useState} from 'react';
+import type {DesktopBridge} from '../lib/desktop';
+export function WindowChrome({api,title,editor=false}:{api?:DesktopBridge;title:string;editor?:boolean}){
+ const [maximized,setMaximized]=useState(false);
+ useEffect(()=>{if(!api)return;let live=true;void api.windowControl('state').then(state=>{if(live)setMaximized(state.maximized);});const unsubscribe=api.onWindowState(state=>setMaximized(state.maximized));return()=>{live=false;unsubscribe();};},[api]);
+ return <div className="window-title window-chrome"><div className={"window-caption"+(editor?" window-caption-brand":"")}><img src={editor?"/brand/logo.png":"/brand/symbol.png"} alt={editor?"RPForge":""}/>{!editor&&<><span className="window-product">RPForge</span><span className="window-caption-divider"/><span className="window-page">{title}</span></>}</div><div className="window-controls" aria-label="Controles da janela"><button disabled={!api} aria-label="Minimizar janela" title="Minimizar" onClick={()=>void api?.windowControl('minimize')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5h10"/></svg></button><button disabled={!api} aria-label={maximized?'Restaurar janela':'Maximizar janela'} title={maximized?'Restaurar':'Maximizar'} onClick={()=>void api?.windowControl('maximize')}><svg viewBox="0 0 16 16" aria-hidden="true">{maximized?<><path d="M5.5 5.5v-2h7v7h-2"/><rect x="3.5" y="5.5" width="7" height="7"/></>:<rect x="3.5" y="3.5" width="9" height="9"/>}</svg></button><button className="window-close" disabled={!api} aria-label="Fechar janela" title="Fechar" onClick={()=>void api?.windowControl('close')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div></div>;
+}

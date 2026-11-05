@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import {readFile,readdir,mkdir,mkdtemp,rm} from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+import {_electron} from 'playwright';
+import {isolateClothingSpec} from '../../scripts/lib/clothing-test-fixtures.mjs';
+import {testProAccess} from './lib/test-pro-access.mjs';
+const [spec]=process.argv.slice(2),isolated=await isolateClothingSpec(spec);
+const source=path.resolve(fileURLToPath(new URL('../',import.meta.url))),project=process.env.RPF_DESKTOP_PROJECT||source;
+const temporary=await mkdtemp(path.join(os.tmpdir(),'rpforge-destination-check-'));
+const env={...process.env,RPF_TEST_USER_DATA:path.join(temporary,'profile')};delete env.ELECTRON_RUN_AS_NODE;
+const folders=isolated.specimens.map(s=>path.dirname(s.model));let app;
+try{
+ app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode','--obj-folder',folders[0]],env});
+ await testProAccess(app,project);
+ const page=await app.firstWindow();page.setDefaultTimeout(20000);
+ const files=page.locator('main.clothing-workspace:not([hidden]) .clothing-file');
+ await page.getByRole('heading',{name:'Exportar roupa para OBJ'}).waitFor();
+ assert.equal(await files.nth(2).getAttribute('title'),folders[0]);
+ async function openFolder(folder){await app.evaluate(({app},args)=>app.emit('second-instance',{},[process.execPath,args.project,'--obj-folder',args.folder]),{project,folder});await page.waitForFunction(folder=>document.querySelectorAll('main.clothing-workspace:not([hidden]) .clothing-file')[2]?.title===folder,folder);}
+ await openFolder(folders[1]);
+ assert.equal(await files.nth(2).getAttribute('title'),folders[1]);
+ await assert.rejects(page.evaluate(selection=>window.rpforge.exportClothingObj('high',selection),{model:isolated.specimens[0].model,texture:isolated.specimens[0].texture,destination:folders[0]}),/destino mudou/);
+ await page.getByRole('button',{name:'Exportar para OBJ',exact:false}).click();
+ await page.getByRole('heading',{name:'Pronta para texturizar.'}).waitFor();
+ assert.ok((await readdir(folders[1])).some(f=>f.endsWith('.mtl')));
+ assert.ok(!(await readdir(folders[0])).some(f=>f.endsWith('.mtl')));
+ const custom=path.join(temporary,'custom');await mkdir(custom);
+ await page.getByRole('button',{name:'Exportar outra peça'}).click();
+ await app.evaluate(({dialog},folder)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[folder]});},custom);
+ await files.nth(2).click();await page.waitForFunction(folder=>document.querySelectorAll('main.clothing-workspace:not([hidden]) .clothing-file')[2]?.title===folder,custom);assert.equal(await files.nth(2).getAttribute('title'),custom);
+ await openFolder(folders[0]);assert.equal(await files.nth(2).getAttribute('title'),folders[0]);
+ await page.getByRole('button',{name:'Exportar para OBJ',exact:false}).click();
+ await page.getByRole('heading',{name:'Pronta para texturizar.'}).waitFor();
+ assert.deepEqual(await readdir(custom),[]);
+ assert.ok((await readdir(folders[0])).some(f=>f.endsWith('.mtl')));
+ await app.evaluate(({app},args)=>app.emit('second-instance',{},[process.execPath,args.project,'--neon-folder',args.folder]),{project,folder:folders[1]});
+ await page.getByRole('heading',{name:'Converter roupa para Neon'}).waitFor();
+ await page.waitForFunction(folder=>document.querySelectorAll('main.clothing-workspace:not([hidden]) .clothing-file')[2]?.title===folder,folders[1]);
+ await page.getByRole('button',{name:'Converter para Neon',exact:false}).click();
+ await page.getByRole('heading',{name:'Versão Neon criada.'}).waitFor();
+ assert.equal((await readdir(folders[0])).filter(f=>f.endsWith('.ydd')).length,1);
+ assert.equal((await readdir(folders[1])).filter(f=>f.endsWith('.ydd')).length,2);
+ assert.equal(await app.evaluate(()=>globalThis.__forgeDiagnostics().workers),0);
+ console.log('PASS: reused quick window A → B → custom destination → A → Neon B; stale source refused, actual OBJ/MTL/YDD destinations verified, isolated copies only.');
+}finally{await app?.close();await rm(temporary,{recursive:true,force:true});await isolated.cleanup();}

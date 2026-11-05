@@ -1,10 +1,10 @@
 {
   "name": "rpforge",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "RPForge: convert open GTA V vehicle archives into FiveM resources from the Windows 11 context menu",
-  "license": "GPL-3.0-only",
+  "license": "UNLICENSED",
   "engines": {
     "node": ">=22"
   },
@@ -12,8 +12,12 @@
     "test": "node --test",
     "signpath:check": "node scripts/check-signpath.mjs",
     "signpath:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-UnsignedBinaries.ps1",
-    "desktop:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Desktop.ps1",
-    "desktop:test": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-DesktopWorkflow.ps1",
+    "desktop:build": "npm --prefix desktop-web run build",
+    "desktop:start": "npm --prefix desktop-web start",
+    "desktop:typecheck": "npm --prefix desktop-web run typecheck",
+    "desktop:test": "npm --prefix desktop-web run test:desktop",
+    "desktop:legacy:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Desktop.ps1",
+    "desktop:legacy:test": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-DesktopWorkflow.ps1",
     "update:local": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Update-LocalDevelopment.ps1",
     "convert": "node src/cli.js",
     "installer": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Installer.ps1",
@@ -24,6 +28,7 @@
     "@xmldom/xmldom": "0.9.12"
   },
   "devDependencies": {
+    "three": "^0.186.1",
     "yaml": "2.9.1"
   }
 }

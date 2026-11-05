@@ -63,7 +63,7 @@ test('inventory excludes dev dependencies, secrets and machine paths, and binds 
   assert.ok(!raw.includes(root)); assert.ok(!raw.includes(os.homedir()));
   const sbom = JSON.parse(await readFile(path.join(destination, 'sbom.cdx.json')));
   assert.equal(sbom.bomFormat, 'CycloneDX');
-  assert.equal(sbom.metadata.component.licenses[0].license.id, 'GPL-3.0-only');
+  assert.equal(sbom.metadata.component.licenses[0].license.name, 'RPForge Proprietary License');
   assert.equal(sbom.components.find(c => c.name === '@xmldom/xmldom').licenses[0].license.id, 'MIT');
   assert.ok(sbom.components.some(c => c.name === '@xmldom/xmldom'));
   assert.ok(sbom.components.some(c => c.name === 'Node.js'));
@@ -78,6 +78,16 @@ test('inventory excludes dev dependencies, secrets and machine paths, and binds 
     assert.equal(component.hashes[0].content, createHash('sha256').update(bytes).digest('hex'));
   }
   assert.deepEqual(await readFile(path.join(destination, 'licenses/Pixelify-Sans-OFL.txt')), await readFile(path.join(root, 'desktop/fonts/OFL.txt')));
+  const bodyFont = sbom.components.find(c => c.name === 'Atkinson Hyperlegible');
+  assert.ok(bodyFont, 'Embedded body fonts must appear in the runtime inventory');
+  assert.equal(bodyFont.licenses[0].license.id, 'OFL-1.1');
+  assert.ok(sbom.dependencies[0].dependsOn.includes(bodyFont['bom-ref']));
+  assert.deepEqual(bodyFont.components.map(c => c.name).sort(), ['AtkinsonHyperlegible-Bold.ttf', 'AtkinsonHyperlegible-Regular.ttf']);
+  for (const component of bodyFont.components) {
+    const bytes = await readFile(path.join(root, 'desktop/fonts', component.name));
+    assert.equal(component.hashes[0].content, createHash('sha256').update(bytes).digest('hex'));
+  }
+  assert.deepEqual(await readFile(path.join(destination, 'licenses/Atkinson-Hyperlegible-OFL.txt')), await readFile(path.join(root, 'desktop/fonts/Atkinson-OFL.txt')));
 });
 
 test('public identity is separate from the local-test identity and contains no assumed publisher', async () => {

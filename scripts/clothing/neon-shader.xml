@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Item>
+     <Name>hash_6F83F1E2</Name>
+     <FileName>hash_1A0AEADA</FileName>
+     <RenderBucket value="0" />
+     <Parameters>
+      <Item name="DiffuseSampler" type="Texture">
+       <Name>redhorn_diff</Name>
+      </Item>
+      <Item name="VolumeSampler" type="Texture">
+       <Name>givemechecker</Name>
+      </Item>
+      <Item name="BumpSampler" type="Texture">
+       <Name>jbib_normal_016</Name>
+      </Item>
+      <Item name="SpecSampler" type="Texture">
+       <Name>jbib_spec_016</Name>
+      </Item>
+      <Item name="umGlobalParams" type="Vector" x="0" y="0" z="0" w="0" />
+      <Item name="envEffFatThickness" type="Vector" x="25" y="25" z="0" w="0" />
+      <Item name="specularIntensityMult" type="Vector" x="0.5" y="0" z="0" w="0" />
+      <Item name="specularFalloffMult" type="Vector" x="100" y="0" z="0" w="0" />
+      <Item name="specularFresnel" type="Vector" x="0.97" y="0" z="0" w="0" />
+      <Item name="bumpiness" type="Vector" x="1" y="0" z="0" w="0" />
+      <Item name="emissiveMultiplier" type="Vector" x="1" y="0" z="0" w="0" />
+      <Item name="detailSettings" type="Vector" x="0" y="0" z="24" w="0" />
+      <Item name="StubbleControl" type="Vector" x="2" y="0.6" z="0" w="0" />
+     </Parameters>
+    </Item>
+    

@@ -12,7 +12,9 @@ if (args[0] === '--bridge') {
 } else {
 const interactive = args[0] === '--interactive';
 if (interactive) args.shift();
-const gui = fileURLToPath(new URL('../RPFForge.exe', import.meta.url));
+const installedGui = fileURLToPath(new URL('../RPFForge.exe', import.meta.url));
+const developmentGui = fileURLToPath(new URL('../.tools/desktop/RPFForge.exe', import.meta.url));
+const gui = existsSync(installedGui) ? installedGui : developmentGui;
 if (interactive && process.platform === 'win32' && existsSync(gui) && process.env.RPF_FORGE_CONSOLE !== '1') {
   const child = spawn(gui, args, { detached: true, stdio: 'ignore', windowsHide: false, cwd: path.dirname(gui) });
   child.on('error', error => { console.error(error.message); process.exitCode = 1; });

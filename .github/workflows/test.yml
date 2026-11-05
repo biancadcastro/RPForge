@@ -3,6 +3,23 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop-web/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm ci --prefix desktop-web
+      - run: npm run desktop:typecheck
+      - run: npm run desktop:build
+      - run: npm run desktop:test
+      - run: node desktop-web/scripts/check-login-gate.mjs
   test:
     strategy:
       matrix:
@@ -20,3 +37,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: node scripts/check-signpath.mjs
+      - name: Test menu migration without changing Windows registration
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: ./scripts/Test-MenuMigration.ps1
