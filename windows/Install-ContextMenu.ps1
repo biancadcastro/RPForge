@@ -32,3 +32,4 @@ if (Test-Path -LiteralPath $desktop) {
     }
 }
 Write-Host 'Menu instalado para o usuario atual. No Windows 11, procure em Mostrar mais opcoes.'
+if (Test-Path -LiteralPath $desktop) { & (Join-Path $PSScriptRoot 'Register-ClothingMenu.ps1') -InstallRoot $projectRoot }
