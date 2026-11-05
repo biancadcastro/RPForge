@@ -8,6 +8,7 @@
 #include <shlguid.h>
 #include <cstdio>
 #include <string>
+#include "ToolAccess.h"
 static const CLSID id = {0x761ca256,0x61cc,0x4b1e,{0x85,0xdb,0x2f,0x7d,0x4e,0x83,0x70,0x10}};
 class IsolatedAccess {
  HKEY key=nullptr;std::wstring location;
@@ -116,7 +117,10 @@ int wmain(int argc, wchar_t** argv) {
         if (FAILED(SHCreateShellItemArrayFromIDLists(1,paths,&selection))) return 38;
         HRESULT selected = clothing->GetState(selection,TRUE,&objState);
         selection->Release();CoTaskMemFree(pidl);DeleteFileW(selectedFile.c_str());
-        if (FAILED(selected) || objState != (!wcscmp(extension,L".ydd") ? ECS_ENABLED : ECS_HIDDEN)) {PWSTR actualIcon=nullptr;clothing->GetIcon(nullptr,&actualIcon);wprintf(L"Unexpected paid state %u for %s; icon=%s; HRESULT=%08lx\n",objState,extension,actualIcon?actualIcon:L"",static_cast<unsigned long>(selected));CoTaskMemFree(actualIcon);return 39;}
+        // Registered activation uses the real installation's access record, unlike
+        // the in-process test's isolated Pro fixture. A signed-out audit must hide OBJ.
+        const bool allowed = access.enabled || ForgeToolAccess(access.root,1);
+        if (FAILED(selected) || objState != (!wcscmp(extension,L".ydd") && allowed ? ECS_ENABLED : ECS_HIDDEN)) {PWSTR actualIcon=nullptr;clothing->GetIcon(nullptr,&actualIcon);wprintf(L"Unexpected paid state %u for %s; icon=%s; HRESULT=%08lx\n",objState,extension,actualIcon?actualIcon:L"",static_cast<unsigned long>(selected));CoTaskMemFree(actualIcon);return 39;}
     }
     if (argc == 4) {
         IObjectWithSite* clothingSite = nullptr;
