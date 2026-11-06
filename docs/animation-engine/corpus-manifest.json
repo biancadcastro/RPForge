@@ -1,0 +1,244 @@
+{
+ "generatedAt": "2026-11-06",
+ "synthetic": [
+  {
+   "file": "skel_s3_f2_raw.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "31ffa800d11bb10da0aae0cbae950f118287cc80d8cd3809c457c87aac8a5339",
+   "bytes": 354,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 3,
+    "frames": 2
+   },
+   "encoding": {
+    "mode": "raw"
+   },
+   "frames": 2,
+   "tracks": 3,
+   "rootMotion": false,
+   "maxPositionError": 1.8890732200738114e-8,
+   "maxAngleError": 4.2146848510894035e-8,
+   "encodings": [
+    "RawFloat+RawFloat+RawFloat",
+    "RawFloat+RawFloat+RawFloat+RawFloat"
+   ]
+  },
+  {
+   "file": "skel_s21_f31_raw.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "bec74c41806d8894ce382425a2117774309c8533b4628a2f2c45a48adead75f4",
+   "bytes": 8296,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 21,
+    "frames": 31,
+    "constantBones": 4
+   },
+   "encoding": {
+    "mode": "raw"
+   },
+   "frames": 31,
+   "tracks": 21,
+   "rootMotion": false,
+   "maxPositionError": 2.9577199467389903e-8,
+   "maxAngleError": 7.884953353001448e-8,
+   "encodings": [
+    "RawFloat+RawFloat+RawFloat",
+    "RawFloat+RawFloat+RawFloat+RawFloat",
+    "StaticQuaternion"
+   ]
+  },
+  {
+   "file": "skel_s21_f31_q.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "436d8fe387365174d97af49e17f87a8376974df56a39703fde8f0e3f8b715228",
+   "bytes": 3595,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 21,
+    "frames": 31,
+    "constantBones": 4
+   },
+   "encoding": {
+    "mode": "quantized"
+   },
+   "frames": 31,
+   "tracks": 21,
+   "rootMotion": false,
+   "maxPositionError": 0.00007347152701489145,
+   "maxAngleError": 0.0001445014643510149,
+   "encodings": [
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "StaticQuaternion"
+   ]
+  },
+  {
+   "file": "skel_s21_f61_mover_q.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "21e542fe334473008300f7f48f0938b201ec018ac6c92c655f7ef80d856f817c",
+   "bytes": 8667,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 21,
+    "frames": 61,
+    "mover": true
+   },
+   "encoding": {
+    "mode": "quantized"
+   },
+   "frames": 61,
+   "tracks": 23,
+   "rootMotion": true,
+   "maxPositionError": 0.0000854969024657315,
+   "maxAngleError": 0.00013818076488068248,
+   "encodings": [
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "StaticFloat+QuantizeFloat+StaticFloat",
+    "StaticFloat+StaticFloat+QuantizeFloat+QuantizeFloat"
+   ]
+  },
+  {
+   "file": "skel_s21_f91_spin_raw.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "c301968a843c36858c022ed71da5670151d17d69a42748edace0e4d04dcf4008",
+   "bytes": 27090,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 21,
+    "frames": 91,
+    "spin": true,
+    "nearPi": true
+   },
+   "encoding": {
+    "mode": "raw"
+   },
+   "frames": 91,
+   "tracks": 21,
+   "rootMotion": false,
+   "maxPositionError": 2.9760302111547787e-8,
+   "maxAngleError": 2.1900144899933154e-7,
+   "encodings": [
+    "RawFloat+RawFloat+RawFloat",
+    "RawFloat+RawFloat+RawFloat+RawFloat",
+    "StaticQuaternion"
+   ]
+  },
+  {
+   "file": "skel_s128_f300_q.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "017a56827868ea8990357b457344a98670d9bc99dd90c34f4f00dace54f15ea8",
+   "bytes": 224165,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 128,
+    "frames": 300,
+    "mover": true
+   },
+   "encoding": {
+    "mode": "quantized"
+   },
+   "frames": 300,
+   "tracks": 130,
+   "rootMotion": true,
+   "maxPositionError": 0.00007839970831801085,
+   "maxAngleError": 0.0001669089355971197,
+   "encodings": [
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "StaticFloat+QuantizeFloat+StaticFloat",
+    "StaticFloat+StaticFloat+QuantizeFloat+QuantizeFloat"
+   ]
+  },
+  {
+   "file": "skel_s128_f1800_q.ycd",
+   "origin": "synthetic: tests/animation-engine/synthetic.js via scripts/animation-engine/fixtures.mjs (regenerated, not committed: *.ycd is git-ignored)",
+   "profile": "ycd-skel-v1",
+   "sha256": "71c1d12d5ab9bf56849e1a60f97e8c656e32bae6a377af5eab59af9701b52d88",
+   "bytes": 1297766,
+   "expectation": "accepted by strict reader; semantic match within encoding tolerances",
+   "params": {
+    "bones": 128,
+    "frames": 1800
+   },
+   "encoding": {
+    "mode": "quantized"
+   },
+   "frames": 1800,
+   "tracks": 128,
+   "rootMotion": false,
+   "maxPositionError": 0.00007872842252254486,
+   "maxAngleError": 0.00016664961438283323,
+   "encodings": [
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat",
+    "QuantizeFloat+QuantizeFloat+QuantizeFloat+QuantizeFloat"
+   ]
+  }
+ ],
+ "invalidCases": [
+  {
+   "id": "truncated-prefixes",
+   "origin": "tests/animation-engine.test.js",
+   "expectation": "INVALID_ENVELOPE or DECOMPRESSION_FAILED for every 7th prefix"
+  },
+  {
+   "id": "single-bit-mutations",
+   "origin": "tests/animation-engine.test.js",
+   "expectation": "every bit of the decoded system region (2 files x 8192 bytes) refused with EngineError or changes the decoded model"
+  },
+  {
+   "id": "inflate-bomb-16MiB",
+   "expectation": "DECOMPRESSION_FAILED"
+  },
+  {
+   "id": "region-above-budget",
+   "expectation": "LIMIT_EXCEEDED before inflation"
+  },
+  {
+   "id": "adler32-trailer-valid/invalid",
+   "expectation": "accepted with note (inspect), UNSUPPORTED_STRUCTURE (strict) / DECOMPRESSION_FAILED"
+  },
+  {
+   "id": "clip-map-self-cycle",
+   "expectation": "CYCLE"
+  },
+  {
+   "id": "foreign/64-bit pointers",
+   "expectation": "POINTER_OUT_OF_RANGE"
+  },
+  {
+   "id": "proof_256 (earlier proof writer)",
+   "expectation": "note animation.sequenceFrameLimit (inspect), UNKNOWN_FIELD (strict)"
+  },
+  {
+   "id": "writer invalid inputs (NaN, Infinity, non-unit, zero quaternion, euler type, duplicates, mover bone, bad name, frames 1/1801)",
+   "expectation": "stable codes, no bytes"
+  }
+ ],
+ "external": {
+  "origin": "local third-party resources under D:RedHornDesenvolvimentoBase and D:Peach (read-only; NOT committed; authorization for redistribution not verified)",
+  "listed": 847,
+  "readable": 451,
+  "unreadableBySandbox": 0,
+  "acceptedInspect": 403,
+  "refusedByCode": {
+   "INCONSISTENT_REFERENCE: Invalid sequence frame layout": 25,
+   "POINTER_OUT_OF_RANGE: Bitstream truncated": 10,
+   "INCONSISTENT_REFERENCE: Sequence block frame count does not match the chunk layout": 6,
+   "INCONSISTENT_REFERENCE: Clip name length mismatch": 3,
+   "LIMIT_EXCEEDED: Frame count outside budget": 1,
+   "LIMIT_EXCEEDED: Sequence frame count invalid or above budget": 1,
+   "INCONSISTENT_REFERENCE: Root motion refs offset mismatch": 1,
+   "INCONSISTENT_REFERENCE: animations has more entries than declared": 1
+  },
+  "note": "per-file SHA-256 and verdicts are in the evidence folder (survey-external.json), outside the repository"
+ }
+}
