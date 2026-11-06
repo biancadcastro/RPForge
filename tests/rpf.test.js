@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { inflateRawSync } from 'node:zlib';
-import { readRpf } from '../src/rpf.js';
+import { deflateRawSync } from 'node:zlib';
+import { readRpf, WORKER_LIMITS, LIMITS } from '../src/rpf.js';
 import { makeRpf, vehicleArchive } from './fixture.js';
 
 test('extracts compressed binary and rebuilds RSC7 header without changing payload', () => {
@@ -12,6 +13,20 @@ test('extracts compressed binary and rebuilds RSC7 header without changing paylo
   assert.equal(resource.readUInt32LE(4), 0x12);
   assert.equal(inflateRawSync(resource.subarray(16)).toString(), 'synthetic geometry');
   assert.match(files.find(f => f.path === 'vehicles.meta').data.toString(), /<modelName>car/);
+});
+
+test('compressed entries inflate only up to their declared size', () => {
+  const archive = makeRpf([{ name: 'big.meta', data: Buffer.alloc(64 * 1024, 65), compressed: true }]);
+  archive.writeUInt32LE(1024, 32 + 8); // entry 0 now declares 1 KiB unpacked but expands to 64 KiB
+  assert.throws(() => [...readRpf(archive)]);
+});
+
+test('worker profile applies tighter limits without changing the desktop profile', () => {
+  const large = makeRpf([{ name: 'large.meta', data: Buffer.alloc(17 * 1024 * 1024, 66) }]);
+  assert.equal([...readRpf(large)][0].data.length, 17 * 1024 * 1024);
+  assert.throws(() => [...readRpf(large, '', { bytes: 0, entries: 0, limits: WORKER_LIMITS })], /limite/i);
+  assert.equal(LIMITS.fileBytes, 256 * 1024 * 1024); // desktop support preserved during migration
+  assert.ok(Object.isFrozen(WORKER_LIMITS) && WORKER_LIMITS.fileBytes <= 128 * 1024 * 1024);
 });
 
 test('extracts nested RPF archives recursively', () => {

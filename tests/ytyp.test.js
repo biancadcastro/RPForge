@@ -11,8 +11,22 @@ export function drawable(min = [-1, -2, -3], max = [1, 2, 3], center = [0, 0, 0]
   for (const [offset, vector] of [[0x20, center], [0x30, min], [0x40, max]]) vector.forEach((v, i) => raw.writeFloatLE(v, offset + i * 4));
   raw.writeFloatLE(radius, 0x2c);
   const header = Buffer.alloc(16); header.write('RSC7'); header.writeUInt32LE(165, 4);
+  // One 512-byte system page (bit 27, shift 0) with Legacy drawable version nibbles, as real headers declare.
+  header.writeUInt32LE(0xa8000000, 8); header.writeUInt32LE(0x50000000, 12);
   return Buffer.concat([header, deflateRawSync(raw)]);
 }
+
+test('drawable header is checked exactly and inflation is bounded by the declared size', () => {
+  for (let i = 0; i < 4; i++) { const bad = drawable(); bad[i] |= 0x80; assert.throws(() => readDrawable(bad, 'bad.ydr'), /inválido/); }
+  const noPages = drawable(); noPages.writeUInt32LE(0xa0000000, 8);
+  assert.throws(() => readDrawable(noPages, 'empty.ydr'), /tamanho/);
+  // Stream larger than the header declares is refused instead of inflating up to a blanket limit.
+  const header = drawable().subarray(0, 16), bomb = Buffer.concat([header, deflateRawSync(Buffer.alloc(4 * 1024 * 1024))]);
+  assert.throws(() => readDrawable(bomb, 'bomb.ydr'), /descompactar/);
+  // A header declaring more than the runtime profile allows is refused before inflating.
+  const big = drawable(); big.writeUInt32LE(0xa800000f, 8); // 1 page of 512<<15 = 16 MiB
+  assert.throws(() => readDrawable(big, 'big.ydr', { fileBytes: 8 * 1024 * 1024 }), /limite/);
+});
 
 test('reads actual drawable bounds, rejects corrupt or non-Legacy models before generation', () => {
   assert.deepEqual(readDrawable(drawable(), 'sample.ydr'), { name: 'sample', min: [-1, -2, -3], max: [1, 2, 3], center: [0, 0, 0], radius: 4 });

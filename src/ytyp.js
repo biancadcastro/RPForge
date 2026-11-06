@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { inflateRawSync, deflateRawSync } from 'node:zlib';
 import path from 'node:path';
 import { LIMITS, safeName } from './rpf.js';
+import { isRsc7, rsc7DeclaredSize } from './rsc7.js';
 import {publication,recoverPublications} from './publication.js';
 
 // Empty schema fixture generated from our own archetypes; no game models or runtime DLLs.
@@ -14,10 +15,13 @@ export function jenkHash(name) {
   value = (value + (value << 3)) >>> 0; value ^= value >>> 11;
   return (value + (value << 15)) >>> 0;
 }
-export function readDrawable(data, name) {
-  if (data.length < 16 || data.toString('ascii', 0, 4) !== 'RSC7' || data.readUInt32LE(4) !== 165) throw new Error(`YDR Legacy inválido ou versão não suportada: ${name}`);
+export function readDrawable(data, name, limits = LIMITS) {
+  if (!isRsc7(data, 165)) throw new Error(`YDR Legacy inválido ou versão não suportada: ${name}`);
+  // Inflate at most what the header declares (bounded by the runtime profile), never a blanket 256 MiB.
+  const declared = rsc7DeclaredSize(data);
+  if (declared < 0xa8 || declared > limits.fileBytes) throw new Error(`Modelo ${name} declara tamanho inválido ou acima do limite de leitura.`);
   let raw;
-  try { raw = inflateRawSync(data.subarray(16), { maxOutputLength: LIMITS.fileBytes }); }
+  try { raw = inflateRawSync(data.subarray(16), { maxOutputLength: declared }); }
   catch { throw new Error(`Não foi possível descompactar o modelo ${name}. O arquivo pode estar corrompido ou acima do limite de leitura.`); }
   if (raw.length < 0xa8) throw new Error(`Drawable truncado: ${name}`);
   const vector = offset => [0, 4, 8].map(at => raw.readFloatLE(offset + at));

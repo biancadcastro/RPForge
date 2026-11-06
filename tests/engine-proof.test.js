@@ -52,6 +52,10 @@ test('resource envelope rejects truncation, trailing bytes, version mismatch and
     const other = Buffer.from(b); other.writeUInt32LE(version ^ 1, 4); assert.throws(() => read(other), /version/);
     const flags = Buffer.from(b); flags.writeUInt32LE(0xafffffff, 8); assert.throws(() => read(flags), /version|layout/);
   }
+  // Magic is compared exactly: setting the high bit of any signature byte must be refused.
+  for (const [b, read] of [[writeYdd(mesh), readYdd], [writeYcd(motion), readYcd]]) {
+    for (let i = 0; i < 4; i++) { const bad = Buffer.from(b); bad[i] |= 0x80; assert.throws(() => read(bad), /magic/); }
+  }
   const big = encodeResource(46, Buffer.alloc(32768)); const lied = Buffer.from(big); lied.writeUInt32LE(0x28000004, 8); assert.throws(() => decodeResource(lied, 46));
   assert.throws(() => encodeResource(46, Buffer.alloc(MAX_PAGE + 1)), /page/i);
 });

@@ -13,7 +13,7 @@ const sha = b => createHash('sha256').update(b).digest('hex');
 function header(bytes) {
   const sf = bytes.readUInt32LE(8), gf = bytes.readUInt32LE(12);
   let expanded = null; try { expanded = inflateRawSync(bytes.subarray(16)).length; } catch { /* reported below */ }
-  return {magic: bytes.toString('ascii', 0, 4), version: bytes.readUInt32LE(4), systemFlags: '0x' + sf.toString(16), graphicsFlags: '0x' + gf.toString(16), expandedBytes: expanded};
+  return {magicHex: bytes.subarray(0, 4).toString('hex'), version: bytes.readUInt32LE(4), systemFlags: '0x' + sf.toString(16), graphicsFlags: '0x' + gf.toString(16), expandedBytes: expanded};
 }
 function sameModel(type, got, want) {
   if (got.name !== want.name) return 'name differs';
@@ -36,6 +36,9 @@ for (const c of manifest) {
   } catch (e) { row.error = e.message; }
   results.push(row);
 }
-const report = {generatedAt: new Date().toISOString(), node: process.version, results};
+const failed = results.filter(r => r.ownRead !== 'passed').length;
+const report = {generatedAt: new Date().toISOString(), node: process.version, passed: results.length - failed, failed, results};
 await writeFile(path.join(folder, 'oracle-reread.json'), JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));
+// The report is always written; automation must still see the failure in the exit code.
+if (failed || !results.length) process.exitCode = 1;

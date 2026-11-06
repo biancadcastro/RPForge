@@ -1,5 +1,7 @@
 // Restricted RSC7 research profile. No game assets or external runtime libraries.
 import {deflateRawSync, inflateRawSync} from 'node:zlib';
+import {RSC7_MAGIC, rsc7PageSizes} from '../rsc7.js';
+export {RSC7_MAGIC};
 export const MAX_PAGE = 8 * 1024 * 1024;
 export function requireThat(value, message) { if (!value) throw new Error(message); }
 export function checkedInteger(n, min, max, label) {
@@ -8,15 +10,9 @@ export function checkedInteger(n, min, max, label) {
 // Budget for one decoded region (system or graphics). Not a claim about game limits.
 export const MAX_REGION = 8 * 1024 * 1024;
 export const MAX_PAGES = 128;
-// RSC7 page-count fields: [bit offset, bit width] for size classes base<<8 ... base<<0.
-const PAGE_FIELDS = [[4, 1], [5, 2], [7, 4], [11, 6], [17, 7], [24, 1], [25, 1], [26, 1], [27, 1]];
 export function pageLayout(flags) {
   // Readers accept any page split; the writer below still emits a single page.
-  const base = 512 * 2 ** (flags & 15), pages = [];
-  PAGE_FIELDS.forEach(([shift, width], i) => {
-    const count = (flags >>> shift) & ((1 << width) - 1), size = base * 2 ** (8 - i);
-    for (let n = 0; n < count; n++) pages.push(size);
-  });
+  const pages = rsc7PageSizes(flags);
   const total = pages.reduce((sum, size) => sum + size, 0);
   requireThat(pages.length <= MAX_PAGES, 'Unsupported page layout');
   requireThat(total <= MAX_REGION, 'Page exceeds proof budget');
@@ -40,7 +36,9 @@ export function encodeResource(version, system, graphics = null) {
 }
 export function decodeResource(bytes, version) {
   requireThat(Buffer.isBuffer(bytes) && bytes.length >= 18 && bytes.length <= MAX_PAGE * 2, 'Invalid resource size');
-  requireThat(bytes.toString('ascii', 0, 4) === 'RSC7' && bytes.readUInt32LE(4) === version, 'Unsupported resource version');
+  // Exact integer compare: Node's 'ascii' decoder drops the high bit (0xD2 would read as 'R').
+  requireThat(bytes.readUInt32LE(0) === RSC7_MAGIC, 'Invalid resource magic');
+  requireThat(bytes.readUInt32LE(4) === version, 'Unsupported resource version');
   const sf = bytes.readUInt32LE(8), gf = bytes.readUInt32LE(12);
   requireThat((sf >>> 28) === (version >>> 4) && (gf >>> 28) === (version & 15), 'Resource version flags mismatch');
   const systemSize = pageSize(sf), graphicsSize = pageSize(gf);

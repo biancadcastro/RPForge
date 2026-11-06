@@ -1,6 +1,10 @@
 import { inflateRawSync } from 'node:zlib';
 
+// Desktop profile: unchanged limits of the existing local application.
 export const LIMITS = { archiveBytes: 512 * 1024 * 1024, fileBytes: 256 * 1024 * 1024, totalBytes: 1024 * 1024 * 1024, entries: 100_000, depth: 16 };
+// Remote Workers profile (128 MB per isolate, shared with runtime, copies and concurrent requests).
+// Initial conservative proposal pending remote measurement; NOT a compatibility claim for larger archives.
+export const WORKER_LIMITS = Object.freeze({ archiveBytes: 16 * 1024 * 1024, fileBytes: 16 * 1024 * 1024, totalBytes: 32 * 1024 * 1024, entries: 20_000, depth: 4 });
 
 export function safeName(name) {
   if (!name || name === '.' || name === '..' || /[<>:"/\\|?*\x00-\x1f]/.test(name) || /[. ]$/.test(name) || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(name)) {
@@ -11,15 +15,16 @@ export function safeName(name) {
 
 /** RPF7 OPEN/NONE only. Resource payloads keep their compressed bytes and receive a canonical RSC7 header. */
 export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, depth = 0) {
-  if (depth > LIMITS.depth) throw new Error('Limite de profundidade de RPF excedido.');
+  const limits = state.limits ?? LIMITS;
+  if (depth > limits.depth) throw new Error('Limite de profundidade de RPF excedido.');
   if (buffer.length < 16 || buffer.readUInt32LE(0) !== 0x52504637) throw new Error('Arquivo inválido: esperado RPF7 GTA V Legacy.');
-  if (buffer.length > LIMITS.archiveBytes) throw new Error('RPF acima do limite de 512 MiB.');
+  if (buffer.length > limits.archiveBytes) throw new Error(`RPF acima do limite de ${limits.archiveBytes / 1048576} MiB.`);
   const count = buffer.readUInt32LE(4);
   const namesSize = buffer.readUInt32LE(8);
   const encryption = buffer.readUInt32LE(12);
   if (![0, 0x4e45504f].includes(encryption)) throw new Error('RPF criptografado: esta ferramenta aceita somente arquivos OPEN/NONE.');
   state.entries += count;
-  if (!count || state.entries > LIMITS.entries) throw new Error('Quantidade de entradas inválida ou acima do limite.');
+  if (!count || state.entries > limits.entries) throw new Error('Quantidade de entradas inválida ou acima do limite.');
   const namesStart = 16 + count * 16;
   const headerEnd = namesStart + namesSize;
   if (headerEnd > buffer.length) throw new Error('Tabela do RPF truncada.');
@@ -33,7 +38,7 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
     return names.toString('utf8', offset, end);
   }
   function* visit(index, folder, level) {
-    if (level > LIMITS.depth * 4 || index >= count || visited.has(index)) throw new Error('Estrutura cíclica ou inválida no RPF.');
+    if (level > limits.depth * 4 || index >= count || visited.has(index)) throw new Error('Estrutura cíclica ou inválida no RPF.');
     visited.add(index);
     const at = 16 + index * 16;
     const directory = buffer.readUInt32LE(at + 4) === 0x7fffff00;
@@ -58,7 +63,7 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
     if (!resource && buffer.readUInt32LE(at + 12) !== 0) throw new Error(`Entrada criptografada não suportada: ${current}`);
     const unpacked = resource ? size : buffer.readUInt32LE(at + 8);
     const stored = resource ? size : size || unpacked;
-    if (stored > LIMITS.fileBytes || unpacked > LIMITS.fileBytes || offset < headerEnd || offset + stored > buffer.length) throw new Error(`Tamanho ou offset inválido: ${current}`);
+    if (stored > limits.fileBytes || unpacked > limits.fileBytes || offset < headerEnd || offset + stored > buffer.length) throw new Error(`Tamanho ou offset inválido: ${current}`);
     let data = buffer.subarray(offset, offset + stored);
     if (resource) {
       if (size < 16) throw new Error(`Resource sem cabeçalho: ${current}`);
@@ -71,11 +76,12 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
       header.writeUInt32LE(graphics, 12);
       data = Buffer.concat([header, data.subarray(16)]);
     } else if (size) {
-      data = inflateRawSync(data, { maxOutputLength: LIMITS.fileBytes });
+      // Bound output by the declared size of this entry (exact), not a blanket limit.
+      data = inflateRawSync(data, { maxOutputLength: Math.max(1, unpacked) });
       if (data.length !== unpacked) throw new Error(`Tamanho descompactado divergente: ${current}`);
     }
     state.bytes += data.length;
-    if (state.bytes > LIMITS.totalBytes) throw new Error('Limite total de extração excedido.');
+    if (state.bytes > limits.totalBytes) throw new Error('Limite total de extração excedido.');
     if (name.toLowerCase().endsWith('.rpf')) yield* readRpf(data, `${current}/`, state, depth + 1);
     else yield { path: current, data };
   }
