@@ -258,3 +258,19 @@ test('engine core stays pure: no filesystem, network, process or dynamic code', 
     assert.doesNotMatch(src, /\b(fetch|eval|Function|require|process|child_process|XMLHttpRequest|WebSocket|import\()\s*\(/, file);
   }
 });
+
+test('public operations return values, never throw, and honour cancellation', async () => {
+  const api = await import('../src/animation-engine/index.js');
+  const {animation} = syntheticAnimation({bones: 4, frames: 6});
+  const w = api.writeYcd(animation);
+  assert.equal(w.ok, true); assert.equal(w.engine.version, '0.1.0'); assert.ok(w.metrics.wallMs >= 0);
+  const i = api.inspectYcd(w.bytes);
+  assert.equal(i.ok, true); assert.equal(i.strictProfile, 'ycd-skel-v1'); assert.equal(i.animations[0].tracks.length, 4);
+  const d = api.decodeYcd(w.bytes, {times: [0, 0.1]});
+  assert.equal(d.animations[0].tracks[1].sampled.length, 2);
+  const bad = api.inspectYcd(new Uint8Array(10));
+  assert.deepEqual([bad.ok, bad.error.code], [false, ErrorCode.INVALID_ENVELOPE]);
+  const controller = new AbortController(); controller.abort();
+  assert.equal(api.writeYcd(animation, {signal: controller.signal}).error.code, ErrorCode.CANCELLED);
+  assert.equal(api.reencode(w.bytes).ok, true);
+});

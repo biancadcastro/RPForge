@@ -15,9 +15,11 @@ export function joaat(name) {
 }
 
 /**
- * Bone tag derived from a bone name (ELF-style hash of the upper-case name,
- * folded into 16 bits). Used only to cross-check tags declared by a reference
- * skeleton; tags in files are authoritative and are never recomputed silently.
+ * ELF-style hash of the upper-case name folded into 16 bits. It reproduces only 30 of
+ * the 128 tags of the freemode reference skeletons (the main bones carry fixed tags),
+ * so it is NOT a name->tag derivation: the engine uses it only to make tags for
+ * synthetic test data and as an informational cross-check. Real tags always come
+ * from the file or from a reference skeleton.
  */
 export function boneTagFromName(name) {
   let h = 0;
