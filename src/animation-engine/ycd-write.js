@@ -95,7 +95,7 @@ function maxAbsDiff(a, b) { let m = 0; for (let i = 0; i < a.length; i++) m = Ma
 
 function planTrack(t, frames, enc) {
   const n = t.spec.size, comps = [];
-  for (let c = 0; c < n; c++) comps.push(Float64Array.from({length: frames}, (_, f) => t.values[f * n + c]));
+  for (let c = 0; c < n; c++) { const s = new Float64Array(frames); for (let f = 0; f < frames; f++) s[f] = t.values[f * n + c]; comps.push(s); }
   const report = {bone: t.bone, type: t.type};
   if (n === 4) {
     report.hemisphereFlips = alignHemispheres(t.values, frames);
@@ -211,12 +211,13 @@ export function writeSkeletalYcd(input, options = {}) {
   for (const [kind, v] of mainParts) { if (kind === 'f') a.f32(p, v); else a.u32(p, v); p += 4; }
   const framed = [];
   for (let type = 0; type < 9; type++) for (const ch of lists[type]) if (ch.frameBits) framed.push(ch);
+  const wordsPerFrame = frameLength / 4, frameWords = new Uint32Array(wordsPerFrame * frames + 1);
   for (let f = 0; f < frames; f++) {
-    const w = new BitWriter();
+    const w = BitWriter.into(frameWords, f * wordsPerFrame);
     for (const ch of framed) w.write(ch.type === ChannelType.RawFloat ? floatBits(ch.values[f]) : ch.codes[f], ch.frameBits);
-    for (let k = 0; k < frameLength / 4; k++) a.u32(p + k * 4, w.words[k] ?? 0);
-    p += frameLength;
   }
+  for (let k = 0; k < wordsPerFrame * frames; k++) a.u32(p + k * 4, frameWords[k]);
+  p += frameLength * frames;
   for (let type = 0; type < 9; type++) { a.u16(p, lists[type].length); p += 2; }
   for (let type = 0; type < 9; type++) {
     for (const ch of lists[type]) { a.u16(p, (ch.sequence << 2) | ch.index); p += 2; }

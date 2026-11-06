@@ -111,7 +111,8 @@ export function parseBlockChannels(data, header, limits) {
     const values = new Float32Array(numFrames);
     const r = new BitReader(data, frameOffset, frameOffset + frameBytes);
     for (let f = 0; f < numFrames; f++) {
-      r.seek((frameOffset + frameLength * f) * 8 + ch.frameBitOffset);
+      // Positions are in range: total frame bits <= frameLength * 8 and the frame block lies inside data.
+      r.pos = (frameOffset + frameLength * f) * 8 + ch.frameBitOffset;
       const raw = r.read(ch.frameBits);
       if (ch.type === ChannelType.RawFloat) {
         const v = bitsFloat(raw);
