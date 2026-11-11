@@ -85,7 +85,7 @@ export function timing(prepared, sourceFps, fpsOption) {
   if (fpsOption === 'source') fps = Math.round(sourceFps);
   else if (fpsOption !== undefined && fpsOption !== null) fps = fpsOption;
   ensure(Number.isInteger(fps) && fps >= 1 && fps <= PROFILE_LIMITS.maxFps, ErrorCode.INVALID_INPUT, 'fps must be an integer between 1 and 120, or "source"', {fps});
-  const sourceDuration = Math.max(0, prepared.stop - prepared.start);
+  const span = prepared.stop - prepared.start, sourceDuration = Number.isFinite(span) && span > 0 ? span : 0; // a take without keys has no range
   const frames = Math.max(PROFILE_LIMITS.minFrames, Math.round(sourceDuration * fps) + 1);
   return {fps, frames, duration: (frames - 1) / fps, sourceDuration};
 }
@@ -295,7 +295,7 @@ export function convertScene(scene, {skel, id: skeletonId}, options = {}) {
   if (stats.cubicKeys && sparse) warnings.push(warning('FBX_SPARSE_CUBIC_KEYS'));
 
   let name = options.clipName;
-  if (name === undefined || name === null || name === '') name = clipNameFrom(take.name);
+  if (name === undefined || name === null || name === '') name = clipNameFrom(take.name.split('|').pop() || take.name); // Blender names takes "Object|Action"
   else { ensure(typeof name === 'string', ErrorCode.INVALID_INPUT, 'clipName must be text'); const clean = clipNameFrom(name); if (clean !== name) warnings.push(warning('CLIP_NAME_ADJUSTED', {name: clean})); name = clean; }
 
   const pinned = trackBones.filter(i => source[i] < 0).map(i => bones[i].name);

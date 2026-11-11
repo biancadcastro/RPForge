@@ -15,6 +15,16 @@ reencode(bytes, {clip?, name?, discard?, encoding?, limits?, signal?}) // bytes 
 matchSkeleton(bytes, skelText, {require?, limits?, signal?})          // tags presentes/ausentes no esqueleto
 ```
 
+Importação FBX (rodada 11/11/2026; opções, relatório e códigos em FBX-AND-RETARGET.md §1):
+
+```js
+inspectFbx(bytes, {skeleton?, boneMap?, fps?, limits?, signal?})
+// takes (nome, duração, fps, quadros, conversível), ossos com o destino de cada um, mapeamento, avisos, issues
+convertFbxToYcd(bytes, {skeleton?, take?, clipName?, rootMotion?, boneMap?, fps?, alignRestPose?, encoding?, limits?, signal?})
+// {ycd: Uint8Array, report}; o YCD é relido em strict e comparado com as trilhas antes de voltar
+```
+Falhas dessas duas operações trazem também `error.userMessage` (frase em pt-BR, sem termos técnicos); avisos vêm em `report.warnings[] = {code, level, message, details}`. Exportados para a tela: `FBX_LIMITS`, `FBX_PROFILE_ID`, `FBX_WARNING_CODES`, `fbxBoneAliases()`, `describeError(error)`. Os módulos `fbx-*.js` e `freemode-skeletons.js` seguem a mesma regra de pureza (só `./` e `node:zlib`). Fluxo sugerido para a tela: `inspectFbx` ao escolher o arquivo (lista de animações, ossos reconhecidos, `issues`), a pessoa escolhe animação, nome, personagem e opções, `convertFbxToYcd`, tela de revisão com `report` antes de salvar.
+
 Todas retornam `{ok: true, engine, ..., metrics: {wallMs}}` ou `{ok: false, engine, error: {code, message, details?}, metrics}`. Nunca lançam para erro de formato; nunca retornam bytes parciais. Erro inesperado vira `{code: 'INTERNAL'}` sem stack.
 
 Pelo RPC do Worker do motor (`WorkerEntrypoint`), sugerimos os métodos `animationInspect`, `animationWrite`, `animationReencode` com o mesmo formato; `Uint8Array` atravessa o RPC por cópia estruturada. Entrada = bytes já validados por tamanho na API; saída = bytes + JSON. Persistência, R2, fila, idempotência, créditos e estados de plataforma ficam fora do motor.

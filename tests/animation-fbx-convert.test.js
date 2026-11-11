@@ -271,6 +271,8 @@ test('fbx -> ycd: refusals are values with stable codes and plain pt-BR text; no
   refused(buildFbx({models: [{name: 'Cube', type: 'Mesh'}]}), ErrorCode.FBX_NO_SKELETON);
   refused(buildFbx({models: [{name: 'SKEL_ROOT'}]}), ErrorCode.FBX_NO_ANIMATION, {}, /não tem animação/);
   refused(buildFbx({models: [{name: 'SKEL_ROOT'}], takes: [{name: 'empty', curves: []}]}), ErrorCode.FBX_NO_ANIMATION);
+  const emptyTake = inspectFbx(buildFbx({models: [{name: 'SKEL_ROOT'}], takes: [{name: 'empty', curves: []}]})).takes[0];
+  assert.deepEqual([emptyTake.frames, emptyTake.duration, emptyTake.convertible, emptyTake.issue.code], [2, 0, false, ErrorCode.FBX_NO_ANIMATION]);
   refused(buildFbx(two('Bone007')).map(b => b), ErrorCode.BONE_MAP_INSUFFICIENT, {boneMap: {SKEL_ROOT: null}}, /Nenhum osso/);
   // 61 seconds at 30 fps = 1831 frames: beyond the single block the writer is proven for.
   const long = buildFbx({models: [{name: 'SKEL_ROOT'}, {name: 'SKEL_Head', parent: 'SKEL_ROOT'}], takes: [{name: 't', curves: [{model: 'SKEL_Head', channel: 'R', axis: 0, times: [0, 61], values: [0, 30]}]}]});

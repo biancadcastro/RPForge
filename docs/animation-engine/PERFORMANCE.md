@@ -47,3 +47,7 @@ node --expose-gc scripts/animation-engine/bench/bench-node.mjs <saida.json> [ext
 node scripts/animation-engine/bench/bench-workerd.mjs <RPForge-API>\node_modules <pasta-saida> [externo.ycd]
 ```
 O runner workerd só importa `esbuild` e executa `@cloudflare/workerd-windows-64` de um `node_modules` já instalado (sem modificá-lo), sem conta, sem wrangler e sem config compartilhada.
+
+## Importação FBX (11/11/2026, Node 24 local, sem medição em workerd)
+
+FBX do Blender de 3,6 MB (128 ossos, 3 takes, 88 mil chaves no take): `inspectFbx` ~90 ms, `convertFbxToYcd` ~100 ms, heap ~32 MB. FBX de malha de 22 MB: inspecionado em ~1 ms (vetores de malha não são descomprimidos). Caso máximo do perfil (1800 quadros × 128 ossos): ~1,5 s no teste, incluindo gerar o FBX. Não medido em workerd nem em CPU faturada.

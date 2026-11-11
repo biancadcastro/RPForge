@@ -30,3 +30,7 @@ Tolerâncias: valores do leitor × oráculo 1e-6 (mesmas fórmulas float32; espe
 - `Unknown_1Ch = 0` (≠ 0 em quase todos os reais), `UsageCount`, `limit = frames + 30`: convenções observadas ou da referência, sem prova no jogo.
 - LinearFloat e CachedQuaternion1: leitura implementada mas sem nenhum arquivo para comparar.
 - Tags/propriedades de clip (eventos), clips AnimationList, escala/UV/facial.
+
+## FBX → YCD (rodada 11/11/2026)
+
+As provas da importação FBX (F1–F9: ida e volta sintética, Blender 5.2.2 como escritor e como leitor independente, CodeWalker relendo os YCDs gerados) estão em [FBX-AND-RETARGET.md](FBX-AND-RETARGET.md) §7, com os comandos para regenerar. Resumo: 6/6 takes exportados pelo Blender convertidos com posição ≤ 0,42 mm e rotação ≤ 0,013° em relação às poses avaliadas pelo próprio Blender; leitor × importador do Blender ≤ 0,005 mm; 3/3 YCDs gerados lidos pelo CodeWalker com diferença 0. Continua sem prova: reprodução no jogo, FBX reais de Mixamo/Unreal/Biped, curvas cúbicas contra implementação independente.

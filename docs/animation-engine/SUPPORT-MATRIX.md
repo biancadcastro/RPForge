@@ -2,6 +2,37 @@
 
 Legenda: **Comprovado** = teste automatizado + comparação independente (oráculo offline) · **Lido** = leitor próprio decodifica e o oráculo concorda nos valores, sem escrita · **Inferido** = sustentado por dados reais, sem confirmação independente · **Recusado** = erro com código estável · **Não comprovado** = sem evidência. Nada foi testado em GTA V/FiveM.
 
+## FBX → YCD (rodada 11/11/2026; detalhes e evidências em FBX-AND-RETARGET.md)
+
+Nesta seção, **Comprovado** = teste automatizado + implementação independente offline (Blender 5.2.2 como escritor ou leitor de FBX; CodeWalker para o YCD) · **Testado** = só testes próprios com FBX gerado por código · **Inferido** = sustentado por dados reais, sem confirmação no jogo.
+
+| Item | Situação | Evidência |
+|---|---|---|
+| FBX binário 7.0–7.7 (cabeçalho 32 e 64 bits, vetores zlib) | Comprovado (7.4 real do Blender); 7.3/7.5/7.7 Testado | F1, F6, F9 |
+| FBX ASCII 7.x | Testado (nenhum arquivo ASCII real) | F1 |
+| FBX 6.x e anteriores, arquivo que não é FBX | Recusado `FBX_UNSUPPORTED_VERSION` / `FBX_INVALID` | F2 |
+| Truncamento, mutação, bomba zlib, orçamentos, ciclo na hierarquia | Recusado com código; sem travar | F2 |
+| Hierarquia, nó pai com rotação/escala, unidades, eixo para cima | Comprovado | F6, F7 |
+| PreRotation, PostRotation, as 6 ordens de rotação | Comprovado (leitor × importador do Blender, ≤ 0,005 mm) | F7 |
+| Pivôs e offsets de rotação/escala | Testado | F1 |
+| `RotationActive` desligado ignora pré/pós-rotação | Testado (regra do formato; igual ao Blender) | F1 |
+| Bind pose como pose de repouso; sem ela, pose padrão com aviso | Comprovado (com e sem, Blender) | F6 |
+| Vários takes: lista, escolha por nome/índice, padrão o primeiro | Comprovado (3 takes do Blender) | F6 |
+| Curvas constantes e lineares; chaves por quadro (bake) | Comprovado | F6 |
+| Curvas cúbicas (Hermite) e com peso | Testado; aviso `FBX_SPARSE_CUBIC_KEYS` quando há poucos pontos | F3 |
+| Chaves TCB | Limitado: viram reta, com aviso `FBX_TCB_AS_LINEAR` | F3 |
+| Mais de uma camada animada, escala negativa, ordem esférica | Recusado `FBX_UNSUPPORTED_FEATURE` | testes |
+| Rig com os nomes do jogo → rotações locais do esqueleto do jogo | Comprovado offline (128 ossos; ≤ 0,05° ida e volta; ≤ 0,013° vs Blender) | F4, F6 |
+| Apelidos Mixamo/HumanIK, Unreal, Biped; mapa manual | Testado (nenhum FBX real desses rigs) | F5 |
+| Ajuste de pose T → pose do jogo (direção dos ossos) | Testado; torção de mãos/pés não corrigida | F5 |
+| Espaço do ped: frente +Y, esquerda −X, raiz identidade em repouso | **Inferido** (101 emotes reais) | levantamento |
+| Quadril de outros rigs → `SKEL_ROOT` | **Inferido** (101 de 126 emotes animam a raiz; 6 a pélvis) | levantamento |
+| Reamostragem para 30 fps; `fps` explícito ou `'source'` | Testado | testes |
+| Root motion na raiz (padrão) ou na trilha mover | Escrita comprovada; efeito no jogo **não comprovado** | testes, F8 |
+| Mais de 1800 quadros | Recusado `ANIMATION_TOO_LONG` (blocos múltiplos não comprovados) | testes |
+| YCD gerado relido pelo CodeWalker | Comprovado (3/3, diferença 0) | F8 |
+| Reprodução no GTA V/FiveM | **Não comprovado** — amostras e roteiro em `D:\RedHorn\output\rpforge-animacao-teste\` | — |
+
 ## Envelope e formato
 
 | Item | Leitura | Escrita | Evidência |
