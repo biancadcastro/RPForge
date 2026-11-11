@@ -19,7 +19,7 @@ Para veículos, o campo editável altera o spawn e as referências. Para outros 
 
 ## Um clique para YTYP
 
-O menu tem duas ações independentes: **Converter com RPForge** aparece em pastas com RPFs; **Gerar YTYP com RPForge** aparece em pastas com YDRs. Quando os dois tipos estão presentes, ambas as opções ficam disponíveis. Um clique em Gerar YTYP abre o app, gera automaticamente e mostra o resultado, mesmo em pastas com RPFs. Selecionar uma pasta somente com YDRs pelo app também gera automaticamente. Não há prévia obrigatória nem atalho de aplicativo separado.
+O menu tem duas ações independentes: **Converter RPFs com RPForge** aparece em pastas com RPFs; **Gerar YTYP com RPForge** aparece em pastas com YDRs. Quando os dois tipos estão presentes, ambas as opções ficam disponíveis. Um clique em Gerar YTYP abre o app, gera automaticamente e mostra o resultado, mesmo em pastas com RPFs. Selecionar uma pasta somente com YDRs pelo app também gera automaticamente. Não há prévia obrigatória nem atalho de aplicativo separado.
 
 O gerador é implementado em JavaScript no próprio projeto. Lê RSC7 Legacy versão 165, caixa e esfera delimitadoras; usa hashes Jenkins dos nomes; associa YTD/YBN homônimos quando presentes. Cria YTYP **binário RSC7 versão 2**, não um XML com extensão trocada. O app não depende do GTAUtil, do cache enviado ou de bibliotecas CodeWalker em execução.
 

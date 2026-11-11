@@ -24,15 +24,17 @@ As ferramentas atuais, registradas em `lib/desktop.ts`, são:
 
 | Ferramenta | Acesso | Entrada |
 | --- | --- | --- |
-| Converter RPFs | Free, sem login | Pasta com `.rpf` |
-| Gerar YTYP | Free, sem login | Pasta com `.ydr` |
+| Converter RPFs | Free, sem conta | Pasta com `.rpf` |
+| Gerar YTYP | Free, sem conta | Pasta com `.ydr` |
 | Roupas para OBJ | Pro (`clothing.obj`) | Peça `.ydd` ou pasta |
 | Roupas para Neon | Pro (`clothing.neon`) | Peça `.ydd` ou pasta |
 | Separar pele | Pro (`clothing.skin`) | Peça `.ydd` ou pasta |
 
 Assetto foi retirado da
 interface, CLI, bridge e código de conversão. As fontes e imagens locais são as
-mesmas do site RPForge. Pixelify é usada nos títulos e ações; Atkinson, nos textos.
+mesmas do site RPForge: Pixelify Sans só em títulos de 28 px ou mais e no logo;
+Atkinson Hyperlegible em todo o resto, inclusive botões, rótulos, nomes de arquivo e
+caminhos (ver [IDENTIDADE.md](IDENTIDADE.md)).
 
 ## Ferramentas e estado
 
@@ -55,8 +57,8 @@ principal e não são aceitos como autoridade quando enviados pelo renderer.
 - `--neon <peça.ydd>` / `--neon-folder <pasta>`: Roupas para Neon.
 - `--skin <peça.ydd>` / `--skin-folder <pasta>`: Separar pele.
 
-As ações de RPF e YTYP não exigem conta. As ações de OBJ, Neon e Separar pele exigem
-uma sessão conectada: sem sessão, a janela mostra o login integrado e mantém a ação
+As ações de RPF e YTYP não exigem conta. As ações Roupas para OBJ, Roupas para Neon e Separar pele exigem
+uma sessão conectada: sem sessão, a janela mostra a tela **Entrar** integrada e mantém a ação
 pendente; após a conexão, retoma a ferramenta e os caminhos solicitados. Não há
 verificação de versão nesse fluxo.
 
@@ -118,16 +120,16 @@ de teste são fechados ao terminar.
 A compilação de desenvolvimento não cria instalador, não publica versão e não
 altera projetos pessoais, certificados ou registros do Windows.
 
-A interface desktop usa navegação lateral persistente, catálogo funcional de ferramentas e superfícies de trabalho compactas. A identidade visual mantém a paleta e o logotipo do RPForge, com Segoe UI nos controles e dados para legibilidade nativa no Windows. Nas telas de resultado, títulos e ações usam Pixelify e ícones em pixel, conforme a referência aprovada. `workspace.css` concentra as regras compartilhadas de densidade, navegação e painéis. A barra superior é integrada ao app, com ações restritas por IPC para a janela remetente. Os modos rápidos de roupas usam a sessão conectada; todos os modos rápidos continuam separados da navegação completa.
+A interface desktop usa navegação lateral persistente, catálogo funcional de ferramentas e superfícies de trabalho compactas. A identidade visual é a do site: uma paleta (`app/tokens.css`), botões lisos em Atkinson (`app/controls.css`) e Pixelify apenas em títulos grandes; os ícones de estado continuam em pixel. Detalhes em [DESKTOP_VISUAL_SYSTEM.md](DESKTOP_VISUAL_SYSTEM.md). Avisos transitórios usam o toast da marca (`components/toast.tsx`), mensagens persistentes usam `components/notice.tsx` e ações destrutivas usam `components/confirm-dialog.tsx`. `workspace.css` concentra as regras compartilhadas de densidade, navegação e painéis. A barra superior é integrada ao app, com ações restritas por IPC para a janela remetente. Os modos rápidos de roupas usam a sessão conectada; todos os modos rápidos continuam separados da navegação completa.
 
 A seleção 3D de roupas fica em `lib/mesh-selection.ts`, separada da classificação e da exportação. Seleções por clique, área e pincel são transitórias; a atribuição produz overrides explícitos por face. O visualizador reutiliza um contexto WebGL e renderiza em resposta a eventos, com descarte dos recursos ao sair da tela. Os testes de peças reais usam cópias isoladas fora do acervo; testes de conta e RPF usam fixtures sem credenciais reais.
 
 Menus Pro são apresentados apenas após validar uma licença assinada com as capacidades correspondentes. O app sincroniza um cache local mínimo (máscara, expiração e instalação) na abertura, ao conectar a conta e periodicamente enquanto estiver aberto. O Explorer não consulta a rede: `IExplorerCommand` e `IExplorerCommandState` ocultam comandos sem acesso ou expirados. A mesma regra vale para o menu moderno e Mostrar mais opções. O cache é apenas de apresentação; a operação sempre exige novamente a licença real no processo do app. Nenhuma chave privada ou token é gravado no cache do menu.
 
-Os resultados de RPF, YTYP, OBJ e Neon compartilham `components/operation-result.tsx`: blocos compactos com arquivos e destino, sucesso em pixel, ações de abertura restritas aos resultados autorizados e retorno à ferramenta. Falhas e cancelamentos permanecem identificados por item, sem indicador de sucesso quando nenhum item concluiu. Avisos de auditoria ficam em detalhes expansíveis. No OBJ, a prévia 3D é opcional e só cria o visualizador ao expandir; detalhes de LOD do Neon ficam recolhidos. A separação de pele mantém os dois blocos aprovados de Roupa e Pele.
+Os resultados de RPF, YTYP, OBJ e Neon compartilham `components/operation-result.tsx`, com a mesma trilha e o mesmo título da configuração: blocos compactos com arquivos e destino, ícone de sucesso em pixel, ações de abertura restritas aos resultados autorizados e retorno à ferramenta. Falhas e cancelamentos permanecem identificados por item, sem indicador de sucesso quando nenhum item concluiu. Avisos de auditoria ficam em detalhes expansíveis. No OBJ, a prévia 3D é opcional e só cria o visualizador ao expandir; detalhes de LOD (Alto/Médio/Baixo) do Neon ficam recolhidos. A separação de pele mantém os dois blocos aprovados de Roupa e Pele.
 
 No Explorer empacotado, o cache binário atômico de acesso da instalação tem precedência sobre o registro, que pode apresentar uma visão virtualizada antiga. Um cache da instalação com máscara zero, expirado ou inválido não pode ser sobreposto por um registro Pro antigo. Após corrigir a extensão local, os comandos registrados foram verificados no mesmo servidor COM alternando Free (ocultos e invocação negada) e Pro (habilitados), restaurando a licença real ao final.
 
-O login é exigido apenas pelas ferramentas Pro (OBJ, Neon e Separar pele). O app completo, Converter RPFs e Gerar YTYP abrem e executam sem conta; `scripts/check-login-gate.mjs` verifica esse limite. Nas ações Pro sem sessão, a navegação e os controles da ferramenta não são exibidos; a execução também é bloqueada no processo principal (`requireSession` e `requireToolAccess`), antes de criar workers. A entrada usa a própria janela, inclusive em modo rápido, e os eventos de autenticação retomam o pedido original. Login não concede Pro: a licença assinada precisa ter `plan` igual a `pro` e a capacidade correspondente (`clothing.obj`, `clothing.neon` ou `clothing.skin`). O plano Pro é concedido manualmente no servidor; o app não tem preços, checkout nem pagamento.
+Entrar na conta é exigido apenas pelas ferramentas Pro (Roupas para OBJ, Roupas para Neon e Separar pele). O app completo, Converter RPFs e Gerar YTYP abrem e executam sem conta; `scripts/check-login-gate.mjs` verifica esse limite. Nas ações Pro sem sessão, a navegação e os controles da ferramenta não são exibidos; a execução também é bloqueada no processo principal (`requireSession` e `requireToolAccess`), antes de criar workers. A entrada usa a própria janela, inclusive em modo rápido, e os eventos de autenticação retomam o pedido original. Entrar não concede Pro: a licença assinada precisa ter `plan` igual a `pro` e a capacidade correspondente (`clothing.obj`, `clothing.neon` ou `clothing.skin`). O plano Pro é concedido manualmente no servidor; o app não tem preços, checkout nem pagamento.
 
-A geometria compartilhada dos controles e o layout de entrada ficam em `app/workspace.css` (a antiga `alignment.css` foi incorporada, conforme [DESKTOP_VISUAL_SYSTEM.md](DESKTOP_VISUAL_SYSTEM.md)). O formulário e os provedores usam colunas explícitas; campos e botões de login têm 44 px, e os controles gerais usam 40 px sem alterar os controles compactos do editor ou os botões pixel aprovados dos resultados. Os logos dos provedores reutilizam `components/provider-icon.tsx` do website e são SVGs locais. O teste desktop verifica início das colunas, alturas, larguras e centralização dos logos e setas.
+A geometria compartilhada dos controles e o layout de entrada ficam em `app/workspace.css` (a antiga `alignment.css` foi incorporada, conforme [DESKTOP_VISUAL_SYSTEM.md](DESKTOP_VISUAL_SYSTEM.md)). O formulário e os provedores usam colunas explícitas; campos e botões têm a altura única `--control-height` (44 px); só as ferramentas densas do editor usam `--control-height-dense` (36 px). Todos os botões, inclusive os dos resultados, seguem o sistema liso de `app/controls.css`. Os logos dos provedores reutilizam `components/provider-icon.tsx` do website e são SVGs locais. O teste desktop verifica início das colunas, alturas, larguras e centralização dos logos e setas.

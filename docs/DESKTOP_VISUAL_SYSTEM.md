@@ -1,29 +1,109 @@
-# Referência visual do desktop
+# Sistema visual do desktop
 
-O website **https://rpforge.dev** é a referência visual do RPForge. Esta padronização foi solicitada em 5 de novembro de 2026. Não substituir sua linguagem por uma interface genérica do Windows ou por uma identidade diferente no editor.
+O site **https://rpforge.dev** é a referência visual. O desktop usa a mesma paleta, as
+mesmas fontes e o mesmo sistema de botões; não substituir por uma interface genérica do
+Windows. Paleta, fontes, nomes, glossário e regras de mensagem: [IDENTIDADE.md](IDENTIDADE.md).
 
-## Contrato visual
+## Arquivos
 
-- Títulos: Pixelify, com os arquivos já distribuídos pelo projeto. Textos, campos e navegação: Atkinson Hyperlegible.
-- Fundo `#121218`, superfície `#1d1d27`, texto `#f5f1e8`, bordas estruturais `#343444` e laranja `#ff7b25`.
-- Ação primária: fundo `#e9843d`, contorno `#ffd0a5` e texto escuro `#20150d`. Manter o relevo do website e o foco visível. O texto claro anterior não deve voltar ao botão laranja.
-- Controles de ação usam Pixelify; ferramentas compactas do editor e campos usam Atkinson para leitura de dados. A densidade é adaptada ao desktop, com altura base de 44 px, sem reduzir a fonte do conteúdo indiscriminadamente.
-- Os estados de configuração, progresso, erro e resultado devem usar os mesmos tokens e componentes. As cores de Roupa/Pele, eixos e advertências têm significado funcional e permanecem distintas.
+| Arquivo | Responsabilidade |
+| --- | --- |
+| `app/tokens.css` | Única origem de cores, famílias, medidas, foco e movimento. |
+| `app/controls.css` | Botões, campos, foco, `.notice`, toast, diálogo de confirmação, trilha. Carregado por último. |
+| `app/globals.css` | Base e estruturas gerais. |
+| `app/workspace.css` | Shell, navegação, formulários e páginas (incorporou a antiga `alignment.css`). |
+| `app/atelier.css` | Editor de pele e resultados. |
 
-## Responsabilidade dos arquivos
+Não criar folhas novas para sobrepor fonte ou cor de uma tela; ajustar a regra dona.
 
-`tokens.css` é a origem da paleta e das famílias. `globals.css` contém base e estruturas existentes. `controls.css` possui o desenho dos botões compartilhados. `workspace.css` possui shell, navegação, formulários e páginas. `atelier.css` possui a geometria do editor e dos resultados.
+## Botões
 
-A antiga camada `alignment.css` foi incorporada à geometria de `workspace.css`. Não criar uma nova folha para sobrepor fontes ou cores de uma tela. Ajustar a regra que possui essa responsabilidade.
+Iguais ao site: lisos (sem relevo, sombra ou texto em pixel), **Atkinson 15 px/700**,
+altura `--control-height` (44 px; 36 px só em ferramentas densas do editor).
 
-`PageHeading` compõe os cabeçalhos. `OperationResult` atende RPF, YTYP, OBJ, Neon e pele. `OperationProgress` é o diálogo de processamento compartilhado pelas ferramentas de roupas. Os rótulos e ações preservam seus nomes e comportamentos.
+| Variante | Classe | Aparência |
+| --- | --- | --- |
+| Primária | `.button.primary` | Fundo `#ff7b25`, borda `#ff8c43`, texto `#20150d`; hover `#ff8d43` |
+| Secundária | `.button.secondary` | Superfície, borda `--field-border` |
+| Perigo | `.button.danger` | Fundo `--danger-bg`, borda `--danger-border`, texto `--danger` |
+| Texto | `.button.ghost` / `.text-link` | Transparente, 14 px, sublinha no hover; alvo mínimo 32 px |
+| Ícone | `.button.icon` | Quadrado 44 px; **`aria-label` obrigatório** |
 
-## Verificação e capturas
+- Um raio (`--control-radius`) e um foco (`--focus`, anel laranja 2 px com afastamento 3 px)
+  para todos os controles.
+- Desabilitado: opacidade `.45` e cursor `not-allowed`.
+- Carregando: `aria-busy="true"` mostra o spinner **junto** do texto do botão (o texto
+  não some). Com movimento reduzido, o spinner fica parado.
+- Uma ação primária por área.
 
-1. Executar `npm run desktop:typecheck`, `npm run desktop:build` e `npm run desktop:test`.
-2. Executar `node desktop-web/scripts/check-login-gate.mjs` para preservar os limites Free/Pro.
-3. Executar `node desktop-web/scripts/check-visual.mjs`. O ensaio cobre 32 telas/estados em Electron, verifica fontes, cores aplicadas, overflow, erros do renderer e triagem WCAG automatizada. Usa perfis e dados sintéticos; não toca a conta real.
-4. Os checks OBJ/Neon/pele com espécimes devem usar cópias isoladas. Seus prints podem ser incorporados por `node desktop-web/scripts/build-visual-gallery.mjs`.
-5. A galeria é gravada em `output/visual-website/gallery/index.html`; prints abrem em resolução completa. `output` permanece fora do Git.
+## Campos
 
-Esses comandos compilam somente a interface local e fazem testes. Não empacotam distribuição, executável ou instalador. Uma triagem automatizada de acessibilidade não é certificação nem substitui avaliação com leitor de tela.
+Borda `--field-border` (`#6e6a78`, ≥ 3:1), hover `--field-border-hover`, inválido com
+`aria-invalid="true"` em `--danger`. Validação de pasta e de "Nome no jogo (spawn)"
+aparece no campo enquanto se digita (`.field-error`).
+
+## Onde cada mensagem vai
+
+| Situação | Componente |
+| --- | --- |
+| Aviso transitório, sem campo ou etapa (pasta não abriu, conta conectada/desconectada, prévia 3D indisponível, autorização renovada, aviso de abertura) | Toast — `components/toast.tsx` (`useToast`) |
+| Mensagem persistente ligada a um campo ou etapa (erro da operação, validação, revisão) | Aviso inline — `components/notice.tsx` (`.notice`), o único estilo inline |
+| Ação destrutiva (descartar revisão de pele, "Desconectar este computador") | Diálogo — `components/confirm-dialog.tsx`; nunca `window.confirm` |
+
+### Toast
+
+- Tons: info (laranja), sucesso (`#7fd49b`), aviso (âmbar `#ffc857`), erro (`--danger`);
+  barra lateral na cor do tom, ícone pixel, título em Atkinson, ação opcional (ghost) e
+  botão fechar ("Fechar notificação").
+- Some em ~6 s; pausa com mouse ou foco em cima. **Erro fica até fechar.**
+- No máximo 3 ao mesmo tempo; repetidos não se acumulam. Canto inferior direito.
+- `aria-live="polite"` (`role="status"`) para info/sucesso/aviso; `aria-live="assertive"`
+  (`role="alert"`) para erro.
+- Sem animação de entrada com `prefers-reduced-motion`.
+- Nunca texto de desenvolvedor: a mensagem passa pelo helper e o detalhe técnico fica
+  recolhido.
+
+### Aviso inline (`.notice`)
+
+Tons `error` (padrão), `warning`, `info`, `success`; título opcional, texto, ação opcional e
+"Detalhe técnico" recolhido quando a mensagem traz o marcador. `role="alert"` só no erro.
+Não criar outros estilos de nota/alerta.
+
+### Diálogo de confirmação
+
+`role="alertdialog"`, foco começa em cancelar ("Continuar editando" por padrão), Esc
+cancela, Tab fica preso no diálogo, botão de confirmar na variante `danger`.
+
+## Mensagens
+
+Todo erro passa por `userMessage()` (`lib/user-message.ts`), que remove "Error:" e
+prefixos de IPC, troca falhas de rede por "Sem conexão com o RPForge…" e separa o detalhe
+técnico pelo marcador `"\n\nDetalhe técnico: "` (o mesmo de `src/user-error.js`). Erros
+internos chegam como "Algo deu errado. Feche e abra a ferramenta novamente."; RPF
+corrompido mostra o texto amigável com o detalhe técnico recolhido.
+
+## Páginas
+
+- Trilha `Início / grupo / ferramenta` (`components/breadcrumb.tsx`); separadores
+  decorativos, item atual com `aria-current="page"`.
+- O resultado mantém a mesma trilha e o mesmo título da configuração; o estado é um `h2`.
+- O foco começa no título da página.
+- Roupas para OBJ, Roupas para Neon e Separar pele usam um só layout
+  (`components/clothing-setup.tsx`): "Selecionar peça YDD", "Selecionar textura YTD",
+  pasta de destino e ação primária. "Exclusivo do plano Pro" só aparece para quem não é Pro.
+- `PageHeading` compõe os cabeçalhos; `OperationResult` atende RPF, YTYP, OBJ, Neon e pele;
+  `OperationProgress` é o diálogo de processamento das ferramentas de roupas.
+
+## Verificação
+
+1. `npm run desktop:typecheck`, `npm run desktop:build` e `npm run desktop:test`.
+2. `node desktop-web/scripts/check-login-gate.mjs` (limites Free/Pro).
+3. `node desktop-web/scripts/check-visual.mjs`: telas em Electron com dados sintéticos;
+   confere fontes (controles em Atkinson, nenhum texto pequeno em Pixelify), a cor da
+   primária, o toast de sucesso, overflow, erros do renderer e triagem WCAG automatizada.
+4. Checks de OBJ/Neon/pele com espécimes usam cópias isoladas; a galeria
+   (`node desktop-web/scripts/build-visual-gallery.mjs`) vai para
+   `output/visual-website/gallery/index.html`, fora do Git.
+
+Esses comandos não empacotam nem instalam. Triagem automatizada não substitui teste com
+leitor de tela.

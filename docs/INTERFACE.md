@@ -6,7 +6,7 @@ O fluxo principal tem três etapas. Escolher a pasta inicia a análise automatic
 
 - Escolha a pasta de origem pelo seletor moderno do Windows; a análise começa ao confirmar. Cancelar mantém a configuração atual.
 - Nomes dos veículos e pastas de saída ficam juntos na mesma tela.
-- Clique no nome para editar o spawn de veículos ou o nome do recurso dos demais conteúdos. O nome original já vem preenchido.
+- Clique no nome para editar o **Nome no jogo (spawn)** de veículos ou o nome do recurso dos demais conteúdos. O nome original já vem preenchido.
 - Marque os RPFs a converter. Em pacotes com vários veículos, cada spawn pode ser editado.
 - Se a pasta já existir, escolha explicitamente **Cancelar**, **Usar outro nome** ou **Backup e substituir**. O app não escolhe uma ação por você.
 - Clique em **Revisar conversão**. As edições são validadas automaticamente; não há um passo separado de reanálise.
@@ -15,13 +15,13 @@ Em janelas menores, a configuração tem rolagem vertical para manter campos e l
 
 ## 2. Revisar
 
-Confira nomes finais, pastas, avisos, metas unificados e tuning que será removido. **Voltar** retorna à configuração. **Converter agora** só é habilitado após uma prévia válida e revisada. A etapa de revisão não grava o addon.
+Confira nomes finais, pastas, avisos, metas unificados e tuning que será removido. **Voltar** retorna à configuração. **Converter agora** só é habilitado após uma prévia válida e revisada. A etapa de revisão não grava o recurso.
 
 Se um spawn for inválido, o app mantém os campos preenchidos e bloqueia a conversão. Volte, corrija o campo e avance novamente.
 
 ## 3. Resultado
 
-Após a gravação e validação final, o app informa addons concluídos, cancelados e falhas. **Abrir resultado** abre o último addon concluído nessa operação. **Nova conversão** reinicia o fluxo e permite escolher outra pasta.
+Após a gravação e validação final, o app informa recursos concluídos, cancelados e falhas. **Abrir resultado** abre o último recurso concluído nessa operação. **Nova conversão** reinicia o fluxo e permite escolher outra pasta.
 
 A etapa Resultado não pode ser aberta antes de existir uma operação concluída ou com falha. Não se confunde com a prévia.
 
@@ -31,7 +31,7 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 | --- | --- |
 | Cancelar | Não substitui a pasta existente; esse RPF não é convertido. |
 | Usar outro nome | Edite o nome da pasta de saída para um nome livre. |
-| Backup e substituir | Preserva a pasta anterior em backup antes de entregar o novo addon. |
+| Backup e substituir | Preserva a pasta anterior em backup antes de entregar o novo recurso. |
 
 ## Ações auxiliares
 
@@ -49,7 +49,7 @@ A etapa Resultado não pode ser aberta antes de existir uma operação concluíd
 
 ## Desenvolvimento
 
-A prévia executa o conversor real: revisar é leitura; Converter grava addons. Mudanças no código requerem uma nova instância. Janelas anteriores não são fechadas automaticamente. Nenhum instalador é gerado durante o desenvolvimento.
+A prévia executa o conversor real: revisar é leitura; Converter grava recursos. Mudanças no código requerem uma nova instância. Janelas anteriores não são fechadas automaticamente. Nenhum instalador é gerado durante o desenvolvimento.
 
 A configuração mostra o nome original e o nome no jogo. As decisões de destino aparecem somente quando existe conflito. Revisão e resultado usam cartões com detalhes técnicos recolhidos. Ajuda e licenças são separadas; documentos têm rolagem escura e as ações de conflito usam menu estilizado.
 

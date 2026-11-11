@@ -1,13 +1,13 @@
 # Roupas para OBJ — primeira implementação
 
 Ferramenta Pro, incluída no instalador atual (1.0.1; motor em `engines\clothing`).
-Exige login e licença assinada com a capacidade `clothing.obj`. O processamento é
+Exige entrar na conta e licença assinada com a capacidade `clothing.obj`. O processamento é
 local, sem Blender e sem envio de modelos ou texturas à API.
 
 ## Fluxo
 
 Na bancada ou no menu Ferramentas, abra **Roupas para OBJ**. Selecione o YDD,
-o YTD correspondente (dispensável quando a difusa está embutida), o LOD e a pasta
+o YTD correspondente (**Selecionar textura YTD**) (dispensável quando a difusa está embutida), o LOD e a pasta
 de destino. A ferramenta salva somente OBJ e MTL diretamente no destino e mostra uma
 prévia 3D do próprio OBJ entregue. O cancelamento aguarda o processo terminar
 e remove somente os arquivos temporários daquela operação.
@@ -19,13 +19,13 @@ imagens que não foram exportadas. A prévia apresenta a malha sem textura.
 
 ## Ação rápida pelo Explorer
 
-Clique com o botão direito em um YDD e escolha **Exportar para OBJ com RPForge**.
+Clique com o botão direito em um YDD e escolha **Roupas para OBJ com RPForge**.
 A ação também fica disponível sobre uma pasta e no espaço vazio dentro dela.
 Quando existe um único YDD diretamente na pasta, ele vem selecionado; se houver
 vários ou estiverem em subpastas, use o seletor de peça para escolher o arquivo.
 A ação existe no menu moderno do Windows 11 e no clássico. Abre uma janela
 compacta, sem consulta de versão nem navegação do app completo. Sem sessão
-conectada, a janela mostra primeiro o login integrado e depois retoma a peça. O
+conectada, a janela mostra primeiro a tela **Entrar** integrada e depois retoma a peça. O
 menu só é exibido quando o cache local de acesso indica licença Pro válida. O YDD vem
 selecionado, com destino inicial na mesma pasta; nenhum arquivo é escrito antes
 da confirmação. Pode-se escolher outro destino.
@@ -45,7 +45,7 @@ que mantém a autoridade sobre os caminhos selecionados.
 - YDD Legacy RSC7 versão 165 e YTD versão 13. Os casos reais validados são duas
   roupas freemode, uma masculina e uma feminina; isso não representa certificação
   de todos os tipos de drawable ou formatos de textura.
-- O LOD padrão é High. Não existe substituição silenciosa por outro LOD.
+- O LOD padrão é Alto (opções Alto, Médio, Baixo e Muito baixo). Não existe substituição silenciosa por outro LOD.
 - Posições e normais nativas, triangulação e escala original preservadas.
   Eixos GTA Z-up; UV OBJ usa `V = 1 - GTA V`. UVs fora do tile são mantidos.
 - As texturas permanecem nos arquivos originais; não são exportadas ou modificadas.

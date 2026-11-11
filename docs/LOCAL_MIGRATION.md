@@ -15,7 +15,7 @@ não importa certificados e não altera uma instalação existente durante os te
   a desinstalação também preserva o pacote, em vez de presumir que ele é desta cópia.
 - A propriedade antiga é preservada para permitir nova tentativa se a remoção falhar.
 - A migração pública exige que o RPForge esteja fechado; o script não encerra a janela.
-- Nenhum RPF, addon, projeto ou certificado confiável é removido pela migração.
+- Nenhum RPF, recurso, projeto ou certificado confiável é removido pela migração.
 
 ## Verificação local
 

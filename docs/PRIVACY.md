@@ -13,19 +13,19 @@ Esta descricao corresponde ao codigo atual (versao 1.0.1, interface Electron em
   em um processo de trabalho local que encerra ao terminar. Nao ha servidor HTTP local.
   O fallback WinForms legado (`desktop/`) ainda troca pedidos com o conversor por
   arquivos temporarios, removidos ao finalizar a operacao.
-- Previa, avisos e diagnostico de peso aparecem na interface; nao e gravado relatorio JSON no addon.
+- Previa, avisos e diagnostico de peso aparecem na interface; nao e gravado relatorio JSON no recurso.
 - Os RPFs e YDDs originais sao preservados. Quando o usuario escolhe substituir uma saida,
-  o backup fica ao lado do addon e permanece sob controle do usuario.
+  o backup fica ao lado do recurso e permanece sob controle do usuario.
 
 ## Conta e licenca
 
 - Converter RPFs e Gerar YTYP funcionam sem conta e sem conexao.
-- Roupas para OBJ, Roupas para Neon e Separar pele exigem login e uma licenca Pro
+- Roupas para OBJ, Roupas para Neon e Separar pele exigem entrar na conta e uma licenca Pro
   assinada. Somente nesse fluxo o app se comunica com `https://api.rpforge.dev`:
   - autorizacao do computador: identificador de instalacao, chave publica RSA gerada
     localmente, nome do computador (nome de host do Windows, limitado a 60 caracteres)
     e um desafio PKCE;
-  - login por e-mail: e-mail, senha e, quando ativo, o codigo MFA, enviados a API para
+  - entrada por e-mail: e-mail, senha e, quando ativo, o codigo MFA, enviados a API para
     autenticar. A senha nao e salva pelo aplicativo;
   - Discord, Google e GitHub: a autorizacao abre no navegador padrao; o app consulta a
     API ate a confirmacao, sem copiar cookies do navegador;
@@ -59,7 +59,7 @@ Esta descricao corresponde ao codigo atual (versao 1.0.1, interface Electron em
   sao manuais, pelo instalador.
 - Os botoes de conta e downloads abrem `rpforge.dev` no navegador padrao.
 - A instalacao configura o menu do Explorer e os dados de desinstalacao. A remocao do
-  programa nao deve apagar os addons ou arquivos de trabalho do usuario. Desinstalar
+  programa nao deve apagar os recursos ou arquivos de trabalho do usuario. Desinstalar
   nao exclui a conta no servico.
 
 Os scripts de desenvolvimento podem baixar dependencias e ferramentas dos seus

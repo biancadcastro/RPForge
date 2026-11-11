@@ -32,7 +32,7 @@ Ele nao publica releases e nao produz instaladores.
 
 Consulte [PRIVACY.md](PRIVACY.md). O aplicativo processa os arquivos localmente,
 sem telemetria ou envio de assets. Somente as ferramentas Pro usam a API da conta
-para login e licenca. A instalacao registra o comando do Explorer e o
+para entrar na conta e validar a licenca. A instalacao registra o comando do Explorer e o
 desinstalador. A distribuicao final devera informar essas alteracoes e permitir remocao.
 A confianca manual no certificado de teste foi uma etapa autorizada de desenvolvimento;
 ela nao deve fazer parte da distribuicao publica.

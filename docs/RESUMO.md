@@ -9,19 +9,19 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 | --- | --- |
 | Converter RPFs | Free, sem conta |
 | Gerar YTYP | Free, sem conta |
-| Roupas para OBJ | Pro: login e licenca `clothing.obj` |
-| Roupas para Neon | Pro: login e licenca `clothing.neon` |
-| Separar pele | Pro: login e licenca `clothing.skin` |
+| Roupas para OBJ | Pro: entrar na conta e licenca `clothing.obj` |
+| Roupas para Neon | Pro: entrar na conta e licenca `clothing.neon` |
+| Separar pele | Pro: entrar na conta e licenca `clothing.skin` |
 
 O Pro e concedido manualmente no servidor; nao ha preco, checkout ou pagamento no app. Detalhes em SUBSCRIPTIONS.md e CLOTHING_*.md.
 
 ## Acesso e fluxo
 
 - Interface Electron + Next.js (`desktop-web/`), incluida no instalador atual (1.0.1). A janela WinForms em `desktop/` permanece apenas como fallback legado.
-- Comandos **Converter com RPForge** e **Gerar YTYP com RPForge** no menu do Windows 11 e no menu classico; os comandos de roupas aparecem sobre YDDs e pastas quando ha licenca Pro valida.
+- Comandos **Converter RPFs com RPForge** e **Gerar YTYP com RPForge** no menu do Windows 11 e no menu classico; os comandos de roupas (**Roupas para OBJ com RPForge**, **Roupas para Neon com RPForge**, **Separar pele com RPForge**) aparecem sobre YDDs e pastas quando ha licenca Pro valida.
 - Funciona sobre a pasta e no espaco vazio dentro dela; a extensao detecta a presenca de RPF.
-- Fluxo guiado **Configurar → Revisar → Resultado**, com **Como usar** como página auxiliar; acoes rapidas abrem uma janela compacta.
-- Identidade pixel art e fonte Pixelify Sans do portfólio, embutidas para uso offline.
+- Fluxo guiado **Configurar → Revisar → Resultado**, com **Ajuda** como página auxiliar; acoes rapidas abrem uma janela compacta.
+- Identidade do site rpforge.dev, embutida para uso offline: Atkinson Hyperlegible no texto e nos controles, Pixelify Sans só em títulos grandes e no logo. Slogan: "Você cria. O RPForge organiza."
 - Analise antes de converter; nenhuma extracao e gravada durante a previa.
 - Edicao de spawns por carro, com maiusculas e minusculas preservadas. Campo vazio mantem o nome atual.
 - Alterar nomes ou destinos é validado automaticamente ao avançar para Revisar. O RPF tambem e conferido para detectar mudancas desde a analise.
@@ -30,14 +30,14 @@ O Pro e concedido manualmente no servidor; nao ha preco, checkout ou pagamento n
 ## Conversao e organizacao
 
 - Extracao de RPF7 OPEN/NONE, inclusive arquivos RPF internos.
-- Um addon por RPF externo; pacotes com varios carros permanecem juntos.
+- Um recurso por RPF externo; pacotes com varios carros permanecem juntos.
 - Pasta com o spawn escolhido ou atual; pacotes usam o primeiro spawn seguido de `_pack`.
 - Modelos e dicionarios principais em `stream`; tuning e arquivos associados em `stream/mods`.
 - Metas diretamente em `data`, sem subpastas numeradas.
 - Metas de mesmo nome de RPFs internos sao unificados quando suas definicoes sao compativeis.
 - Definicoes contraditorias, nomes duplicados e conflitos de modkits sao apontados.
 - `fxmanifest.lua` gerado com os registros necessarios e `-- Convertido com RPForge`.
-- Sem `conversion-report.json` no addon.
+- Sem `conversion-report.json` no recurso.
 
 ## Spawns e tuning
 
@@ -54,7 +54,7 @@ O Pro e concedido manualmente no servidor; nao ha preco, checkout ou pagamento n
 - Confere manifest, lista de arquivos e tipos `data_file`.
 - Diferencia erros comprovados de dependencias externas ou texturas embutidas que exigem verificacao no jogo.
 - Bloqueia a conversao se a validacao encontrar erros estruturais.
-- Grava primeiro em uma pasta temporaria e confere os bytes por SHA-256 antes de entregar o addon.
+- Grava primeiro em uma pasta temporaria e confere os bytes por SHA-256 antes de entregar o recurso.
 - Se o destino existir, permite cancelar, usar outro nome ou criar backup e substituir.
 - Preserva o RPF original e os backups. Nao fecha aplicativos para forcar alteracoes.
 

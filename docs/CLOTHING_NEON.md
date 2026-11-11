@@ -1,14 +1,15 @@
-# Roupa para Neon — conversão nativa
+# Roupas para Neon — conversão nativa
 
-Disponível no app e no botão direito do YDD, sobre a pasta ou no fundo da pasta.
+Disponível no app e no botão direito do YDD, sobre a pasta ou no fundo da pasta
+(**Roupas para Neon com RPForge**).
 As ações do Explorer usam `--neon` e `--neon-folder` e abrem uma janela compacta.
-Não consultam versão e não executam Blender. A ferramenta é Pro: exige login e
+Não consultam versão e não executam Blender. A ferramenta é Pro: exige entrar na conta e
 licença assinada com a capacidade `clothing.neon`; sem sessão, a janela compacta
-mostra o login integrado antes de retomar a peça.
+mostra a tela **Entrar** integrada antes de retomar a peça.
 
 ## Uso e saída
 
-Selecione a roupa e seu YTD, confira o destino e use Converter para Neon.
+Selecione a roupa e seu YTD, confira o destino e use **Converter para Neon**.
 Não há confirmação de separação de pele no fluxo. Neon e Separar pele são
 operações independentes: a conversão Neon não recorta malhas nem gera uma peça
 de pele. Peças com pele reconhecida são recusadas com orientação para usar
@@ -48,8 +49,8 @@ encerra após cada operação; cancelamento e falhas removem a saída temporári
 
 `scripts/check-neon-real.mjs` recebe o mesmo JSON externo de peças usado nos testes
 OBJ. Foram usadas a Camisa #003 masculina e a Camisa #001 feminina do acervo:
-LOD alto, respectivamente 1.993/988 vértices e 2.656/1.462 triângulos. Os LODs
-médio e baixo também foram preservados. O teste verifica hashes dos originais,
+LOD Alto, respectivamente 1.993/988 vértices e 2.656/1.462 triângulos. Os LODs
+Médio e Baixo também foram preservados. O teste verifica hashes dos originais,
 cópia exata do YTD, IDs distintos em conversões repetidas e cancelamento sem sobras.
 
 `desktop-web/scripts/check-neon.mjs` valida as duas peças reais pela janela

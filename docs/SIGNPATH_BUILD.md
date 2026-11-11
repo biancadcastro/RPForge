@@ -80,7 +80,7 @@ aprovado, nunca um nome presumido.
 placeholders e identidade de teste. Nao empacota ou registra nada.
 O empacotamento e a assinatura MSIX, a assinatura do instalador e o teste de migracao
 serao feitos quando houver aprovacao e um pedido explicito para preparar a distribuicao.
-Uma migracao devera preservar os addons e dados, retirar somente a integracao `.Local`
+Uma migracao devera preservar os recursos e dados, retirar somente a integracao `.Local`
 e evitar duas entradas simultaneas do menu. Certificados de teste nao devem ser removidos
 silenciosamente caso ainda sejam usados por outra instalacao.
 
