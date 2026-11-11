@@ -5,9 +5,12 @@
 #ifndef PreviewOutput
   #error PreviewOutput is required
 #endif
+#ifndef AppVersion
+  #error AppVersion is required; run scripts/Preview-Installer.ps1 (reads package.json)
+#endif
 [Setup]
 AppName=RPForge — prévia visual
-AppVersion=1.0.0
+AppVersion={#AppVersion}
 AppId=RPForgeInstallerPresentationPreview
 AppPublisher=Bianca de Castro
 DefaultDirName={tmp}\RPForge-visual-preview
@@ -17,7 +20,8 @@ CreateUninstallRegKey=no
 PrivilegesRequired=lowest
 OutputDir={#PreviewOutput}
 OutputBaseFilename=RPForge-Installer-VisualPreview
-SetupIconFile=..\desktop\assets\rpforge.ico
+; Same icon as the real setup: Build-Shell.ps1 copies this file to shell\rpforge-mark-v3.ico.
+SetupIconFile={#AddBackslash(SourcePath)}..\desktop\assets\rpforge.ico
 Compression=lzma2
 SolidCompression=yes
 DisableDirPage=yes
@@ -64,7 +68,7 @@ begin
     if CurPageID = ForgeLegalPage.ID then begin
       for Index := 0 to 3 do begin
         ForgeChooseDocument(ForgeDocumentOptions[Index]);
-        if ForgeDocumentText.Lines.Count = 0 then RaiseException('Documento vazio na previa.');
+        if ForgeDocumentText.Lines.Count = 0 then RaiseException('Documento vazio na prévia.');
         SaveStringToFile(ReviewDirectory + '\state.txt', #13#10 +
           'Document' + IntToStr(Index) + '=' + IntToStr(ForgeDocumentText.Lines.Count), True);
       end;

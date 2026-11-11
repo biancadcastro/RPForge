@@ -104,8 +104,11 @@ int wmain(int argc, wchar_t** argv) {
      access.set(7,access.now+3600,access.root);
     }
     PWSTR objTitle = nullptr;
-    if (FAILED(clothing->GetTitle(nullptr,&objTitle)) || wcscmp(objTitle,L"Exportar para OBJ com RPForge")) return 34;
+    if (FAILED(clothing->GetTitle(nullptr,&objTitle)) || wcscmp(objTitle,L"Roupas para OBJ com RPForge")) return 34;
     CoTaskMemFree(objTitle);
+    PWSTR objTip = nullptr;
+    if (FAILED(clothing->GetToolTip(nullptr,&objTip)) || wcscmp(objTip,L"Exporta a roupa YDD para OBJ e MTL. Exige o plano Pro.")) return 52;
+    CoTaskMemFree(objTip);
     EXPCMDSTATE objState;
     if (FAILED(clothing->GetState(nullptr,TRUE,&objState)) || objState != ECS_HIDDEN) return 35;
     for (const auto extension : { L".ydd", L".ytd" }) {
@@ -135,8 +138,11 @@ int wmain(int argc, wchar_t** argv) {
     clothing->Release();
     }
     PWSTR title = nullptr;
-    if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter com RPForge")) return 15;
+    if (FAILED(command->GetTitle(nullptr,&title)) || wcscmp(title,L"Converter RPFs com RPForge")) return 15;
     CoTaskMemFree(title);
+    PWSTR tip = nullptr;
+    if (FAILED(command->GetToolTip(nullptr,&tip)) || wcscmp(tip,L"Converte os RPFs desta pasta em recursos FiveM, revisando antes de gravar.")) return 53;
+    CoTaskMemFree(tip);
     PWSTR icon = nullptr;
     if (FAILED(command->GetIcon(nullptr,&icon)) || !wcsstr(icon,L"\\shell\\rpforge-mark-v3.ico,0")) return 16;
     CoTaskMemFree(icon);

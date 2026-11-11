@@ -58,10 +58,10 @@ Source: "{#PresentationDir}\third-party.txt"; DestDir: "{app}\legal"; DestName: 
 Source: "{#PresentationDir}\chromium-notices.txt"; DestDir: "{app}\legal"; DestName: "CHROMIUM-LICENSES.txt"; Flags: ignoreversion
 
 [Registry]
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\RpfToFiveM"; ValueType: string; ValueData: "Converter com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\RpfToFiveM"; ValueType: string; ValueData: "Converter RPFs com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RpfToFiveM"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RpfToFiveM\command"; ValueType: string; ValueData: """{app}\runtime\node.exe"" ""{app}\src\cli.js"" --interactive ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM"; ValueType: string; ValueData: "Converter com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM"; ValueType: string; ValueData: "Converter RPFs com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RpfToFiveM\command"; ValueType: string; ValueData: """{app}\runtime\node.exe"" ""{app}\src\cli.js"" --interactive ""%V"""
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeYtyp"; ValueType: string; ValueData: "Gerar YTYP com RPForge"
@@ -71,24 +71,24 @@ Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeYtyp"; V
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeYtyp"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeYtyp\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --ytyp ""%V"""
 
-Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj"; ValueType: string; ValueData: "Exportar para OBJ com RPForge"
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj"; ValueType: string; ValueData: "Roupas para OBJ com RPForge"
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Single"
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --obj ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeObj"; ValueType: string; ValueData: "Exportar roupa para OBJ com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeObj"; ValueType: string; ValueData: "Roupas para OBJ com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeObj"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeObj\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --obj-folder ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeObj"; ValueType: string; ValueData: "Exportar roupa para OBJ com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeObj"; ValueType: string; ValueData: "Roupas para OBJ com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeObj"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeObj\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --obj-folder ""%V"""
 
-Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeNeon"; ValueType: string; ValueData: "Converter roupa para Neon com RPForge"
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeNeon"; ValueType: string; ValueData: "Roupas para Neon com RPForge"
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeNeon"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeNeon\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --neon ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeNeon"; ValueType: string; ValueData: "Converter roupa para Neon com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeNeon"; ValueType: string; ValueData: "Roupas para Neon com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeNeon"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\shell\RPForgeNeon\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --neon-folder ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeNeon"; ValueType: string; ValueData: "Converter roupa para Neon com RPForge"
+Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeNeon"; ValueType: string; ValueData: "Roupas para Neon com RPForge"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeNeon"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\RPFForge.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\Directory\Background\shell\RPForgeNeon\command"; ValueType: string; ValueData: """{app}\RPFForge.exe"" --neon-folder ""%V"""
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeSkin"; ValueType: string; ValueData: "Separar pele com RPForge"
@@ -136,12 +136,12 @@ var
 
 procedure InitializeWizard();
 begin
-  LocalTrustPage := CreateInputOptionPage(wpLicense, 'Confianca local do RPForge',
-    'Revise esta alteracao de seguranca antes de instalar.',
-    'Para ativar o menu principal do Explorer, o instalador pode adicionar o certificado publico RPF Forge Local Test em TrustedPeople para todos os usuarios deste computador.' + #13#10#13#10 +
-    'Isso permite confiar tambem em outros arquivos assinados com a mesma chave. Nao e um certificado publico validado e nao garante remover alertas do SmartScreen ou do antivirus. Nenhum certificado raiz sera instalado.' + #13#10#13#10 +
-    'Ao autorizar, a importacao sera automatica apos a confirmacao de administrador. Sem autorizacao, o aplicativo sera instalado com o menu classico em Mostrar mais opcoes. A desinstalacao nao revoga essa confianca automaticamente.', False, False);
-  LocalTrustPage.Add('Autorizo instalar o certificado local para todos os usuarios e ativar o menu moderno.');
+  LocalTrustPage := CreateInputOptionPage(wpLicense, 'Confiança local do RPForge',
+    'Revise esta alteração de segurança antes de instalar.',
+    'Para ativar o menu principal do Explorer, o instalador pode adicionar o certificado público RPF Forge Local Test em TrustedPeople para todos os usuários deste computador.' + #13#10#13#10 +
+    'Isso permite confiar também em outros arquivos assinados com a mesma chave. Não é um certificado público validado e não garante remover alertas do SmartScreen ou do antivírus. Nenhum certificado raiz será instalado.' + #13#10#13#10 +
+    'Ao autorizar, a importação será automática após a confirmação de administrador. Sem autorização, o aplicativo será instalado com o menu clássico em Mostrar mais opções. A desinstalação não revoga essa confiança automaticamente.', False, False);
+  LocalTrustPage.Add('Autorizo instalar o certificado local para todos os usuários e ativar o menu moderno.');
   LocalTrustPage.Values[0] := False;
   ForgeInitializePresentation;
 end;
@@ -195,12 +195,12 @@ begin
       '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\windows\Trust-InstallerCertificate.ps1') + '" -CertificatePath "' + ExpandConstant('{app}\shell\RPFForge.LocalTest.cer') + '" -ExpectedSha256 {#LocalCertificateHash}',
       '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then begin
       ModernMenuFailed := True;
-      MsgBox('A confianca local nao foi instalada. O RPForge continua disponivel pelo aplicativo e pelo menu classico em Mostrar mais opcoes.', mbInformation, MB_OK);
+      MsgBox('A confiança local não foi instalada. O RPForge continua disponível pelo aplicativo e pelo menu clássico em Mostrar mais opções.', mbInformation, MB_OK);
       Exit;
     end;
     if not Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'), '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\windows\Register-ModernMenu.ps1') + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then begin
       ModernMenuFailed := True;
-      MsgBox('Nao foi possivel ativar o menu moderno. O RPForge continua disponivel pelo aplicativo e pelo menu classico em Mostrar mais opcoes.', mbInformation, MB_OK);
+      MsgBox('Não foi possível ativar o menu moderno. O RPForge continua disponível pelo aplicativo e pelo menu clássico em Mostrar mais opções.', mbInformation, MB_OK);
     end;
   end;
 end;

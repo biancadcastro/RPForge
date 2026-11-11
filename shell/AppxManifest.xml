@@ -19,7 +19,7 @@
  <Capabilities><rescap:Capability Name="runFullTrust" /><rescap:Capability Name="unvirtualizedResources" /></Capabilities>
  <Applications>
   <Application Id="RPFForge" Executable="RPFForge.exe" uap10:TrustLevel="mediumIL" uap10:RuntimeBehavior="win32App">
-   <uap:VisualElements AppListEntry="none" DisplayName="RPForge" Description="Conversor de addons FiveM" BackgroundColor="transparent" Square150x150Logo="Assets\LargeLogo.png" Square44x44Logo="Assets\MenuLogo.png" />
+   <uap:VisualElements AppListEntry="none" DisplayName="RPForge" Description="Conversor de recursos FiveM" BackgroundColor="transparent" Square150x150Logo="Assets\LargeLogo.png" Square44x44Logo="Assets\MenuLogo.png" />
    <Extensions>
     <desktop4:Extension Category="windows.fileExplorerContextMenus"><desktop4:FileExplorerContextMenus>
      <desktop5:ItemType Type=".ydd"><desktop5:Verb Id="ExportClothingObj" Clsid="3C9EE5A7-895C-46E2-931B-13A51EA7A842" /><desktop5:Verb Id="ConvertClothingNeon" Clsid="86A7BF51-2C9E-4B80-94F2-8920FB8F4299" /><desktop5:Verb Id="SeparateClothingSkin" Clsid="B91E247D-60A8-4CE3-99B7-F3D44D1EAD50" /></desktop5:ItemType>

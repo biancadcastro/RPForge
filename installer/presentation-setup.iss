@@ -14,7 +14,7 @@ LicenseFile={#PresentationDir}\terms-license.txt
 DialogFontSize=10
 
 [Messages]
-WelcomeLabel1=Você cria.%nO RPForge acompanha.
+WelcomeLabel1=Você cria.%nO RPForge organiza.
 WelcomeLabel2=Instale as ferramentas do RPForge para preparar seus recursos de GTA V e FiveM.%n%nAntes de instalar, você pode consultar os termos de uso, a licença, a privacidade e os avisos de terceiros neste assistente.
 WizardLicense=Termos de uso e licença
 LicenseLabel=Leia os termos e a licença antes de continuar.

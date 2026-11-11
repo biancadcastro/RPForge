@@ -1,4 +1,4 @@
-param([switch]$Unregister, [string]$InstallRoot)
+﻿param([switch]$Unregister, [string]$InstallRoot)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'ModernMenu-Lifecycle.ps1')
@@ -10,7 +10,7 @@ Import-Module (Join-Path $PSHOME 'Modules\Appx\Appx.psd1') -ErrorAction Stop
 if ($Unregister) {
     $owner = Get-ForgeOptionalMenuProperty -LiteralPath $ownersKey -Name $identity
     if (!$owner -and $identity -eq 'RedHorn.RPFForge.Local') { $owner = Get-ForgeOptionalMenuProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner' }
-    if (!(Test-ForgeMenuOwnership $owner $root)) { Write-Host 'Identidade sem propriedade desta copia preservada.'; return }
+    if (!(Test-ForgeMenuOwnership $owner $root)) { Write-Host 'Identidade sem propriedade desta cópia preservada.'; return }
     Get-AppxPackage -Name $identity | Remove-AppxPackage -ErrorAction Stop
     Remove-ItemProperty -LiteralPath $ownersKey -Name $identity -ErrorAction SilentlyContinue
     $currentOwner = Get-ForgeOptionalMenuProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner'
@@ -32,7 +32,7 @@ if ($Unregister) {
     }
     $sourcePri = Join-Path $root 'shell\resources.pri'
     if (Test-Path -LiteralPath $sourcePri) { Copy-Item -LiteralPath $sourcePri -Destination (Join-Path $root 'resources.pri') -Force }
-    if (!(Test-Path -LiteralPath (Join-Path $root 'Assets\MenuLogo.png')) -or !(Test-Path -LiteralPath (Join-Path $root 'resources.pri'))) { throw 'Recursos visuais externos do menu ausentes; registro interrompido para preservar a instalacao.' }
+    if (!(Test-Path -LiteralPath (Join-Path $root 'Assets\MenuLogo.png')) -or !(Test-Path -LiteralPath (Join-Path $root 'resources.pri'))) { throw 'Recursos visuais externos do menu ausentes; registro interrompido para preservar a instalação.' }
     $oldOwner = Get-ForgeOptionalMenuProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuOwner'
     $oldIdentity = Get-ForgeOptionalMenuProperty -LiteralPath 'HKCU:\Software\RPForge' -Name 'MenuPackage'
     if ($identity -eq 'RedHorn.RPFForge' -and (Get-Process -Name RPFForge -ErrorAction SilentlyContinue)) { throw 'Feche o RPForge antes de migrar a identidade do menu. Nenhuma janela foi encerrada.' }
@@ -41,22 +41,22 @@ if ($Unregister) {
       $previousOwner = Get-ForgeOptionalMenuProperty -LiteralPath $ownersKey -Name $identity
       if (!$previousOwner -and (!$oldIdentity -or $oldIdentity -eq $identity)) { $previousOwner = $oldOwner }
       if ($existing -and $previousOwner -and !(Test-ForgeMenuOwnership $previousOwner $root)) {
-        if (Get-Process -Name RPFForge -ErrorAction SilentlyContinue) { throw 'Feche o RPForge antes de trocar a localizacao do menu; nenhuma janela foi encerrada.' }
+        if (Get-Process -Name RPFForge -ErrorAction SilentlyContinue) { throw 'Feche o RPForge antes de trocar a localização do menu; nenhuma janela foi encerrada.' }
         $previousPackage = Join-Path $previousOwner 'shell\RPFForge.identity.msix'
-        if (!(Test-Path -LiteralPath $previousPackage -PathType Leaf) -or (Get-ForgeMenuIdentity $previousPackage) -ne $identity) { throw 'Pacote anterior nao disponivel para restauracao; menu preservado.' }
+        if (!(Test-Path -LiteralPath $previousPackage -PathType Leaf) -or (Get-ForgeMenuIdentity $previousPackage) -ne $identity) { throw 'Pacote anterior não disponível para restauração; menu preservado.' }
         # Windows rejects the same package identity/version at a new ExternalLocation.
         # Only its registration is removed; files remain, and failure restores it.
         Invoke-ForgeMenuLocationChange -RemovePrevious { $existing | Remove-AppxPackage -ErrorAction Stop } -RegisterNew {
             Add-AppxPackage -Path $package -ExternalLocation $root -ErrorAction Stop
             $active = Get-AppxPackage -Name $identity
-            if (!$active -or $active.Status -ne 'Ok') { throw 'Menu novo nao confirmado.' }
+            if (!$active -or $active.Status -ne 'Ok') { throw 'Menu novo não confirmado.' }
         } -RestorePrevious {
             Get-AppxPackage -Name $identity | Remove-AppxPackage -ErrorAction Stop
             Add-AppxPackage -Path $previousPackage -ExternalLocation $previousOwner -ErrorAction Stop
         }
       } elseif (Get-Process -Name RPFForge -ErrorAction SilentlyContinue) {
         Add-AppxPackage -Path $package -ExternalLocation $root -DeferRegistrationWhenPackagesAreInUse -ErrorAction Stop
-        Write-Host 'Atualizacao do menu agendada; a janela RPForge aberta foi preservada.'
+        Write-Host 'Atualização do menu agendada; a janela RPForge aberta foi preservada.'
       } else {
         # Release only this package's headless COM host, never Explorer or another app.
         Add-AppxPackage -Path $package -ExternalLocation $root -ForceTargetApplicationShutdown -ErrorAction Stop

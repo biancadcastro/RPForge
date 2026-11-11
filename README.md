@@ -54,14 +54,14 @@ As capturas são do manual 1.0.1 e usam exemplos fictícios. O [manual oficial n
 
 1. Baixe e instale o RPForge pelo [site oficial](https://rpforge.dev/#download).
 2. Coloque o `.rpf` em uma pasta e clique com o botão direito nela.
-3. Escolha **Converter com RPForge**.
+3. Escolha **Converter RPFs com RPForge**.
 4. Em **Configurar**, mantenha os nomes ou edite o spawn.
 5. Clique em **Revisar conversão**, confira o resumo e use **Converter agora**.
 6. Use **Abrir resultado** e teste o addon no FiveM.
 
 Para YTYP, reúna os `.ydr` em uma pasta e use **Gerar YTYP com RPForge**. A geração começa automaticamente.
 
-Com licença Pro ativa, o botão direito sobre um `.ydd` (ou sobre a pasta) mostra **Exportar para OBJ com RPForge**, **Converter roupa para Neon com RPForge** e **Separar pele com RPForge**. Sem licença Pro, esses comandos ficam ocultos.
+Com licença Pro ativa, o botão direito sobre um `.ydd` (ou sobre a pasta) mostra **Roupas para OBJ com RPForge**, **Roupas para Neon com RPForge** e **Separar pele com RPForge**. Sem licença Pro, esses comandos ficam ocultos.
 
 ### 📥 Instalação
 

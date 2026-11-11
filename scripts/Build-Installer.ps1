@@ -1,4 +1,4 @@
-param([string]$CompilerPath, [string]$SignedBinaryDirectory, [string]$UnsignedBinaryDirectory, [switch]$ValidateSignedInputsOnly, [switch]$LocalTest, [string]$ClothingEngineDirectory)
+﻿param([string]$CompilerPath, [string]$SignedBinaryDirectory, [string]$UnsignedBinaryDirectory, [switch]$ValidateSignedInputsOnly, [switch]$LocalTest, [string]$ClothingEngineDirectory)
 $ErrorActionPreference = 'Stop'
 if ($SignedBinaryDirectory -or $UnsignedBinaryDirectory -or $ValidateSignedInputsOnly) {
     if (!$SignedBinaryDirectory -or !$UnsignedBinaryDirectory) { throw 'Informe os diretorios assinado e original sem assinatura.' }
@@ -93,31 +93,45 @@ try {
     Copy-Item -LiteralPath (Join-Path $lockedNode 'LICENSE') -Destination (Join-Path $runtimeDir 'LICENSE.txt')
     $instructions = @'
 RPForge
+Você cria. O RPForge organiza.
 
-1. Clique com o botao direito na pasta que contem o arquivo .rpf.
-2. Selecione Converter com RPForge.
-   A extensao usa o menu principal do Windows 11.
-3. Revise a previa na janela e preencha o novo spawn, se desejar.
-4. Em Configurar, escolha o tratamento para pastas existentes.
-5. Clique em Revisar conversao, confira os avisos e use Converter agora.
-6. Copie o addon para resources e adicione o ensure indicado ao server.cfg.
+Converter RPFs
+1. Clique com o botão direito na pasta que contém o arquivo .rpf.
+2. Selecione Converter RPFs com RPForge.
+   No Windows 11, o comando fica no menu principal quando a confiança local
+   foi autorizada; caso contrário, procure em Mostrar mais opções.
+3. Revise a prévia na janela e preencha o novo spawn, se desejar.
+4. Em Configurar, escolha o tratamento para pastas de destino existentes.
+5. Clique em Revisar conversão, confira os avisos e use Converter agora.
+6. Copie o recurso para resources e adicione o ensure indicado ao server.cfg.
 
-Nao requer Node.js separado, GTA, OpenIV ou CodeWalker instalados.
-Os RPFs originais sao preservados. Saidas existentes nao sao sobrescritas.
-Suporta conteudos GTA V Legacy, RPF7 OPEN/NONE: veiculos, roupas identificadas,
-mapas, props, animacoes, texturas e tipos reconhecidos de peds, armas e audio.
-RPFs criptografados, Enhanced e tipos especiais desconhecidos sao recusados.
-Em pastas com YDRs, use Gerar YTYP com RPForge para gerar YTYPs basicos.
-YTYPs basicos nao reconstroem salas ou portais de MLO.
-Valide o resultado no FiveM antes de usar em producao.
+Não requer Node.js separado, GTA, OpenIV ou CodeWalker instalados.
+Os RPFs originais são preservados. Se a pasta de destino já existir, você
+escolhe usar outro nome, cancelar ou substituí-la: a pasta anterior é
+preservada como backup antes da substituição.
+Suporta conteúdos GTA V Legacy, RPF7 OPEN/NONE: veículos, roupas identificadas,
+mapas, props, animações, texturas e tipos reconhecidos de peds, armas e áudio.
+RPFs criptografados, Enhanced e tipos especiais desconhecidos são recusados.
+Valide o resultado no FiveM antes de usar em produção.
 
-Para remover, use Configuracoes > Aplicativos > RPForge.
-Seus addons e arquivos originais nao sao apagados na desinstalacao.
+Gerar YTYP
+Em pastas com YDRs, use Gerar YTYP com RPForge para gerar YTYPs básicos.
+YTYPs básicos não reconstroem salas ou portais de MLO.
 
-Codigo proprio sob licenca proprietaria. Veja LICENSE e NOTICE.
-As dependencias mantem suas licencas proprias.
-Versao de testes com certificado local. A confianca requer autorizacao explicita.
-A primeira instalacao em maquina limpa ainda nao foi validada.
+Ferramentas de roupas (plano Pro)
+Roupas para OBJ, Roupas para Neon e Separar pele trabalham com roupas .ydd e
+exigem o plano Pro. Use Entrar no RPForge para ativar o plano neste computador;
+no plano Free, esses comandos ficam ocultos no botão direito.
+Dúvidas: abra Ajuda no RPForge ou consulte o site.
+
+Para remover, use Configurações > Aplicativos > RPForge.
+Seus recursos e arquivos originais não são apagados na desinstalação.
+
+Código próprio sob licença proprietária. Veja legal\TERMOS-E-LICENCA.txt e
+legal\AVISOS-DE-TERCEIROS.txt na pasta de instalação.
+As dependências mantêm suas licenças próprias.
+Versão de testes com certificado local. A confiança requer autorização explícita.
+A primeira instalação em máquina limpa ainda não foi validada.
 '@
     Set-Content -LiteralPath (Join-Path $stage 'LEIA-ME.txt') -Value $instructions -Encoding UTF8
     $version = (Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json).version

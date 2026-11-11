@@ -1,6 +1,6 @@
-{ Site controls.css: Pixelify, #e9843d primary, #ffd0a5 rim,
-  graphite secondary and pale border. Native buttons keep their
-  captions, keyboard behavior, default/cancel actions and enabled state. }
+{ Brand controls: Pixelify; flat primary with fill #ff7b25, border #ff8c43 and
+  text #20150D; raised graphite secondary with pale border. Native buttons keep
+  their captions, keyboard behavior, default/cancel actions and enabled state. }
 var
   ForgeButtonImages: array[0..2] of TBitmap;
   ForgeButtonStates: array[0..2] of String;
@@ -54,7 +54,8 @@ begin
   Image.Height := H;
   Fill := $002D2325; Rim := $0092878C; Shadow := $00181112; Ink := $00E7F0F7;
   if Index = 1 then begin
-    Fill := $003D84E9; Rim := $00A5D0FF; Shadow := $00214488; Ink := $00EEF8FF;
+    { $00BBGGRR: fill #ff7b25, border #ff8c43, text #20150D. }
+    Fill := $00257BFF; Rim := $00438CFF; Shadow := $00181212; Ink := $000D1520;
   end;
   if not Button.Enabled then begin
     Fill := $002D2B32; Rim := $005A555F; Shadow := $00181112; Ink := $00B7A9AA;
@@ -65,9 +66,13 @@ begin
   Image.Canvas.Pen.Color := $00181212;
   Image.Canvas.Rectangle(0, 0, W, H);
   BottomEdge := H - ScaleY(4);
-  Image.Canvas.Brush.Color := Shadow;
+  { The enabled primary is flat: no raised lip below its face. }
+  if (Index <> 1) or not Button.Enabled then begin
+    Image.Canvas.Brush.Color := Shadow;
+    Image.Canvas.Pen.Color := Rim;
+    Image.Canvas.Rectangle(0, ScaleY(3), W, H);
+  end;
   Image.Canvas.Pen.Color := Rim;
-  Image.Canvas.Rectangle(0, ScaleY(3), W, H);
   Image.Canvas.Brush.Color := Fill;
   Image.Canvas.Pen.Width := ScaleX(2);
   Image.Canvas.Rectangle(1, 1, W - 1, BottomEdge);

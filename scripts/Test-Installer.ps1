@@ -86,7 +86,10 @@ try {
     & (Join-Path $projectRoot 'windows\Uninstall-ContextMenu.ps1')
     if ($testModernMenu -and !(Get-AppxPackage -Name 'RedHorn.RPFForge.Local')) { throw 'Outra copia removeu o pacote ativo.' }
     & (Join-Path $PSScriptRoot 'Test-ContextMenu.ps1') -RequireYtyp
-    foreach ($file in @('LICENSE','NOTICE','licenses\Pixelify-Sans-OFL.txt','THIRD_PARTY_NOTICES.md','sbom.cdx.json','build-manifest.json')) { if (!(Test-Path -LiteralPath (Join-Path $installDir $file))) { throw "Inventario ou aviso ausente: $file" } }
+    foreach ($file in @('LICENSE','NOTICE','legal\TERMOS-E-LICENCA.txt','legal\AVISOS-DE-TERCEIROS.txt','LEIA-ME.txt','licenses\Pixelify-Sans-OFL.txt','THIRD_PARTY_NOTICES.md','sbom.cdx.json','build-manifest.json')) { if (!(Test-Path -LiteralPath (Join-Path $installDir $file))) { throw "Inventario ou aviso ausente: $file" } }
+    # LEIA-ME must point to the legal files under the names they are installed with.
+    $readme = [IO.File]::ReadAllText((Join-Path $installDir 'LEIA-ME.txt'))
+    if (!$readme.Contains('legal\TERMOS-E-LICENCA.txt') -or !$readme.Contains('legal\AVISOS-DE-TERCEIROS.txt') -or $readme.Contains('LICENSE e NOTICE')) { throw 'LEIA-ME cita documentos legais com nomes diferentes dos instalados.' }
     $installedVersion = (Get-Content -LiteralPath (Join-Path $installDir 'package.json') -Raw | ConvertFrom-Json).version
     if (Test-Path -LiteralPath (Join-Path $installDir 'source')) { throw 'Codigo-fonte do projeto incluido no instalador.' }
     if (Get-ChildItem -LiteralPath $installDir -Recurse -File | Where-Object { $_.Extension -in @('.cs','.cpp','.pfx','.p12','.key') -or $_.Name -like 'RPForge-source-*.zip' }) { throw 'Fonte de desenvolvimento ou chave privada incluida no instalador.' }

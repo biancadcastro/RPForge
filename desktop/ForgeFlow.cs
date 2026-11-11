@@ -35,7 +35,7 @@ namespace RPFForge {
             reviewDetails.Text = details.Text; BuildReviewDocument();
             reviewed = previewValid; tabs.SelectedIndex = 1;
             stage.Text = previewValid ? "02 / REVISAR" : "CORRIJA OS ERROS";
-            status.Text = previewValid ? "Confira o que será gerado. Converter inicia a gravação dos addons." : "A conversão está bloqueada. Volte para corrigir a configuração ou escolha outra origem.";
+            status.Text = previewValid ? "Confira o que será gerado. Converter inicia a gravação dos recursos." : "A conversão está bloqueada. Volte para corrigir a configuração ou escolha outra origem.";
             RefreshActions();
         }
 

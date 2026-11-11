@@ -24,14 +24,14 @@ namespace RPFForge {
                 int removed = ArrayValue(Get(item, "removedTuning")).Length, skipped = ArrayValue(Get(item, "skipped")).Length;
                 if (removed + skipped > 0) reviewView.AddSection("Ajustes automáticos", CountLabel(removed, "opção de tuning sem modelo será removida", "opções de tuning sem modelo serão removidas") + ".\n" + CountLabel(skipped, "arquivo auxiliar será ignorado", "arquivos auxiliares serão ignorados") + ".");
             }
-            reviewView.AddSection("O original será mantido", "A conversão cria o addon na pasta indicada acima. Confira os nomes e clique em Converter agora.");
+            reviewView.AddSection("O original será mantido", "A conversão cria o recurso na pasta indicada acima. Confira os nomes e clique em Converter agora.");
             AddDiagnostics(reviewView, details.Text);
         }
         void BuildResultDocument(object[] results) {
             resultView.ClearDocument();
             foreach (object value in results) {
                 var item = Map(value); bool ok = Yes(Get(item, "ok"));
-                resultView.AddSection(ok ? "Addon criado" : Yes(Get(item, "cancelled")) ? "Conversão cancelada" : "Não foi possível converter", ok ? "Pasta: " + TextValue(Get(item, "output")) + "\nAdicione ao server.cfg: ensure " + TextValue(Get(item, "resource")) : TextValue(Get(item, "error")), false, ok ? ForgeTheme.Success : ForgeTheme.Warning);
+                resultView.AddSection(ok ? "Recurso criado" : Yes(Get(item, "cancelled")) ? "Conversão cancelada" : "Não foi possível converter", ok ? "Pasta: " + TextValue(Get(item, "output")) + "\nAdicione ao server.cfg: ensure " + TextValue(Get(item, "resource")) : TextValue(Get(item, "error")), false, ok ? ForgeTheme.Success : ForgeTheme.Warning);
                 if (Get(item, "backup") != null) resultView.AddSection("Backup preservado", TextValue(Get(item, "backup")));
                 foreach (object problem in ArrayValue(Get(Map(Get(item, "audit")), "issues"))) resultView.AddSection("Confira no jogo", TextValue(Get(Map(problem), "message")), false, ForgeTheme.Warning);
             }
@@ -45,7 +45,7 @@ namespace RPFForge {
             helpView = new ForgeDocument { AccessibleName = "Ajuda do RPForge" };
             helpView.AddSection("1. Selecione a pasta", "Escolha a pasta que contém os arquivos RPF. A análise começa automaticamente.");
             helpView.AddSection("2. Confira o nome", "Para veículos, clique no nome e edite o spawn. Para outros conteúdos, edite o nome do recurso; os arquivos internos mantêm seus nomes.");
-            helpView.AddSection("3. Confira e converta", "Clique em Revisar. Confira os nomes e avisos e use Converter agora. Ao terminar, abra a pasta do addon.");
+            helpView.AddSection("3. Confira e converta", "Clique em Revisar. Confira os nomes e avisos e use Converter agora. Ao terminar, abra a pasta do recurso.");
             helpView.AddSection("Se a pasta já existir", "Você poderá usar outro nome, preservar um backup e substituir ou cancelar. Nada será sobrescrito sem sua escolha.");
             helpView.AddSection("O que o app aceita", "RPF7 aberto de veículos, roupas com coleção identificada, mapas/interiores, animações e texturas de GTA V Legacy, até 768 MiB por RPF. Conteúdos sem suporte são informados antes de gravar. Teste o recurso no FiveM.");
             helpView.AddSection("Gerar YTYP em um clique", "Clique com o botão direito em uma pasta com YDRs e escolha Gerar YTYP com RPForge. A geração começa automaticamente. YTYPs existentes são preservados; não é necessário instalar GTAUtil. As opções de converter RPF e gerar YTYP são independentes, inclusive em pastas com os dois tipos de arquivo.");

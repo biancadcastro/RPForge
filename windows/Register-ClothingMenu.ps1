@@ -1,20 +1,20 @@
-param([string]$InstallRoot)
+﻿param([string]$InstallRoot)
 $ErrorActionPreference='Stop'
 $root=if($InstallRoot){[IO.Path]::GetFullPath($InstallRoot)}else{[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))}
 $executable=Join-Path $root 'RPFForge.exe'
-if(!(Test-Path -LiteralPath $executable -PathType Leaf) -or $executable.Contains('"')){throw 'Executavel do RPForge nao encontrado.'}
+if(!(Test-Path -LiteralPath $executable -PathType Leaf) -or $executable.Contains('"')){throw 'Executável do RPForge não encontrado.'}
 $key='HKCU:\Software\Classes\SystemFileAssociations\.ydd\shell\RPForgeObj'
 New-Item -Path $key -Force | Out-Null
-Set-Item -LiteralPath $key -Value 'Exportar para OBJ com RPForge'
+Set-Item -LiteralPath $key -Value 'Roupas para OBJ com RPForge'
 New-ItemProperty -LiteralPath $key -Name Icon -Value ('"'+$executable+'",0') -PropertyType String -Force | Out-Null
 New-ItemProperty -LiteralPath $key -Name MultiSelectModel -Value 'Single' -PropertyType String -Force | Out-Null
 New-Item -Path ($key+'\command') -Force | Out-Null
 Set-Item -LiteralPath ($key+'\command') -Value ('"{0}" --obj "%1"' -f $executable)
-Write-Output 'Acao de exportar OBJ registrada para arquivos YDD. Associacao de abertura preservada.'
+Write-Output 'Ação Roupas para OBJ registrada para arquivos YDD. Associação de abertura preservada.'
 foreach($entry in @(@('Directory','%1'),@('Directory\Background','%V'))){
  $folderKey='HKCU:\Software\Classes\'+$entry[0]+'\shell\RPForgeObj'
  New-Item -Path $folderKey -Force | Out-Null
- Set-Item -LiteralPath $folderKey -Value 'Exportar roupa para OBJ com RPForge'
+ Set-Item -LiteralPath $folderKey -Value 'Roupas para OBJ com RPForge'
  New-ItemProperty -LiteralPath $folderKey -Name Icon -Value ('"'+$executable+'",0') -PropertyType String -Force | Out-Null
  New-Item -Path ($folderKey+'\command') -Force | Out-Null
  Set-Item -LiteralPath ($folderKey+'\command') -Value ('"{0}" --obj-folder "{1}"' -f $executable,$entry[1])
@@ -22,7 +22,7 @@ foreach($entry in @(@('Directory','%1'),@('Directory\Background','%V'))){
 foreach($entry in @(@('SystemFileAssociations\.ydd','--neon','%1'),@('Directory','--neon-folder','%1'),@('Directory\Background','--neon-folder','%V'))){
  $neonKey='HKCU:\Software\Classes\'+$entry[0]+'\shell\RPForgeNeon'
  New-Item -Path $neonKey -Force | Out-Null
- Set-Item -LiteralPath $neonKey -Value 'Converter roupa para Neon com RPForge'
+ Set-Item -LiteralPath $neonKey -Value 'Roupas para Neon com RPForge'
  New-ItemProperty -LiteralPath $neonKey -Name Icon -Value ('"'+$executable+'",0') -PropertyType String -Force | Out-Null
  New-ItemProperty -LiteralPath $neonKey -Name MultiSelectModel -Value 'Single' -PropertyType String -Force | Out-Null
  New-Item -Path ($neonKey+'\command') -Force | Out-Null

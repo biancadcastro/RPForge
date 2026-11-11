@@ -113,10 +113,17 @@ public:
     HRESULT STDMETHODCALLTYPE SetSite(IUnknown* value) override { if (value) value->AddRef(); if (site) site->Release(); site = value; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetSite(REFIID id, void** output) override { if (!output) return E_POINTER; *output = nullptr; return site ? site->QueryInterface(id, output) : E_FAIL; }
     HRESULT STDMETHODCALLTYPE GetTitle(IShellItemArray* items, PWSTR* value) override {
-        return SHStrDupW(splitSkin ? L"Separar pele com RPForge" : neon ? L"Converter roupa para Neon com RPForge" : obj ? L"Exportar para OBJ com RPForge" : ytyp ? L"Gerar YTYP com RPForge" : L"Converter com RPForge", value);
+        return SHStrDupW(splitSkin ? L"Separar pele com RPForge" : neon ? L"Roupas para Neon com RPForge" : obj ? L"Roupas para OBJ com RPForge" : ytyp ? L"Gerar YTYP com RPForge" : L"Converter RPFs com RPForge", value);
     }
     HRESULT STDMETHODCALLTYPE GetIcon(IShellItemArray*, PWSTR* value) override { return SHStrDupW((appRoot() + L"\\shell\\rpforge-mark-v3.ico,0").c_str(), value); }
-    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override { return SHStrDupW(L"RPForge: converter RPFs ou gerar YTYPs de modelos YDR", value); }
+    HRESULT STDMETHODCALLTYPE GetToolTip(IShellItemArray*, PWSTR* value) override {
+        // One short sentence per tool; accents are escaped to keep the source ASCII.
+        return SHStrDupW(splitSkin ? L"Separa a pele e a roupa do YDD em arquivos distintos. Exige o plano Pro."
+            : neon ? L"Cria uma vers\u00E3o Neon emissiva da roupa YDD. Exige o plano Pro."
+            : obj ? L"Exporta a roupa YDD para OBJ e MTL. Exige o plano Pro."
+            : ytyp ? L"Gera YTYPs b\u00E1sicos dos modelos YDR desta pasta, sem substituir os existentes."
+            : L"Converte os RPFs desta pasta em recursos FiveM, revisando antes de gravar.", value);
+    }
     HRESULT STDMETHODCALLTYPE GetCanonicalName(GUID* value) override { if (!value) return E_POINTER; *value = splitSkin ? SkinClsid : neon ? NeonClsid : obj ? ObjClsid : ytyp ? YtypClsid : ForgeClsid; return S_OK; }
     HRESULT STDMETHODCALLTYPE GetState(IShellItemArray* items, BOOL slow, EXPCMDSTATE* value) override {
         if (!value) return E_POINTER;

@@ -1,4 +1,4 @@
-# The callbacks keep migration tests independent from Appx and the real registry.
+﻿# The callbacks keep migration tests independent from Appx and the real registry.
 function Get-ForgeOptionalMenuProperty {
     param([string]$LiteralPath, [string]$Name)
     $properties = Get-ItemProperty -LiteralPath $LiteralPath -ErrorAction SilentlyContinue
@@ -21,7 +21,7 @@ function Invoke-ForgeMenuLocationChange {
     catch {
         $registrationError = $_
         try { & $RestorePrevious }
-        catch { throw 'Registro novo e restauracao do menu anterior falharam. Preserve as duas instalacoes para recuperacao.' }
+        catch { throw 'Registro novo e restauração do menu anterior falharam. Preserve as duas instalações para recuperação.' }
         throw $registrationError
     }
 }
@@ -33,7 +33,7 @@ function Invoke-ForgeMenuTransition {
     if ($Identity -notin @('RedHorn.RPFForge.Local','RedHorn.RPFForge')) { throw 'Identidade de menu desconhecida.' }
     & $Register
     $active = & $FindPackage $Identity
-    if (!$active -or $active.Status -ne 'Ok') { throw 'Registro novo nao confirmado; identidade anterior preservada.' }
+    if (!$active -or $active.Status -ne 'Ok') { throw 'Registro novo não confirmado; identidade anterior preservada.' }
     & $SaveOwner $Identity $Root
     # Never remove the old identity until the new one is usable. Other copies win.
     if ($Identity -eq 'RedHorn.RPFForge') {
@@ -51,14 +51,14 @@ function Get-ForgeMenuIdentity {
     $zip = [IO.Compression.ZipFile]::OpenRead($PackagePath)
     try {
         $entry = $zip.GetEntry('AppxManifest.xml')
-        if (!$entry -or $entry.Length -gt 1MB) { throw 'Manifesto da identidade ausente ou invalido.' }
+        if (!$entry -or $entry.Length -gt 1MB) { throw 'Manifesto da identidade ausente ou inválido.' }
         $reader = New-Object IO.StreamReader($entry.Open())
         try { $settings = New-Object Xml.XmlReaderSettings; $settings.DtdProcessing = 'Prohibit'; $settings.XmlResolver = $null
             $xmlReader = [Xml.XmlReader]::Create($reader, $settings)
             try { $xml = New-Object Xml.XmlDocument; $xml.XmlResolver = $null; $xml.Load($xmlReader) } finally { $xmlReader.Dispose() }
         } finally { $reader.Dispose() }
         $name = [string]$xml.DocumentElement.Identity.Name
-        if ($name -notin @('RedHorn.RPFForge.Local','RedHorn.RPFForge')) { throw 'Pacote nao pertence ao RPForge.' }
+        if ($name -notin @('RedHorn.RPFForge.Local','RedHorn.RPFForge')) { throw 'Pacote não pertence ao RPForge.' }
         return $name
     } finally { $zip.Dispose() }
 }

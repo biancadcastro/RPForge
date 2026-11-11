@@ -158,7 +158,7 @@ namespace RPFForge {
             Controls.Add(main); convert.Enabled = false; open.Enabled = false;
             SetWorkspaceReady(false); RefreshActions();
             summary.Text = "Nenhum arquivo analisado.";
-            DefaultAction = analyze; hints.SetToolTip(analyze, "Analisa os RPFs e atualiza a prévia sem gravar o addon."); hints.SetToolTip(convert, "Converte somente os RPFs selecionados na aba Destinos, usando a prévia atual."); hints.SetToolTip(open, "Abre a pasta do último addon concluído nesta operação.");
+            DefaultAction = analyze; hints.SetToolTip(analyze, "Analisa os RPFs e atualiza a prévia sem gravar o recurso."); hints.SetToolTip(convert, "Converte somente os RPFs selecionados na aba Destinos, usando a prévia atual."); hints.SetToolTip(open, "Abre a pasta do último recurso concluído nesta operação.");
         }
         void BuildEmptyState() {
             empty.Dock = DockStyle.Fill; empty.BackColor = surface;

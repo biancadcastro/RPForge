@@ -164,7 +164,7 @@ namespace RPFForge {
             if (!busy) return;
             string phase = TextValue(Get(message, "phase"));
             stage.Text = phase == "verify" || phase == "audit" ? "VALIDANDO" : phase == "write" || phase == "convert" ? "CONVERTENDO" : "ANALISANDO";
-            string label = phase == "read" ? "Lendo RPF" : phase == "write" ? "Gravando addon" : phase == "verify" ? "Conferindo arquivos gravados" : phase == "audit" ? "Validando referências" : phase == "convert" ? "Convertendo" : "Preparando prévia";
+            string label = phase == "read" ? "Lendo RPF" : phase == "write" ? "Gravando recurso" : phase == "verify" ? "Conferindo arquivos gravados" : phase == "audit" ? "Validando referências" : phase == "convert" ? "Convertendo" : "Preparando prévia";
             status.Text = label + ": " + TextValue(Get(message, "label")); progress.AccessibleDescription = status.Text;
             double total = Number(Get(message, "total"));
             if (total <= 0) progress.Style = ProgressBarStyle.Marquee;
@@ -260,8 +260,8 @@ namespace RPFForge {
                 } else { if (Yes(Get(result, "cancelled"))) cancelled++; else failed++; text.AppendLine(TextValue(Get(result, "error"))); }
                 text.AppendLine();
             }
-            details.Text = text.ToString(); summary.Text = CountLabel(success, "addon concluído", "addons concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Teste o recurso no FiveM.";
-            stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM ADDON GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "03 / CONCLUÍDO";
+            details.Text = text.ToString(); summary.Text = CountLabel(success, "recurso concluído", "recursos concluídos") + "  ·  " + CountLabel(cancelled, "cancelado", "cancelados") + "  ·  " + CountLabel(failed, "falha", "falhas") + ". Teste o recurso no FiveM.";
+            stage.Text = failed > 0 ? "CONCLUÍDO COM FALHAS" : success == 0 ? "NENHUM RECURSO GERADO" : warnings > 0 ? "CONCLUÍDO COM AVISOS" : "03 / CONCLUÍDO";
             stage.ForeColor = failed > 0 ? ForgeTheme.Error : warnings > 0 || success == 0 ? ForgeTheme.Warning : ForgeTheme.Success;
             BuildResultDocument(results);
             tabs.SelectedIndex = 2; open.Enabled = !busy && Directory.Exists(lastOutput);
