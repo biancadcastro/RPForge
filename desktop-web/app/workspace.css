@@ -18,7 +18,7 @@
   color: var(--muted);
 }
 .desktop .page-heading h1 {
-  font: 700 32px/1.15 var(--font-display);
+  font: 400 32px/1.15 var(--font-display);
   letter-spacing: -.025em;
   margin: 0;
   color: var(--text);
@@ -35,8 +35,21 @@
 .desktop .page-heading > :not(.page-heading-copy) { margin-top: 10px; flex-shrink: 0; }
 .desktop .clothing-config { padding: 20px 24px 24px; background: var(--surface); border: 1px solid var(--line); border-top-color: var(--orange); border-radius: 2px; }
 .desktop .clothing-config > .button { margin-bottom: 5px; }
-.desktop .clothing-file, .desktop .clothing-config select { background: var(--bg); border-color: var(--field-border); }
-.desktop .clothing-file:hover:not(:disabled) { background: var(--surface-raised); border-color: var(--control-border); }
+/* File pickers and selects of the three clothing tools: one definition. */
+.desktop .clothing-file, .desktop .clothing-config select {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 8px 12px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--control-radius);
+  background: var(--bg);
+  color: var(--text);
+  font: 400 14px/20px var(--font-body);
+}
+.desktop .clothing-file { display: flex; align-items: center; gap: 12px; min-width: 0; text-align: left; cursor: pointer; }
+.desktop .clothing-file:hover:not(:disabled) { background: var(--surface-raised); border-color: var(--field-border-hover); }
+.desktop .clothing-file > svg { display: block; flex-shrink: 0; width: 20px; height: 20px; color: var(--orange); }
+.desktop .clothing-file > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .desktop .profile-summary h2 { font: 700 26px/1.2 var(--font-body); }
 .desktop .account-panel > .button { margin-top: 12px; align-self: stretch; }
 .desktop .account-panel .account-footnote { color: var(--muted); }
@@ -200,12 +213,6 @@ body{
   display: none!important;
 }
 
-.desktop:not(.quick)>.preview-warning{
-  position: absolute;
-  left: 230px;
-  top: 35px;
-  z-index: 5;
-}
 
 .app-sidebar{
   grid-column: 1;
@@ -475,7 +482,7 @@ body{
 }
 
 .desktop .breadcrumb{
-  font-size: 11px;
+  font-size: 13px;
   margin: 0 0 12px;
 }
 
@@ -483,12 +490,6 @@ body{
   display: none;
 }
 
-.desktop .clothing-file,.desktop .clothing-config select{
-  min-height: 38px;
-  padding: 8px 11px;
-  font-size: 13px;
-  border-radius: 3px;
-}
 
 .desktop .clothing-config label{
   font-size: 13px;
@@ -677,7 +678,7 @@ body{
 }
 
 .desktop .help-page>h1{
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1.3;
   max-width: none;
   margin: 0 0 20px;
@@ -1043,7 +1044,7 @@ body{
 }
 
 .quick .clothing-heading h1{
-  font-size: 23px;
+  font-size: 28px;
 }
 
 .quick .clothing-heading{
@@ -1071,15 +1072,10 @@ body{
   height: 36px;
 }
 
-.desktop .clothing-file svg{
-  width: 18px;
-  height: 18px;
-  stroke-width: 1.65;
-}
 
 .desktop .help-page>h1{
   font-weight: 600;
-  font-size: 24px;
+  font-size: 28px;
 }
 
 @media(min-width:1550px){
@@ -1243,29 +1239,6 @@ body{
   line-height: 1.25;
 }
 
-.desktop .clothing-file,.desktop .clothing-config select{
-  min-height: var(--control-height);
-  line-height: 20px;
-}
-
-.desktop .clothing-file{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.desktop .clothing-file>svg{
-  width: 20px;
-  height: 20px;
-  display: block;
-  flex-shrink: 0;
-}
-
-.desktop .clothing-file>span{
-  min-width: 0;
-  text-align: left;
-}
 
 .desktop .source-field>div,.desktop .quick-path>div{
   min-height: var(--control-height);
@@ -1464,10 +1437,6 @@ body{
   line-height: 18px;
 }
 
-.desktop .account-form-error{
-  margin: 0;
-  line-height: 20px;
-}
 
 .desktop .profile-summary{
   align-items: center;
@@ -1487,9 +1456,6 @@ body{
   margin: 0;
 }
 
-.desktop .account-panel>.account-form-error{
-  margin: 16px 0 0;
-}
 
 @media(max-width:760px){
 

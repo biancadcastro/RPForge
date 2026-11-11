@@ -52,7 +52,7 @@ async function start(args = []) {
     if (message.type() === "error") console.error("PAGE:", message.text());
   });
   await page
-    .getByText("Carregando a conexão com o aplicativo…")
+    .getByText("Abrindo o RPForge…")
     .waitFor({ state: "hidden" });
   await page.evaluate(() => document.fonts.ready);
   return page;
@@ -255,7 +255,7 @@ try {
     .getByRole("button", { name: "Selecionar pasta", exact: true })
     .click();
   await page
-    .getByRole("textbox", { name: "Spawn car", exact: true })
+    .getByRole("textbox", { name: "Nome no jogo (spawn) de car", exact: true })
     .fill("WEBTEST");
   assert.deepEqual(await readFile(path.join(fixtures, "dlc.rpf")), original);
   await page.screenshot({ path: path.join(screenshots, "08-configurar.png") });
@@ -275,7 +275,7 @@ try {
   assert.deepEqual(await readFile(path.join(fixtures, "dlc.rpf")), original);
   await idle();
   await page.screenshot({ path: path.join(screenshots, "03-resultado.png") });
-  await page.getByRole('button', { name: 'Como usar', exact: true }).click();
+  await page.getByRole('button', { name: 'Ajuda', exact: true }).click();
   await page.locator('.help-page').waitFor();
   await page.getByText(/RPForge .*ambiente de desenvolvimento/).waitFor();
   await page.getByRole('button',{name:'Instalação e atualização manual',exact:true}).click();

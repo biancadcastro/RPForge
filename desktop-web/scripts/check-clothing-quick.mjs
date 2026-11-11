@@ -21,7 +21,7 @@ try {
   app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode',...(process.env.RPF_TEST_OBJ_FOLDER ? ['--obj-folder',path.dirname(specimen.model)] : ['--obj',specimen.model])],env,timeout:25000});
   await testProAccess(app,project);
   const page=await app.firstWindow();page.setDefaultTimeout(20000);
-  await page.getByRole('heading',{name:'Exportar roupa para OBJ'}).waitFor();
+  await page.getByRole('heading',{name:'Roupas para OBJ'}).waitFor();
   assert.equal(await page.locator('header.header').count(),0,'No full app navigation');
   await page.getByRole('button',{name:path.basename(specimen.model)}).waitFor();
   await page.getByRole('button',{name:path.basename(specimen.texture)}).waitFor();

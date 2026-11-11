@@ -26,9 +26,9 @@ try {
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.getByRole('heading',{name:'Ferramentas',exact:true}).waitFor();
  await page.locator('.app-sidebar').getByRole('button',{name:/Roupas para OBJ/}).click();
- await page.getByRole('heading',{name:'Exportar roupa para OBJ'}).waitFor();
+ await page.getByRole('heading',{name:'Roupas para OBJ'}).waitFor();
  await assert.rejects(page.evaluate(()=>window.rpforge.exportClothingObj('high')),/Selecione a peça/);
- await assert.rejects(page.evaluate(()=>window.rpforge.selectClothingFile('outside')),/Seleção inválida/);
+ await assert.rejects(page.evaluate(()=>window.rpforge.selectClothingFile('outside')),/Algo deu errado. Feche e abra a ferramenta novamente./);
  assert.equal(await page.locator('main.clothing-workspace:not([hidden])').evaluate(el=>el.scrollWidth>el.clientWidth),false);
  const choose=async (button,file)=>{
   await app.evaluate(({dialog},file)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[file]});},file);
@@ -37,7 +37,7 @@ try {
  };
  for(const specimen of specimens) {
   await choose(/Selecionar peça YDD|jbib_\d{3}_u.ydd/,specimen.model);
-  await choose('Selecionar texturas YTD',specimen.texture);
+  await choose('Selecionar textura YTD',specimen.texture);
   await choose('destination',path.resolve(destination));
   await page.getByRole('button',{name:'Exportar para OBJ',exact:false}).click();
   await page.getByRole('heading',{name:'Pronta para texturizar.'}).waitFor();

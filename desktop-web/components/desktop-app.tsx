@@ -19,8 +19,15 @@ import { ClothingWorkspace } from './clothing-workspace';
 import { NeonWorkspace } from './neon-workspace';
 import { SkinWorkspace } from './skin-workspace';
 import {WindowChrome} from './window-chrome';
+import {useToast} from './toast';
+import {userMessage} from '../lib/user-message';
+
+export const screenTitles:Record<Screen,string>={home:'Ferramentas',converter:'Converter RPFs',ytyp:'Gerar YTYP',clothing:'Roupas para OBJ',neon:'Roupas para Neon',skin:'Separar pele',account:'Conta',help:'Ajuda'};
 
 export function DesktopApp() {
+  const toast = useToast();
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
   const [api, setApi] = useState<DesktopBridge>();
   const [launch, setLaunch] = useState<Launch>({
     mode: "full",
@@ -89,10 +96,7 @@ export function DesktopApp() {
         });
     } catch (error) {
       change(id, {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Não foi possível concluir. Tente novamente.",
+        error: userMessage(error),
         reviewId: null,
       });
     } finally {
@@ -110,6 +114,7 @@ export function DesktopApp() {
     const open = (value: Launch) => {
       setLaunch(value);
       setLaunchReady(true);
+      if (value.notice) toastRef.current({ tone: "error", title: "Não foi possível abrir pelo Explorer", message: value.notice });
       loginRequiredRef.current=!!value.loginRequired;setLoginRequired(!!value.loginRequired);
       if(value.loginRequired){setScreen('account');return;}
       if (value.action === 'obj') { setScreen('clothing'); return; }
@@ -139,12 +144,20 @@ export function DesktopApp() {
           );
       }else setScreen('home');
     };
-    void bridge.bootstrap().then(open);
-    const unsubscribe = bridge.onProgress(setProgress),
+    const fallback = (error: unknown) => {
+      toastRef.current({ tone: "error", title: "Não foi possível abrir a ferramenta", message: userMessage(error) });
+      open({ mode: "full", action: "preview", folder: "" });
+    };
+    void bridge.bootstrap().then(open, fallback);
+    const unsubscribe = bridge.onProgress((value) => {
+        if (value.phase === "error") { toastRef.current({ tone: "error", title: "Não foi possível abrir pelo Explorer", message: userMessage(value.label) }); return; }
+        if (value.phase === "busy") { toastRef.current({ tone: "info", title: "Operação em andamento", message: value.label }); return; }
+        setProgress(value);
+      }),
       unlaunch = bridge.onLaunch(open),
       unprofile=bridge.onProfile(profile=>{
         if(!profile&&loginRequiredRef.current){setScreen('account');}
-        else if(loginRequiredRef.current)void bridge.bootstrap().then(open);
+        else if(loginRequiredRef.current)void bridge.bootstrap().then(open,fallback);
       });
     return () => {
       unsubscribe();
@@ -153,6 +166,15 @@ export function DesktopApp() {
     };
   }, []);
 
+  // Keyboard users start in the content: each screen moves focus to its title.
+  useEffect(() => {
+    if (!launchReady) return;
+    const frame = requestAnimationFrame(() => {
+      const heading = Array.from(document.querySelectorAll<HTMLElement>("main h1")).find((element) => element.getClientRects().length);
+      if (heading && !document.querySelector("[role=dialog],[role=alertdialog]")) heading.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [screen, launchReady, loginRequired]);
   function navigate(target: typeof screen) {
     if (!busyRef.current&&!loginRequiredRef.current) {
       setScreen(target);
@@ -166,7 +188,7 @@ export function DesktopApp() {
       change(id, { ...emptyDraft(), folder: selected });
       if (id === "converter") await perform(id, "preview", selected, {});
     } catch (error) {
-      change(id, { error: String(error) });
+      change(id, { error: userMessage(error) });
     }
   }
   function edit(archive: string, patch: Choices[string]) {
@@ -185,7 +207,7 @@ export function DesktopApp() {
 
   return (
     <div className={(quick ? "desktop quick" : "desktop")+(skinEditing?' atelier-shell':'')+(loginRequired?' login-shell':'')}>
-      <WindowChrome api={api} editor={skinEditing} title={screen==='home'?'Ferramentas':screen==='skin'?'Separar pele':screen==='clothing'?'Exportar OBJ':screen==='neon'?'Converter para Neon':screen==='account'?'Conta':screen==='help'?'Ajuda':screen==='ytyp'?'Gerar YTYP':'Converter RPFs'}/>
+      <WindowChrome api={api} quick={quick} title={screenTitles[screen]}/>
       {launchReady && !loginRequired && !quick && !skinEditing && (
         <MainNavigation
           screen={screen}
@@ -195,8 +217,9 @@ export function DesktopApp() {
         />
       )}
       {!launchReady && (
-        <p className="preview-warning" role="status">
-          Carregando a conexão com o aplicativo…
+        <p className="app-loading" role="status">
+          <span className="working-indicator" aria-hidden="true" />
+          Abrindo o RPForge…
         </p>
       )}
 
@@ -221,9 +244,9 @@ export function DesktopApp() {
           perform={perform}
         />
       )}
-      {launchReady && !loginRequired && (!quick || launch.action === 'obj') && <ClothingWorkspace api={api} active={screen === 'clothing'} busy={busy} launch={launch} onBusy={value => { busyRef.current = value; setBusy(value); }} />}
-      {launchReady && !loginRequired && (!quick || launch.action === 'neon') && <NeonWorkspace api={api} active={screen === 'neon'} busy={busy} launch={launch} onBusy={value => { busyRef.current=value;setBusy(value); }} />}
-      {launchReady && !loginRequired && (!quick || launch.action === 'skin') && <SkinWorkspace api={api} active={screen === 'skin'} busy={busy} launch={launch} onEditorState={setSkinEditing} onBusy={value=>{busyRef.current=value;setBusy(value);}} />}
+      {launchReady && !loginRequired && (!quick || launch.action === 'obj') && <ClothingWorkspace api={api} onHome={() => navigate('home')} active={screen === 'clothing'} busy={busy} launch={launch} onBusy={value => { busyRef.current = value; setBusy(value); }} />}
+      {launchReady && !loginRequired && (!quick || launch.action === 'neon') && <NeonWorkspace api={api} onHome={() => navigate('home')} active={screen === 'neon'} busy={busy} launch={launch} onBusy={value => { busyRef.current=value;setBusy(value); }} />}
+      {launchReady && !loginRequired && (!quick || launch.action === 'skin') && <SkinWorkspace api={api} onHome={() => navigate('home')} active={screen === 'skin'} busy={busy} launch={launch} onEditorState={setSkinEditing} onBusy={value=>{busyRef.current=value;setBusy(value);}} />}
     </div>
   );
 }

@@ -4,7 +4,7 @@ export function PageHeading({title,description,eyebrow,aside,className=''}:{titl
   return <header className={`page-heading ${className}`}>
     <div className="page-heading-copy">
       {eyebrow&&<p className="kicker">{eyebrow}</p>}
-      <h1>{title}</h1>
+      <h1 tabIndex={-1}>{title}</h1>
       {description&&<p className="page-description">{description}</p>}
     </div>
     {aside}

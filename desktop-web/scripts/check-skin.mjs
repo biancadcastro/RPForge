@@ -15,13 +15,13 @@ try{
   await page.locator('.desktop.quick').waitFor();await page.getByRole('heading',{name:'Separar pele',exact:true}).waitFor();assert.equal(await page.locator('header.header').count(),0);
   await page.getByRole('button',{name:path.basename(s.model)}).waitFor();
   await page.evaluate(()=>{globalThis.__sawSkinProgress=false;new MutationObserver(()=>{if(document.querySelector('.skin-progress-dialog [role="progressbar"]'))globalThis.__sawSkinProgress=true;}).observe(document.body,{childList:true,subtree:true});});
-  assert.equal(await page.locator('[aria-label="Configuração da separação"] .clothing-file').nth(2).getAttribute('title'),folder);
+  assert.equal(await page.locator('[aria-label="Configuração: Separar pele"] .clothing-file').nth(2).getAttribute('title'),folder);
   const progressCapture=page.getByRole('dialog',{name:'Analisando a peça'}).waitFor({timeout:1500}).then(()=>page.screenshot({path:path.join(artifacts,`${s.gender}-progress.png`)})).catch(()=>{});
   await page.getByRole('button',{name:'Analisar peça',exact:false}).click();await progressCapture;
   await page.getByRole('region',{name:'Revisão da separação',exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>globalThis.__sawSkinProgress),true,'Native analysis must show the progress dialog');
   assert.deepEqual(await readdir(folder),before,'Analysis cannot write into the input directory, even for temporary copies');
-  const chooseLod=async value=>page.getByRole('button',{name:{high:'Alta',medium:'Média',low:'Baixa',verylow:'Muito baixa'}[value],exact:true}).click();
+  const chooseLod=async value=>page.getByRole('button',{name:{high:'Alto',medium:'Médio',low:'Baixo',verylow:'Muito baixo'}[value],exact:true}).click();
   const canvas=page.locator('.skin-review canvas');await canvas.waitFor();await page.waitForFunction(()=>document.querySelector('.skin-review canvas')?.width>100);
   await page.getByRole('button',{name:'Enquadrar',exact:true}).click();
   const canvasBox=await canvas.boundingBox();assert.ok(canvasBox.height>=300,'Editor must have a usable viewport');
@@ -81,7 +81,7 @@ try{
    assert.equal(await page.locator('.pixel-result img').count(),0);
    assert.equal(await page.locator('.pixel-output').count(),2);
    assert.equal(await page.locator('.pixel-output li').count(),4);
-   assert.match(await page.locator('.pixel-result-heading h1').evaluate(e=>getComputedStyle(e).fontFamily),/Pixelify/);
+   assert.match(await page.locator('.pixel-result .page-heading h1').evaluate(e=>getComputedStyle(e).fontFamily),/Pixelify/);
    assert.match(await page.getByRole('button',{name:'Abrir pasta',exact:true}).evaluate(e=>getComputedStyle(e).fontFamily),/Atkinson/);
    assert.equal(await page.locator('.pixel-result-heading svg[shape-rendering="crispEdges"]').count(),1);
    const cards=await page.locator('.pixel-output').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};}));assert.equal(cards[0].y,cards[1].y);assert.ok(Math.abs(cards[0].width-cards[1].width)<1);

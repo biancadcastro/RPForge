@@ -5,7 +5,7 @@ try{
  const env={...process.env,RPF_TEST_USER_DATA:temporary};delete env.ELECTRON_RUN_AS_NODE;
  app=await _electron.launch({executablePath:process.env.RPF_ELECTRON_EXECUTABLE||createRequire(import.meta.url)('electron'),args:[project,'--test-mode'],env});
  const page=await app.firstWindow();page.setDefaultTimeout(10000);await page.getByRole('heading',{name:'Ferramentas',exact:true}).waitFor();await page.waitForFunction(()=>!document.querySelector('.window-controls button')?.disabled);
- await assert.rejects(page.evaluate(()=>window.rpforge.windowControl('outside')),/inválido/);
+ await assert.rejects(page.evaluate(()=>window.rpforge.windowControl('outside')),/Algo deu errado. Feche e abra a ferramenta novamente./);
  const bounds=await page.locator('.window-chrome').boundingBox();assert.equal(bounds.height,40);
  for(const button of await page.locator('.window-controls button').all()){const offset=await button.evaluate(el=>{const b=el.getBoundingClientRect(),s=el.querySelector('svg').getBoundingClientRect();return Math.abs(b.x+b.width/2-s.x-s.width/2)+Math.abs(b.y+b.height/2-s.y-s.height/2);});assert.ok(offset<1,'Window icons must be centered');}
  await page.screenshot({path:path.join(artifacts,'desktop.png')});

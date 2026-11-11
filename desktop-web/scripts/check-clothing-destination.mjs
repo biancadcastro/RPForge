@@ -17,7 +17,7 @@ try{
  await testProAccess(app,project);
  const page=await app.firstWindow();page.setDefaultTimeout(20000);
  const files=page.locator('main.clothing-workspace:not([hidden]) .clothing-file');
- await page.getByRole('heading',{name:'Exportar roupa para OBJ'}).waitFor();
+ await page.getByRole('heading',{name:'Roupas para OBJ'}).waitFor();
  assert.equal(await files.nth(2).getAttribute('title'),folders[0]);
  async function openFolder(folder){await app.evaluate(({app},args)=>app.emit('second-instance',{},[process.execPath,args.project,'--obj-folder',args.folder]),{project,folder});await page.waitForFunction(folder=>document.querySelectorAll('main.clothing-workspace:not([hidden]) .clothing-file')[2]?.title===folder,folder);}
  await openFolder(folders[1]);
@@ -37,10 +37,10 @@ try{
  assert.deepEqual(await readdir(custom),[]);
  assert.ok((await readdir(folders[0])).some(f=>f.endsWith('.mtl')));
  await app.evaluate(({app},args)=>app.emit('second-instance',{},[process.execPath,args.project,'--neon-folder',args.folder]),{project,folder:folders[1]});
- await page.getByRole('heading',{name:'Converter roupa para Neon'}).waitFor();
+ await page.getByRole('heading',{name:'Roupas para Neon'}).waitFor();
  await page.waitForFunction(folder=>document.querySelectorAll('main.clothing-workspace:not([hidden]) .clothing-file')[2]?.title===folder,folders[1]);
  await page.getByRole('button',{name:'Converter para Neon',exact:false}).click();
- await page.getByRole('heading',{name:'Versão Neon criada.'}).waitFor();
+ await page.getByRole('heading',{name:'Versão Neon criada'}).waitFor();
  assert.equal((await readdir(folders[0])).filter(f=>f.endsWith('.ydd')).length,1);
  assert.equal((await readdir(folders[1])).filter(f=>f.endsWith('.ydd')).length,2);
  assert.equal(await app.evaluate(()=>globalThis.__forgeDiagnostics().workers),0);

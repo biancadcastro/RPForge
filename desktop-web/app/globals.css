@@ -49,7 +49,7 @@
 }
 
 .clothing-quick .clothing-heading h1 {
-  font-size: 26px;
+  font-size: 28px;
 }
 
 .clothing-quick .clothing-config h2 {
@@ -87,7 +87,7 @@
 }
 
 .clothing-heading h1 {
-  font: 700 32px/1.15 var(--font-display);
+  font: 400 32px/1.15 var(--font-display);
   margin: 10px 0;
 }
 
@@ -130,38 +130,6 @@
   font-size: 13px;
 }
 
-.clothing-file {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
-  text-align: left;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--line);
-}
-
-.clothing-file svg {
-  flex-shrink: 0;
-  color: var(--orange);
-}
-
-.clothing-file span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.clothing-config select {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--line);
-}
 
 .clothing-note, .clothing-caption {
   color: var(--muted);
@@ -274,7 +242,7 @@
 }
 
 .skin-editing .clothing-heading h1 {
-  font-size: 24px;
+  font-size: 28px;
   margin: 0 0 4px;
 }
 
@@ -759,7 +727,7 @@
 }
 
 .skin-progress-dialog h2 {
-  font: 700 28px/1.2 var(--font-display);
+  font: 400 28px/1.2 var(--font-display);
   margin: 0 0 10px;
 }
 
@@ -1396,6 +1364,7 @@ select {
 }
 
 .breadcrumb button {
+  min-height: 24px;
   font: inherit;
   background: transparent;
   border: 0;
@@ -1509,13 +1478,16 @@ select {
 }
 
 .stepper {
+  list-style: none;
+  padding: 0;
+  margin-top: 0;
   display: flex;
   gap: 24px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 18px;
 }
 
-.stepper button {
+.stepper li {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -1528,12 +1500,12 @@ select {
   opacity: 1;
 }
 
-.stepper button[aria-current="step"] {
+.stepper li[aria-current="step"] {
   border-bottom-color: var(--orange);
   color: var(--text);
 }
 
-.stepper button[aria-current="step"] span {
+.stepper li[aria-current="step"] span {
   color: var(--orange);
 }
 
@@ -1696,25 +1668,8 @@ input[type="checkbox"] {
   gap: 8px;
 }
 
-.warning-note,
-.error-note {
-  padding: 10px 13px;
-  font-size: 13px;
-  line-height: 1.5;
-  border-left: 2px solid var(--yellow);
-  background: #ffc85707;
-  color: #d6c8a4;
-}
 
-.error-note {
-  border-color: var(--orange-hover);
-  color: var(--danger);
-}
 
-.warning-note > span,
-.error-note > span {
-  font-weight: 700;
-}
 
 .review-list,
 .result-list {
@@ -1746,36 +1701,11 @@ input[type="checkbox"] {
   overflow-wrap: anywhere;
 }
 
-.review-list .warning-note {
-  margin-top: 10px;
-}
 
-.error-text {
-  color: var(--danger);
-  font-size: 13px;
-}
 
-.error-message {
-  border: 1px solid #74453f;
-  padding: 12px 16px;
-  background: #8c3e3310;
-  margin-bottom: 15px;
-  font-size: 13px;
-}
 
-.error-message strong {
-  color: var(--danger);
-}
 
-.error-message p {
-  margin-top: 4px;
-  color: var(--muted-strong);
-}
 
-.error-message .text-link {
-  font-size: 12px;
-  margin-top: 6px;
-}
 
 .result-heading {
   display: flex;
@@ -1864,11 +1794,6 @@ input[type="checkbox"] {
   animation: spin 1s linear infinite;
 }
 
-.preview-warning {
-  font-size: 12px;
-  color: var(--yellow);
-  padding: 8px 30px;
-}
 
 .help-page {
   flex: 1;
@@ -2029,9 +1954,6 @@ input[type="checkbox"] {
   margin-top: 10px;
 }
 
-.quick .warning-note {
-  font-size: 12px;
-}
 
 .quick .working-state h2 {
   font-size: 24px;
@@ -2188,6 +2110,9 @@ to {
 }
 
 .stepper {
+  list-style: none;
+  padding: 0;
+  margin-top: 0;
   margin-bottom: 12px;
 }
 
@@ -2348,7 +2273,7 @@ svg {
   align-items: center;
 }
 
-.stepper button > span {
+.stepper li > span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2527,13 +2452,6 @@ svg {
   color: var(--muted);
 }
 
-.account-panel .account-form-error {
-  font: 13px/1.5 var(--font-body);
-  color: var(--danger);
-  padding: 10px 12px;
-  border-left: 2px solid var(--orange-hover);
-  background: #8c3e3310;
-}
 
 .account-panel.single-column {
   max-width: 440px;
@@ -2603,7 +2521,7 @@ svg {
 }
 
 .account-intro h1 {
-  font-size: 27px;
+  font-size: 28px;
 }
 
 .account-panel {

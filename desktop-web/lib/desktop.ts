@@ -30,6 +30,7 @@ export type Choice = {
 export type Choices = Record<string, Choice>;
 export type Launch = {
   loginRequired?: boolean;
+  notice?: string;
   mode: "full" | "quick";
   action: "preview" | "ytyp" | "obj" | "neon" | "skin";
   folder: string;
@@ -77,8 +78,8 @@ export const emptyDraft = (): Draft => ({
   error: "",
 });
 export interface DesktopBridge {
-  windowControl(action:'state'|'minimize'|'maximize'|'close'):Promise<{maximized:boolean}>;
-  onWindowState(callback:(state:{maximized:boolean})=>void):()=>void;
+  windowControl(action:'state'|'minimize'|'maximize'|'close'):Promise<{maximized:boolean;maximizable?:boolean}>;
+  onWindowState(callback:(state:{maximized:boolean;maximizable?:boolean})=>void):()=>void;
   bootstrap(): Promise<Launch>;
   selectFolder(): Promise<string | null>;
   selectClothingFile(kind: 'model' | 'texture' | 'destination',tool?:'obj'|'neon'|'skin'): Promise<string | null>;
@@ -123,14 +124,14 @@ declare global {
   }
 }
 export const tools = [
-  {id:'skin',title:'Separar pele',description:'Revise a seleção e gere a roupa e a pele em arquivos separados.',badge:'.ydd',category:'Roupas e geometria',access:'pro'},
-  {id:'neon',title:'Roupas para Neon',description:'Crie uma versão emissiva da roupa isolada, preservando a malha e o rig.',badge:'.ydd',category:'Roupas e materiais',access:'pro'},
+  {id:'skin',title:'Separar pele',description:'Revise a seleção e gere a roupa e a pele em arquivos separados.',badge:'.ydd',category:'Roupas',access:'pro'},
+  {id:'neon',title:'Roupas para Neon',description:'Crie uma versão emissiva da roupa isolada, preservando a malha e o rig.',badge:'.ydd',category:'Roupas',access:'pro'},
   {
     id: 'clothing',
     title: 'Roupas para OBJ',
     description: 'Exporte a peça com UVs e materiais para texturização.',
     badge: '.ydd → .obj',
-    category: 'Roupas e texturização',
+    category: 'Roupas',
     access: 'pro',
   },
   {
@@ -138,7 +139,7 @@ export const tools = [
     title: "Converter RPFs",
     description: "Veículos, roupas e mapas organizados em recursos FiveM.",
     badge: ".rpf",
-    category: "GTA V → FiveM",
+    category: "Arquivos e recursos",
     access: "free",
   },
   {
@@ -147,7 +148,7 @@ export const tools = [
     description:
       "Registre os modelos YDR da sua pasta sem alterar os originais.",
     badge: ".ydr",
-    category: "Modelos e mapas",
+    category: "Arquivos e recursos",
     access: "free",
   },
 ] as const;

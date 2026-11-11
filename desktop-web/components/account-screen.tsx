@@ -1,55 +1,77 @@
 "use client";
 import {PageHeading} from './page-heading';
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { AccountProfile, AuthOptions, BrowserAuthState, DesktopBridge } from "../lib/desktop";
 import { Arrow, UserIcon } from "./icons";
 import {ProviderIcon} from "./provider-icon";
+import {Notice} from './notice';
+import {ConfirmDialog} from './confirm-dialog';
+import {useToast} from './toast';
+import {userMessage} from '../lib/user-message';
+
+type License = Awaited<ReturnType<DesktopBridge['licenseInfo']>>;
+const providerNames: Record<string, string> = { discord: "Discord", google: "Google", github: "GitHub" };
+function planText(license?: License) {
+  if (!license) return { title: "Conferindo o plano…", text: "" };
+  if (license.plan === "pro") return { title: "Plano Pro ativo", text: "Todas as ferramentas estão liberadas neste computador." };
+  if (license.plan === "free") return { title: "Plano Free", text: "Converter RPFs e Gerar YTYP estão liberados. O plano Pro libera Roupas para OBJ, Roupas para Neon e Separar pele." };
+  if (license.issue === "clock") return { title: "Data e hora do Windows incorretas", text: "Ajuste a data e a hora do Windows e atualize a autorização." };
+  if (license.issue === "revoked") return { title: "Autorização revogada", text: "Este computador foi desconectado da sua conta pelo site. Desconecte e entre novamente para autorizar esta instalação." };
+  if (license.issue === "missing") return { title: "Autorização ausente", text: "Desconecte e entre novamente para autorizar esta instalação." };
+  return { title: "Autorização não confirmada", text: "Não foi possível validar a autorização agora. Verifique a internet e atualize a autorização." };
+}
 
 export function AccountScreen({ api }: { api?: DesktopBridge }) {
+  const toast = useToast();
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [browserAuth,setBrowserAuth]=useState<BrowserAuthState>({status:'idle'});
   const [options, setOptions] = useState<AuthOptions>();
-  const [license,setLicense]=useState<Awaited<ReturnType<DesktopBridge['licenseInfo']>>>();
-  useEffect(()=>{if(api&&profile)void api.licenseInfo().then(setLicense).catch(error=>setError(error.message));},[api,profile]);
+  const [license,setLicense]=useState<License>();
   const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
+    [pending, setPending] = useState(""),
+    [confirmSignOut, setConfirmSignOut] = useState(false),
     [showPassword, setShowPassword] = useState(false);
   const [challenge, setChallenge] = useState(""),
     [avatarFailed, setAvatarFailed] = useState(false);
+  const busy = !!pending;
+  const connected = useRef<boolean | undefined>(undefined);
+  useEffect(()=>{if(api&&profile)void api.licenseInfo().then(setLicense).catch(error=>setError(userMessage(error)));},[api,profile]);
   useEffect(() => {
     if (!api) return;
     let active = true;
     void api.profile().then((value) => {
-      if (active) setProfile(value);
-    }).catch(error=>{if(active)setError(error.message);});
+      if (active) { setProfile(value); connected.current = !!value; }
+    }).catch(error=>{if(active)setError(userMessage(error));});
     void api
       .authOptions()
       .then((value) => {
         if (active) setOptions(value);
       })
       .catch((error) => {
-        if (active) setError(error.message);
+        if (active) setError(userMessage(error));
       });
     const unsubscribe = api.onProfile((value) => {
       if (active) {
+        if (value && connected.current === false) toast({ tone: "success", title: "Conta conectada", message: "Bem-vindo, " + value.displayName + "." });
+        connected.current = !!value;
         setProfile(value);
         setChallenge("");
-        setBusy(false);
+        setPending("");
       }
     });
     const unsubAuth = api.onAuthChallenge((value) => {
       if (active) {
         setChallenge(value);
-        setBusy(false);
+        setPending("");
       }
     });
     const unsubError = api.onAuthError((value) => {
       if (active) {
-        setError(value);
-        setBusy(false);
+        setError(userMessage(value));
+        setPending("");
       }
     });
-    const updateBrowser=(value:BrowserAuthState)=>{if(active){setBrowserAuth(value);if(value.challengeToken)setChallenge(value.challengeToken);setBusy(value.status==='starting'||value.status==='waiting');if(value.status==='error')setError(value.message||'Não foi possível conectar.');}};
+    const updateBrowser=(value:BrowserAuthState)=>{if(active){setBrowserAuth(value);if(value.challengeToken)setChallenge(value.challengeToken);setPending(value.status==='starting'||value.status==='waiting'?'provider:'+(value.provider||''):'');if(value.status==='error')setError(userMessage(value.message,'Não foi possível conectar. Tente de novo.'));}};
     void api.browserAuthState().then(updateBrowser).catch(()=>{});
     const unsubBrowser=api.onBrowserAuth(updateBrowser);
     return () => {
@@ -59,13 +81,13 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
       unsubError();
       unsubBrowser();
     };
-  }, [api]);
+  }, [api, toast]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!api || busy) return;
     const form = event.currentTarget,
       fields = new FormData(form);
-    setBusy(true);
+    setPending("password");
     setError("");
     try {
       if (challenge)
@@ -83,33 +105,51 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
       form.reset();
       setProfile(await api.profile());
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível entrar. Tente novamente.",
-      );
+      setError(userMessage(error, "Não foi possível entrar. Tente de novo."));
     } finally {
-      setBusy(false);
+      setPending("");
     }
   }
   async function provider(id: string) {
     if (!api || busy) return;
     setError("");
-    setBusy(true);
+    setPending("provider:" + id);
     try {
       await api.startOAuth(id);
     } catch (error) {
-      setBusy(false);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível abrir o provedor.",
-      );
+      setPending("");
+      setError(userMessage(error, "Não foi possível abrir o navegador. Tente de novo."));
     }
   }
+  function retryOptions() {
+    setPending("options");
+    setError("");
+    void api?.authOptions().then(setOptions).catch((error) => setError(userMessage(error))).finally(() => setPending(""));
+  }
+  function refreshLicense() {
+    setPending("license");
+    setError("");
+    void api?.licenseInfo().then((value) => {
+      setLicense(value);
+      toast({ tone: value.plan ? "success" : "warning", title: value.plan ? "Autorização atualizada" : "Autorização não confirmada", message: planText(value).title + "." });
+    }).catch((error) => setError(userMessage(error))).finally(() => setPending(""));
+  }
+  function signOut() {
+    setConfirmSignOut(false);
+    setPending("signout");
+    setError("");
+    void api?.signOut().then(() => {
+      connected.current = false;
+      setProfile(null);
+      setLicense(undefined);
+      toast({ tone: "success", title: "Computador desconectado", message: "Entre novamente quando quiser usar as ferramentas Pro." });
+    }).catch((error) => setError(userMessage(error))).finally(() => setPending(""));
+  }
+  const plan = planText(license);
+  const waitingBrowser = browserAuth.status === 'starting' || browserAuth.status === 'waiting';
   return (
     <main className="account-page wrap">
-<PageHeading className="account-intro" eyebrow="RPForge / Conta" title="Sua conta no RPForge" description="O mesmo perfil para suas ferramentas."/>
+<PageHeading className="account-intro" title="Sua conta no RPForge" description="O mesmo perfil para suas ferramentas."/>
       <section
         className={`account-panel ${profile || !options?.passwordAuthEnabled || !options?.providers.some(item=>item.enabled) || challenge ? "single-column" : ""}`}
         aria-labelledby="account-heading"
@@ -135,18 +175,18 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
               </div>
             </div>
             <p>
-              Seu avatar e nick aparecem na barra lateral. As ações rápidas
-              usam a sua sessão conectada.
+              Sua foto e seu nome de exibição aparecem na barra lateral. As ações
+              rápidas do Windows usam a conta conectada.
             </p>
-            <p>{license?.issue==='clock'?'Ajuste a data e a hora do Windows e tente validar novamente.':license?.plan==='pro'?'Plano Pro ativo':license?.plan==='free'?'Plano Free':license?.issue==='missing'?'Conecte novamente para autorizar esta instalação.':'Não foi possível validar a autorização agora. Tente novamente.'}
-              {license?.installationId&&<small> · Instalação {license.installationId.slice(0,8)}</small>}</p>
-            <button className="button secondary" disabled={busy} onClick={()=>{setBusy(true);setError('');void api?.licenseInfo().then(setLicense).catch(error=>setError(error.message)).finally(()=>setBusy(false));}}>Atualizar autorização</button>
-            <button className="button secondary" disabled={busy} onClick={()=>void api?.openAccount().catch(error=>setError(error.message))}>Gerenciar conta e computadores</button>
-            <button className="button secondary" disabled={busy} onClick={()=>{
-              setBusy(true);setError('');
-              void api?.signOut().then(()=>setProfile(null)).catch(error=>setError(error.message)).finally(()=>setBusy(false));
-            }}>Desconectar este computador</button>
-            {error&&<p role="alert" className="account-form-error">{error}</p>}
+            <div className={"account-plan" + (license && !license.plan ? " account-plan--issue" : "")}>
+              <strong>{plan.title}</strong>
+              {plan.text && <p>{plan.text}</p>}
+              {license?.installationId && <small>Instalação {license.installationId.slice(0,8)}</small>}
+            </div>
+            <button className="button secondary" disabled={busy} aria-busy={pending === "license" || undefined} onClick={refreshLicense}>{pending === "license" ? "Atualizando…" : "Atualizar autorização"}</button>
+            <button className="button secondary" disabled={busy} onClick={()=>void api?.openAccount().catch(error=>toast({tone:'error',title:'Não foi possível abrir o site',message:userMessage(error)}))}>Gerenciar conta e computadores</button>
+            <button className="button danger" disabled={busy} aria-busy={pending === "signout" || undefined} onClick={()=>setConfirmSignOut(true)}>{pending === "signout" ? "Desconectando…" : "Desconectar este computador"}</button>
+            {error&&<Notice message={error}/>}
           </>
         ) : (
           <>
@@ -156,14 +196,14 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
             <p>
               {challenge
                 ? "Digite o código do autenticador ou um código de recuperação."
-                : "Entre com a conta que você já usa no RPForge."}
+                : "Entre com a conta que você já usa no site do RPForge."}
             </p>
             {!options && !error && (
               <p role="status" className="account-loading">
+                <span className="working-indicator" aria-hidden="true" />
                 Carregando opções de entrada…
               </p>
             )}
-            {!options&&error&&<button className="button secondary" disabled={busy} onClick={()=>{setBusy(true);setError('');void api?.authOptions().then(setOptions).catch(error=>setError(error.message)).finally(()=>setBusy(false));}}>Tentar carregar opções novamente</button>}
             <div className="account-entry-columns">
             {(challenge||options?.passwordAuthEnabled)&&<form onSubmit={submit}>
               {challenge ? (
@@ -216,72 +256,57 @@ export function AccountScreen({ api }: { api?: DesktopBridge }) {
                   </>
                 )
               )}
-              {(challenge || options?.passwordAuthEnabled) && (
-                <button
-                  className="button primary account-submit"
-                  disabled={busy}
-                >
-                  {busy
-                    ? "Aguarde…"
-                    : challenge
-                      ? "Confirmar acesso"
-                      : "Entrar"}
-                  <Arrow />
-                </button>
-              )}
+              <button
+                className="button primary account-submit"
+                disabled={busy}
+                aria-busy={pending === "password" || undefined}
+              >
+                {pending === "password"
+                  ? "Aguarde…"
+                  : challenge
+                    ? "Confirmar acesso"
+                    : "Entrar"}
+                {pending !== "password" && <Arrow />}
+              </button>
             </form>}
             {!challenge &&
               !!options?.providers.some((item) => item.enabled) && (
-                <>
                   <div className="account-providers"><h3>{options.passwordAuthEnabled?'Ou continue com':'Escolha sua conta'}</h3><div className="account-provider-buttons">
                     {options.providers
                       .filter((item) => item.enabled)
-                      .map((item) => (
+                      .map((item) => {
+                        const waiting = pending === "provider:" + item.provider;
+                        return (
                         <button
                           key={item.provider}
                           className="button secondary"
                           onClick={() => void provider(item.provider)}
                           disabled={busy}
+                          aria-busy={waiting || undefined}
                         >
                           <span className="provider-mark"><ProviderIcon provider={item.provider}/></span>
-                          <span className="provider-label">Continuar com{" "}
-                          {(
-                            {
-                              discord: "Discord",
-                              google: "Google",
-                              github: "GitHub",
-                            } as Record<string, string>
-                          )[item.provider] || item.provider}</span>
+                          <span className="provider-label">{waiting ? "Aguarde…" : "Continuar com " + (providerNames[item.provider] || item.provider)}</span>
                           <Arrow />
                         </button>
-                      ))}
+                      );})}
                   </div><p className="browser-auth-hint">Discord, Google e GitHub são autorizados no navegador padrão do Windows.</p>
                   </div>
-                </>
               )}
             </div>
-            {error&&<p className="account-form-error" role="alert">{error}</p>}
-            {error && !options && (
-              <button
-                className="text-link"
-                onClick={() => {
-                  setError("");
-                  void api
-                    ?.authOptions()
-                    .then(setOptions)
-                    .catch((error) => setError(error.message));
-                }}
-              >
-                Tentar novamente <Arrow />
-              </button>
+            {error && (
+              <Notice
+                message={error}
+                action={!options ? <button className="button ghost" disabled={busy} aria-busy={pending === "options" || undefined} onClick={retryOptions}>Tentar de novo <Arrow /></button> : undefined}
+              />
             )}
           </>
         )}
-        {(browserAuth.status==='starting'||browserAuth.status==='waiting')&&<div className="browser-auth-pending" role="status"><p>{browserAuth.status==='starting'?'Preparando a conexão…':'Aguardando autorização no navegador'}</p><small>{browserAuth.message||'A conta será conectada aqui quando você concluir.'}</small><button className="text-link" onClick={()=>void api?.cancelBrowserAuth()}>Cancelar conexão</button></div>}
+        {waitingBrowser&&<div className="browser-auth-pending" role="status"><span className="working-indicator" aria-hidden="true"/><div><p>{browserAuth.status==='starting'?'Abrindo o navegador…':'Aguardando autorização no navegador'}</p><small>{browserAuth.message?userMessage(browserAuth.message):'A conta será conectada aqui quando você concluir.'}</small></div><button className="button ghost" onClick={()=>void api?.cancelBrowserAuth()}>Cancelar conexão</button></div>}
         <p className="account-footnote">
           Seus arquivos permanecem no computador.
         </p>
       </section>
+      {confirmSignOut && <ConfirmDialog title="Desconectar este computador?" message="As ferramentas Pro deixam de funcionar aqui até você entrar de novo. Seus arquivos não são afetados." confirmLabel="Desconectar" cancelLabel="Cancelar" onConfirm={signOut} onCancel={() => setConfirmSignOut(false)} />}
     </main>
   );
 }

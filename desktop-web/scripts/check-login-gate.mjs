@@ -26,7 +26,7 @@ try{for(const kind of ['full','rpf','ytyp','obj','neon','skin']){
   await page.getByRole('button',{name:'Entrar',exact:true}).click();await page.getByRole('alert').filter({hasText:'Confira o e-mail'}).first().waitFor();
   assert.equal(await page.locator('.login-shell').count(),1);
   await page.getByLabel('Senha',{exact:true}).fill('fixture-password');await page.getByRole('button',{name:'Entrar',exact:true}).click();
-  const heading={obj:'Exportar roupa para OBJ',neon:'Converter roupa para Neon',skin:'Separar pele'}[kind];
+  const heading={obj:'Roupas para OBJ',neon:'Roupas para Neon',skin:'Separar pele'}[kind];
   await page.getByRole('heading',{name:heading,exact:true}).waitFor();
   await page.getByRole('button',{name:kind==='obj'?'Exportar para OBJ':kind==='neon'?'Converter para Neon':'Analisar peça',exact:false}).click();
   await page.getByRole('alert').filter({hasText:/Pro/}).first().waitFor();
