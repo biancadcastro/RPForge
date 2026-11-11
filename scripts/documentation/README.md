@@ -4,8 +4,11 @@ Conteúdo: `docs/guia-usuario/conteudo.json`. A versão navegável e o PDF são 
 por `build_manual.py`, usando ReportLab e fontes abertas incluídas no projeto. O PDF final
 fica em `output/pdf` e uma cópia acompanha o guia em `docs/guia-usuario`.
 
-Os PNGs mostram a área cliente da interface 0.3.1, sem a moldura desenhada pelo
-Windows, com exemplos fictícios. A tela de YTYP registra uma geração real de um modelo sintético. Não há
+Edição atual: 1.0.0 (`version` em `conteudo.json`), gerando `Manual-RPForge-1.0.0.pdf`.
+As capturas `v1-*.png` mostram a interface Electron com exemplos fictícios; os PNGs
+sem prefixo são da interface 0.3.1, sem a moldura desenhada pelo Windows, da
+edição histórica 0.3.1. O conteúdo ainda não cobre as ferramentas Pro de roupas (OBJ, Neon e
+Separar pele) nem o acesso Free/Pro. A tela de YTYP registra uma geração real de um modelo sintético. Não há
 assets do jogo, acervo privado ou credenciais no pacote de documentação.
 
 As logos são as variantes finais aprovadas da identidade RPForge. Pixelify Sans
@@ -27,7 +30,7 @@ chaves de API, e seu fluxo padrão termina em inglês. Nenhum texto do RPForge f
 enviado a esses serviços. Não foi aplicada tradução intermediária, avaliação de
 detectores ou alteração de fatos para produzir o manual.
 
-## Validação da edição 0.3.1
+## Validação da edição 0.3.1 (histórica)
 
 - 18 páginas renderizadas com Poppler e revisadas visualmente.
 - Extração de texto, fontes, limites inferiores e índice clicável conferidos.

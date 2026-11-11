@@ -7,9 +7,9 @@
 
 ### Seus pacotes de GTA V, organizados para o FiveM. 🔥
 
-Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do Windows.
+Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do Windows. No plano Pro, prepare roupas YDD para OBJ, Neon e separação de pele.
 
-**🪟 Windows 11 · 🚗 GTA V Legacy · 📦 Versão 0.3.2 · 📜 Licença proprietária**
+**🪟 Windows 11 · 🚗 GTA V Legacy · 📦 Versão 1.0.1 · 📜 Licença proprietária**
 
 [🌐 Site oficial](https://rpforge.dev/) · [📥 Baixar RPForge](https://rpforge.dev/#download) · [📘 Manual online](https://rpforge.dev/docs/) · [🛠️ Suporte](https://github.com/biancadcastro/RPForge/issues)
 
@@ -26,28 +26,29 @@ Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do 
 | 🔧 Organizar o tuning | Colocar peças em `stream/mods` e remover opções visuais sem o modelo necessário no pacote. |
 | 🗺️ Converter outros conteúdos | Preparar roupas identificadas, mapas, props, animações, texturas e tipos reconhecidos de peds, armas e áudio. |
 | 🧱 Gerar YTYPs | Criar YTYPs básicos a partir de modelos `.ydr`, sem substituir os arquivos que já existem. |
+| 👕 Trabalhar roupas (Pro) | Exportar uma peça `.ydd` para OBJ/MTL, criar uma versão Neon emissiva ou separar pele e roupa em YDDs distintos. |
 | 🛡️ Conferir antes de gravar | Revisar a saída, decidir como tratar pastas existentes e preservar backups. |
 
-Converter RPFs e gerar YTYPs funciona **sem conta, sem terminal e sem instalar Node.js separadamente**; as ferramentas de roupas (OBJ, Neon e separar pele) exigem uma conta RPForge Pro. Seus arquivos não são enviados para um servidor de conversão.
+Converter RPFs e gerar YTYPs funciona **sem conta, sem internet, sem terminal e sem instalar Node.js separadamente**. As ferramentas de roupas (Roupas para OBJ, Roupas para Neon e Separar pele) exigem login e uma licença RPForge Pro; o plano Pro é liberado manualmente pela equipe, sem compra pelo app. Seus arquivos não são enviados para um servidor de conversão — a conta só é usada para login e validação da licença.
 
 ## 🖼️ Conheça o aplicativo
 
-**Interface em desenvolvimento:** a migração para Electron + Next.js está em
-`desktop-web/`, com a identidade visual do site e ações rápidas em janela compacta.
-Veja [arquitetura e execução local](docs/DESKTOP_ARCHITECTURE.md). Essa mudança não
-foi empacotada no instalador público descrito abaixo.
+A interface atual usa Electron + Next.js (`desktop-web/`), com a identidade visual do
+site e ações rápidas em janela compacta, e é incluída no instalador. A janela WinForms
+antiga (`desktop/`) permanece apenas como alternativa legada. Veja
+[arquitetura e execução local](docs/DESKTOP_ARCHITECTURE.md).
 
 ### Configure, revise e converta
 
-![Tela Configurar do RPForge com exemplos fictícios de veículos e escolhas de destino](docs/guia-usuario/assets/02-veiculos.png)
+![Tela Configurar do RPForge com um exemplo fictício de veículo](docs/guia-usuario/assets/v1-configurar.png)
 
 Os nomes ficam na mesma tela. Se a pasta de saída já existir, você escolhe como continuar.
 
 ### Gere YTYPs pelo botão direito
 
-![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/11-ytyp.png)
+![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/v1-ytyp.png)
 
-As capturas são da versão 0.3.1 e usam exemplos fictícios. O [manual oficial no site](https://rpforge.dev/docs/) acompanha cada etapa. O [PDF histórico da 0.3.1](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) permanece como referência dessa edição.
+As capturas são do manual 1.0.0 e usam exemplos fictícios. O [manual oficial no site](https://rpforge.dev/docs/) acompanha cada etapa; o [PDF do manual 1.0.0](docs/guia-usuario/Manual-RPForge-1.0.0.pdf) cobre conversão de RPFs, YTYP e conta. O [PDF histórico da 0.3.1](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) permanece como referência dessa edição.
 
 ## 🧭 Comece por aqui
 
@@ -60,11 +61,14 @@ As capturas são da versão 0.3.1 e usam exemplos fictícios. O [manual oficial 
 
 Para YTYP, reúna os `.ydr` em uma pasta e use **Gerar YTYP com RPForge**. A geração começa automaticamente.
 
+Com licença Pro ativa, o botão direito sobre um `.ydd` (ou sobre a pasta) mostra **Exportar para OBJ com RPForge**, **Converter roupa para Neon com RPForge** e **Separar pele com RPForge**. Sem licença Pro, esses comandos ficam ocultos.
+
 ### 📥 Instalação
 
-- Instalador atual: [RPForge-Setup-0.3.2-x64.exe](https://github.com/biancadcastro/RPForge/releases/download/v0.3.2/RPForge-Setup-0.3.2-x64.exe).
+- Instalador: baixe pelo [site oficial](https://rpforge.dev/#download) (`RPForge-Setup-<versão>-x64.exe`). A versão atual do aplicativo é a 1.0.1.
 - Pasta padrão: `%LOCALAPPDATA%\Programs\RPForge`.
-- A [release 0.3.2](https://github.com/biancadcastro/RPForge/releases/tag/v0.3.2) contém somente o instalador EXE como anexo. O ZIP de código-fonte não acompanha esta versão.
+- Não há atualização automática: para atualizar, baixe e execute o instalador da nova versão.
+- A [release 0.3.2](https://github.com/biancadcastro/RPForge/releases/tag/v0.3.2) no GitHub contém somente o instalador EXE daquela versão. O ZIP de código-fonte não acompanha as versões proprietárias.
 
 **Versão de testes com certificado local:** a ativação do menu moderno pede consentimento para confiar no certificado em `TrustedPeople` para todos os usuários e confirmação de administrador. A confiança abrange outros arquivos assinados com a mesma chave. Nenhum certificado raiz é instalado. Sem autorização, o app e o menu clássico continuam disponíveis. A desinstalação não remove automaticamente essa confiança. Alertas do Windows podem continuar aparecendo; a primeira instalação em máquina limpa ainda não foi validada. Leia a [política de assinatura](https://rpforge.dev/docs/assinatura/).
 
@@ -85,7 +89,7 @@ Se uma pasta já existir, escolha **Cancelar**, **Usar outro nome** ou **Backup 
 
 ## 🛠️ Precisa de ajuda?
 
-- **O menu não apareceu?** Selecione uma única pasta com `.rpf` ou `.ydr`. Confira também **Mostrar mais opções** no Windows.
+- **O menu não apareceu?** Selecione uma única pasta com `.rpf` ou `.ydr`. Confira também **Mostrar mais opções** no Windows. Os comandos de roupas só aparecem com licença Pro válida; abra o app, entre na sua conta e confira o acesso Pro.
 - **Nenhum arquivo foi encontrado?** Escolha a pasta que contém o arquivo. A busca não percorre subpastas do Windows.
 - **O RPF foi recusado?** A versão atual aceita GTA V **Legacy**, RPF7 **OPEN/NONE**. Arquivos criptografados e GTA V Enhanced não são aceitos.
 - **Converteu, mas o conteúdo não funciona no jogo?** Confira a ativação do recurso, o spawn e as dependências do servidor.
@@ -96,7 +100,7 @@ Ao abrir um relato em [Issues](https://github.com/biancadcastro/RPForge/issues),
 
 ## 📜 Licença e privacidade
 
-A partir da **0.3.2**, o código próprio do aplicativo usa [licença proprietária](https://rpforge.dev/docs/licenca/). Esta versão de testes é gratuita. As dependências mantêm suas próprias licenças.
+A partir da **0.3.2**, o código próprio do aplicativo usa [licença proprietária](https://rpforge.dev/docs/licenca/) ([LICENSE](LICENSE): todos os direitos reservados). O uso das ferramentas Free é gratuito; as ferramentas Pro dependem de licença concedida à conta. As dependências mantêm suas próprias licenças.
 
 O código e as versões antigas já disponibilizados neste repositório continuam sob as licenças originais. O histórico público não corresponde ao código atual da versão proprietária e esta mudança não revoga os direitos já concedidos.
 

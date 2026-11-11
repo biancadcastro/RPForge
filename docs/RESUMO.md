@@ -1,13 +1,26 @@
 # RPForge — resumo do aplicativo
 
-O RPForge transforma RPFs de conteúdos GTA V Legacy em recursos FiveM organizados e gera YTYPs de YDRs em um clique.
-E um produto independente do RedHorn Studio e do RedHorn Garage, com processamento local.
+O RPForge transforma RPFs de conteúdos GTA V Legacy em recursos FiveM organizados, gera YTYPs de YDRs em um clique e, no plano Pro, trabalha roupas YDD (OBJ, Neon e separação de pele).
+E um produto independente do RedHorn Studio e do RedHorn Garage, com processamento local. Versao atual: 1.0.1.
+
+## Ferramentas
+
+| Ferramenta | Acesso |
+| --- | --- |
+| Converter RPFs | Free, sem conta |
+| Gerar YTYP | Free, sem conta |
+| Roupas para OBJ | Pro: login e licenca `clothing.obj` |
+| Roupas para Neon | Pro: login e licenca `clothing.neon` |
+| Separar pele | Pro: login e licenca `clothing.skin` |
+
+O Pro e concedido manualmente no servidor; nao ha preco, checkout ou pagamento no app. Detalhes em SUBSCRIPTIONS.md e CLOTHING_*.md.
 
 ## Acesso e fluxo
 
-- Comando **Converter com RPForge** no menu principal do Windows 11.
+- Interface Electron + Next.js (`desktop-web/`), incluida no instalador atual (1.0.1). A janela WinForms em `desktop/` permanece apenas como fallback legado.
+- Comandos **Converter com RPForge** e **Gerar YTYP com RPForge** no menu do Windows 11 e no menu classico; os comandos de roupas aparecem sobre YDDs e pastas quando ha licenca Pro valida.
 - Funciona sobre a pasta e no espaco vazio dentro dela; a extensao detecta a presenca de RPF.
-- Janela RPForge com fluxo guiado **Configurar → Revisar → Resultado**, com **Ajuda** como página auxiliar.
+- Fluxo guiado **Configurar → Revisar → Resultado**, com **Como usar** como página auxiliar; acoes rapidas abrem uma janela compacta.
 - Identidade pixel art e fonte Pixelify Sans do portfólio, embutidas para uso offline.
 - Analise antes de converter; nenhuma extracao e gravada durante a previa.
 - Edicao de spawns por carro, com maiusculas e minusculas preservadas. Campo vazio mantem o nome atual.
@@ -57,6 +70,7 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 - Suporte atual: veículos, roupas, mapas/interiores, props, animações, texturas, peds, armas e formatos de áudio reconhecidos em RPFs abertos, até 768 MiB por arquivo externo.
 - Sem suporte a RPF criptografado, GTA V Enhanced ou metas não reconhecidos. Consulte CONTEUDOS_E_YTYP.md para a matriz de suporte e limites.
 - A validacao estrutural nao substitui o teste no FiveM nem confirma dependencias de outros recursos.
-- Interface de desenvolvimento para Windows, usando o runtime ja incluido na instalacao local.
+- Interface para Windows, com runtime Electron incluido no instalador; nao exige Node.js separado.
+- Sem atualizacao automatica: novas versoes sao instaladas manualmente pelo instalador.
 - Nada e publicado automaticamente. Instaladores novos somente sob pedido explicito.
 - A assinatura da integracao moderna e de teste local; uma distribuicao futura exige revisao de assinatura.

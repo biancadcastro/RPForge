@@ -1,6 +1,6 @@
 # Interoperabilidade — resultados (06/11/2026)
 
-Oráculo offline: **CodeWalker.Core 1.0.0.0** (MIT, aviso `CodeWalker-NOTICE.txt`), SHA-256 `3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8`, .NET 4.0.30319.42000 via Windows PowerShell 5.1, carregado de `RPForge\.tools\clothing-engine` (fora do Git). Uso somente local/desenvolvimento; o motor nunca o carrega. Layouts foram estudados na fonte do CodeWalker (MIT) — não é implementação clean-room; incluir o aviso MIT se trechos derivados forem distribuídos. Evidências completas: `C:\Users\bianc\.codex\visualizations\2026\11\05\01a1acf2-8a0c-7111-afe8-627743381853\animation-engine-2026-11-06\`.
+Oráculo offline: **CodeWalker.Core 1.0.0.0** (MIT, aviso `CodeWalker-NOTICE.txt`), SHA-256 `3d2bb91b35cf0d1888c12772a9af25441adea3ccc8510a149fcf0d47c8e71ca8`, .NET 4.0.30319.42000 via Windows PowerShell 5.1, carregado de `RPForge\.tools\clothing-engine` (fora do Git). Uso somente local/desenvolvimento; o motor nunca o carrega. Layouts foram estudados na fonte do CodeWalker (MIT) — não é implementação clean-room; incluir o aviso MIT se trechos derivados forem distribuídos. Evidências completas: pasta local de evidências da rodada de 06/11/2026, fora do repositório.
 
 O oráculo registra a **própria** avaliação (`AnimSequence.EvaluateVector` em cada frame local de cada bloco) em float32 — a comparação não usa o leitor próprio dos dois lados.
 

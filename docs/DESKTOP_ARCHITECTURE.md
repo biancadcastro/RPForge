@@ -1,8 +1,10 @@
 # Interface desktop — Electron + Next.js
 
 A interface atual fica em `desktop-web/`. Next.js produz arquivos estáticos, servidos
-pelo protocolo local `rpforge://app`. Não há servidor Next nem dependência de internet
-durante o uso. O motor de conversão existente em `src/` é preservado.
+pelo protocolo local `rpforge://app`. Não há servidor Next. Converter RPFs e Gerar
+YTYP funcionam sem internet e sem conta; somente a conexão da conta e a validação da
+licença das ferramentas Pro acessam `https://api.rpforge.dev`. O motor de conversão
+existente em `src/` é preservado.
 
 ## Organização
 
@@ -18,7 +20,17 @@ durante o uso. O motor de conversão existente em `src/` é preservado.
 | `electron/workflow.mjs` | Revisões, snapshots das escolhas e autorização da conversão. |
 | `electron/worker.mjs` | Executa o motor Node em um processo temporário e encerra ao terminar. |
 
-As ferramentas atuais são Converter RPFs e Gerar YTYP. Assetto foi retirado da
+As ferramentas atuais, registradas em `lib/desktop.ts`, são:
+
+| Ferramenta | Acesso | Entrada |
+| --- | --- | --- |
+| Converter RPFs | Free, sem login | Pasta com `.rpf` |
+| Gerar YTYP | Free, sem login | Pasta com `.ydr` |
+| Roupas para OBJ | Pro (`clothing.obj`) | Peça `.ydd` ou pasta |
+| Roupas para Neon | Pro (`clothing.neon`) | Peça `.ydd` ou pasta |
+| Separar pele | Pro (`clothing.skin`) | Peça `.ydd` ou pasta |
+
+Assetto foi retirado da
 interface, CLI, bridge e código de conversão. As fontes e imagens locais são as
 mesmas do site RPForge. Pixelify é usada nos títulos e ações; Atkinson, nos textos.
 
@@ -39,14 +51,23 @@ principal e não são aceitos como autoridade quando enviados pelo renderer.
 - Informar uma pasta: conversão rápida, com prévia e confirmação antes de gravar.
 - `--ytyp <pasta>`: geração de YTYP em janela compacta.
 - `--configure <pasta>`: configuração completa.
+- `--obj <peça.ydd>` / `--obj-folder <pasta>`: Roupas para OBJ em janela compacta.
+- `--neon <peça.ydd>` / `--neon-folder <pasta>`: Roupas para Neon.
+- `--skin <peça.ydd>` / `--skin-folder <pasta>`: Separar pele.
 
-As ações rápidas exigem uma sessão conectada. Quando não há sessão, a janela mostra o login integrado e mantém a ação pendente; após a conexão, retoma a ferramenta e os caminhos solicitados. Não há verificação de versão nesse fluxo.O processo principal cria um pedido temporário
-com PKCE e chave RSA por instalação, aguarda a aprovação e recebe uma sessão
+As ações de RPF e YTYP não exigem conta. As ações de OBJ, Neon e Separar pele exigem
+uma sessão conectada: sem sessão, a janela mostra o login integrado e mantém a ação
+pendente; após a conexão, retoma a ferramenta e os caminhos solicitados. Não há
+verificação de versão nesse fluxo.
+
+A entrada por e-mail e senha (com MFA quando ativo) acontece na própria janela;
+Discord, Google e GitHub abrem no navegador padrão. Em ambos os casos, o processo
+principal cria um pedido temporário com PKCE e chave RSA por instalação, aguarda a aprovação e recebe uma sessão
 própria. Não copia cookies do navegador. O refresh token e a chave privada ficam
 criptografados pelo `safeStorage` do Electron no perfil local; somente nick e
 avatar chegam à interface. Pedidos podem ser cancelados e expiram em dez minutos.
 Renovações concorrentes compartilham a mesma requisição para evitar reutilizar
-tokens rotativos. Uma sessão revogada é removida do armazenamento local.
+tokens rotativos. Uma sessão revogada é removida do armazenamento local, preservando a identidade da instalação.
 A confirmação visual fica em `https://rpforge.dev/conectar-app/`, com a identidade
 do website. A API oferece somente contexto autenticado e registro de consentimento;
 o endereço legado de confirmação encaminha para o website. Os callbacks cadastrados
@@ -97,7 +118,7 @@ de teste são fechados ao terminar.
 A compilação de desenvolvimento não cria instalador, não publica versão e não
 altera projetos pessoais, certificados ou registros do Windows.
 
-A interface desktop usa navegação lateral persistente, catálogo funcional de ferramentas e superfícies de trabalho compactas. A identidade visual mantém a paleta e o logotipo do RPForge, com Segoe UI nos controles e dados para legibilidade nativa no Windows. Nas telas de resultado, títulos e ações usam Pixelify e ícones em pixel, conforme a referência aprovada. `workspace.css` concentra as regras compartilhadas de densidade, navegação e painéis. A barra superior é integrada ao app, com ações restritas por IPC para a janela remetente. Os modos rápidos usam a sessão conectada e continuam separados da navegação completa.
+A interface desktop usa navegação lateral persistente, catálogo funcional de ferramentas e superfícies de trabalho compactas. A identidade visual mantém a paleta e o logotipo do RPForge, com Segoe UI nos controles e dados para legibilidade nativa no Windows. Nas telas de resultado, títulos e ações usam Pixelify e ícones em pixel, conforme a referência aprovada. `workspace.css` concentra as regras compartilhadas de densidade, navegação e painéis. A barra superior é integrada ao app, com ações restritas por IPC para a janela remetente. Os modos rápidos de roupas usam a sessão conectada; todos os modos rápidos continuam separados da navegação completa.
 
 A seleção 3D de roupas fica em `lib/mesh-selection.ts`, separada da classificação e da exportação. Seleções por clique, área e pincel são transitórias; a atribuição produz overrides explícitos por face. O visualizador reutiliza um contexto WebGL e renderiza em resposta a eventos, com descarte dos recursos ao sair da tela. Os testes de peças reais usam cópias isoladas fora do acervo; testes de conta e RPF usam fixtures sem credenciais reais.
 
@@ -107,6 +128,6 @@ Os resultados de RPF, YTYP, OBJ e Neon compartilham `components/operation-result
 
 No Explorer empacotado, o cache binário atômico de acesso da instalação tem precedência sobre o registro, que pode apresentar uma visão virtualizada antiga. Um cache da instalação com máscara zero, expirado ou inválido não pode ser sobreposto por um registro Pro antigo. Após corrigir a extensão local, os comandos registrados foram verificados no mesmo servidor COM alternando Free (ocultos e invocação negada) e Pro (habilitados), restaurando a licença real ao final.
 
-O login é obrigatório tanto no app completo quanto nas ações de contexto. Usuários conectados abrem diretamente a home ou a ferramenta solicitada. Usuários desconectados não veem a navegação nem os controles de ferramenta; a execução também é bloqueada no processo principal, antes de alterar a ação pendente ou criar workers. A entrada usa a própria janela, inclusive em modo rápido, e os eventos de autenticação retomam o pedido original. Login não concede Pro: as capacidades assinadas permanecem obrigatórias nas ferramentas pagas.
+O login é exigido apenas pelas ferramentas Pro (OBJ, Neon e Separar pele). O app completo, Converter RPFs e Gerar YTYP abrem e executam sem conta; `scripts/check-login-gate.mjs` verifica esse limite. Nas ações Pro sem sessão, a navegação e os controles da ferramenta não são exibidos; a execução também é bloqueada no processo principal (`requireSession` e `requireToolAccess`), antes de criar workers. A entrada usa a própria janela, inclusive em modo rápido, e os eventos de autenticação retomam o pedido original. Login não concede Pro: a licença assinada precisa ter `plan` igual a `pro` e a capacidade correspondente (`clothing.obj`, `clothing.neon` ou `clothing.skin`). O plano Pro é concedido manualmente no servidor; o app não tem preços, checkout nem pagamento.
 
-`app/alignment.css` concentra a geometria compartilhada dos controles e o layout de entrada. O formulário e os provedores usam colunas explícitas; campos e botões de login têm 44 px, e os controles gerais usam 40 px sem alterar os controles compactos do editor ou os botões pixel aprovados dos resultados. Os logos dos provedores reutilizam `components/provider-icon.tsx` do website e são SVGs locais. O teste desktop verifica início das colunas, alturas, larguras e centralização dos logos e setas.
+A geometria compartilhada dos controles e o layout de entrada ficam em `app/workspace.css` (a antiga `alignment.css` foi incorporada, conforme [DESKTOP_VISUAL_SYSTEM.md](DESKTOP_VISUAL_SYSTEM.md)). O formulário e os provedores usam colunas explícitas; campos e botões de login têm 44 px, e os controles gerais usam 40 px sem alterar os controles compactos do editor ou os botões pixel aprovados dos resultados. Os logos dos provedores reutilizam `components/provider-icon.tsx` do website e são SVGs locais. O teste desktop verifica início das colunas, alturas, larguras e centralização dos logos e setas.

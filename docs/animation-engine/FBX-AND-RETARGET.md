@@ -2,7 +2,7 @@
 
 ## 1. Inspeção de `ia-emotescript-main.zip` (sem executar nada)
 
-Arquivo: `C:\Users\bianc\Downloads\ia-emotescript-main.zip`, SHA-256 `44b82464a5065a3a9c80e33c233399ba604e11fd746f9e3045c0a08e5d7ee26b`, 41 entradas. Foram extraídos para uma pasta temporária **apenas** `.py/.md/.ps1/.spec` e lidos como texto. Não foram executados: `dist/FBX2YCD.exe` (14,8 MB, PyInstaller), `build/*.pkg/.pyz`, `.pyc`, scripts PowerShell, Blender.
+Arquivo: `ia-emotescript-main.zip` (cópia local, fora do repositório), SHA-256 `44b82464a5065a3a9c80e33c233399ba604e11fd746f9e3045c0a08e5d7ee26b`, 41 entradas. Foram extraídos para uma pasta temporária **apenas** `.py/.md/.ps1/.spec` e lidos como texto. Não foram executados: `dist/FBX2YCD.exe` (14,8 MB, PyInstaller), `build/*.pkg/.pyz`, `.pyc`, scripts PowerShell, Blender.
 
 **Licença:** nenhum arquivo LICENSE/aviso no ZIP. Sem licença explícita, nada do código pode ser copiado ou traduzido para o motor proprietário. O que segue descreve comportamento para orientar uma reimplementação independente.
 

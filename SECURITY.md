@@ -17,12 +17,14 @@ Não faça testes em servidores, contas ou arquivos de outras pessoas sem autori
 
 ## Escopo atual
 
-O RPForge 0.3.1 é uma versão local de testes. O projeto procura manter a versão atual
+O RPForge 1.0.1 é uma versão de testes assinada com certificado local. O projeto procura manter a versão atual
 do código, mas não oferece suporte de segurança de longo prazo a versões antigas.
 Não há prazo de resposta ou correção garantido.
 
 O conversor aceita RPFs abertos de GTA V Legacy e não oferece descriptografia,
 execução de scripts de addons ou envio de assets para serviços de conversão.
+As ferramentas Pro de roupas usam a API `api.rpforge.dev` somente para login e
+licença; a sessão fica criptografada localmente (ver [PRIVACY.md](docs/PRIVACY.md)).
 
 O certificado local de desenvolvimento não é uma assinatura pública de distribuição.
 Não compartilhe chaves privadas nem adicione confiança em certificados desconhecidos.

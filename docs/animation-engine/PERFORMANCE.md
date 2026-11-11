@@ -44,6 +44,6 @@ Tempo total de uma requisição local ao workerd (bundle já carregado, executan
 
 ```powershell
 node --expose-gc scripts/animation-engine/bench/bench-node.mjs <saida.json> [externo.ycd]
-node scripts/animation-engine/bench/bench-workerd.mjs D:\RedHorn\Desenvolvimento\RPForge-API\node_modules <pasta-saida> [externo.ycd]
+node scripts/animation-engine/bench/bench-workerd.mjs <RPForge-API>\node_modules <pasta-saida> [externo.ycd]
 ```
 O runner workerd só importa `esbuild` e executa `@cloudflare/workerd-windows-64` de um `node_modules` já instalado (sem modificá-lo), sem conta, sem wrangler e sem config compartilhada.

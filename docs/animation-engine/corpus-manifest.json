@@ -224,7 +224,7 @@
   }
  ],
  "external": {
-  "origin": "local third-party resources under D:RedHornDesenvolvimentoBase and D:Peach (read-only; NOT committed; authorization for redistribution not verified)",
+  "origin": "local third-party resource folders outside the repository (read-only; NOT committed; authorization for redistribution not verified)",
   "listed": 847,
   "readable": 451,
   "unreadableBySandbox": 0,

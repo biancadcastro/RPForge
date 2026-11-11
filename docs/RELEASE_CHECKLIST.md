@@ -1,6 +1,14 @@
 # Preparação da primeira release
 
-Atualizado em 1 de novembro de 2026. Versão candidata: **0.3.1**.
+Atualizado em 1 de novembro de 2026. Versão candidata na época: **0.3.1**.
+
+> Estado em 10 de novembro de 2026: versão atual **1.0.1** (`package.json`). O
+> `Build-Installer.ps1` monta o instalador com a interface Electron + Next
+> (`Prepare-DesktopPayload.ps1`) e o motor de roupas; o WinForms fica como fallback
+> legado. Binários e MSIX continuam assinados com o certificado local de teste;
+> a SignPath segue pendente e `signpath/project.json` permanece com `enabled: false`.
+> Não há atualização automática: novas versões são instaladas pelo instalador.
+> Os bloqueios de distribuição abaixo continuam válidos.
 
 ## Situação atual
 

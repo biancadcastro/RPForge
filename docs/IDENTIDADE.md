@@ -21,8 +21,9 @@ O manifest gerado identifica a ferramenta com `-- Convertido com RPForge`. A jan
 | Error | `#FF7676` | Falhas |
 | Success | `#4ADE80` | Conclusão |
 
-Na interface Electron + Next.js, o botão laranja usa texto marfim e o relevo discreto
-definido nos controles atuais do site. Estados têm mensagens além da cor.
+Na interface Electron + Next.js, o botão laranja (`#E9843D`, contorno `#FFD0A5`) usa
+texto escuro `#20150D` e o relevo discreto definido nos controles atuais do site,
+conforme `desktop-web/app/tokens.css` e [DESKTOP_VISUAL_SYSTEM.md](DESKTOP_VISUAL_SYSTEM.md). Estados têm mensagens além da cor.
 
 ## Tipografia
 

@@ -1,6 +1,6 @@
 # RPForge — motor de animações (rodada 06/11/2026)
 
-Branch `feat/animation-engine` (worktree `D:\RedHorn\Desenvolvimento\RPForge-Animation-Engine`), criada de `44a715b`. Não integrada, não publicada.
+Desenvolvido na branch `feat/animation-engine` (em worktree própria), criada de `44a715b`, e incorporado à linha `feat/engine-proof-ydd-ycd`. Não integrado à interface, ao menu ou ao instalador; não publicado. Visão geral dos trabalhos de pesquisa em [ENGINE_PROOF.md](../ENGINE_PROOF.md).
 
 ## Estado
 
@@ -21,16 +21,16 @@ Branch `feat/animation-engine` (worktree `D:\RedHorn\Desenvolvimento\RPForge-Ani
 ## Reproduzir
 
 ```powershell
-Set-Location D:\RedHorn\Desenvolvimento\RPForge-Animation-Engine
+Set-Location <worktree-do-animation-engine>
 node --test tests/animation-engine.test.js
 # cadeia completa (testes, corpus sintético, oráculo, comparação, levantamento, reencode, esqueletos):
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/animation-engine/Run-Evidence.ps1 `
-  -EvidenceDirectory <pasta-fora-do-repo> -OracleLibrary D:\RedHorn\Desenvolvimento\RPForge\.tools\clothing-engine `
+  -EvidenceDirectory <pasta-fora-do-repo> -OracleLibrary <repo-RPForge>\.tools\clothing-engine `
   [-ExternalList <lista.txt>] [-EmoteList <lista.txt>] [-SkeletonFiles '<m.skel>;<f.skel>']
 node --expose-gc scripts/animation-engine/bench/bench-node.mjs <saida.json> [externo.ycd]
-node scripts/animation-engine/bench/bench-workerd.mjs D:\RedHorn\Desenvolvimento\RPForge-API\node_modules <pasta> [externo.ycd]
+node scripts/animation-engine/bench/bench-workerd.mjs <RPForge-API>\node_modules <pasta> [externo.ycd]
 ```
-Listas externas: um caminho absoluto por linha. Arquivos de terceiros só são lidos; relatórios que os citam ficam fora do Git. Evidências desta rodada: `C:\Users\bianc\.codex\visualizations\2026\11\05\01a1acf2-8a0c-7111-afe8-627743381853\animation-engine-2026-11-06\` (dumps binários do oráculo e YCDs derivados de terceiros foram apagados após o resumo; são regeneráveis).
+Listas externas: um caminho absoluto por linha. Arquivos de terceiros só são lidos; relatórios que os citam ficam fora do Git. Evidências desta rodada: pasta local de evidências, fora do repositório (dumps binários do oráculo e YCDs derivados de terceiros foram apagados após o resumo; são regeneráveis).
 
 ## Próximas provas, em ordem
 
