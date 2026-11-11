@@ -6,7 +6,7 @@ import { ClothingViewer } from './clothing-viewer';
 import {OperationProgress} from './operation-progress';
 import {ClothingSetup,CLOTHING_GROUP,useProPlan} from './clothing-setup';
 import {useToast} from './toast';
-import {userMessage} from '../lib/user-message';
+import {isCancellation,userMessage} from '../lib/user-message';
 import {lodName} from '../lib/text';
 
 const basename = (value: string) => value.split(/[\\/]/).pop() || value;
@@ -43,7 +43,7 @@ export function ClothingWorkspace({ api, active, busy, launch, onBusy, onHome }:
       setResult(value);
       try { setPreview(await api.clothingPreview()); }
       catch (e) { toast({tone:'info',title:'Prévia 3D indisponível',message:userMessage(e)}); }
-    } catch (e) { setError(userMessage(e)); }
+    } catch (e) { const m=userMessage(e);if(isCancellation(m))toast({tone:'info',title:'Cancelamento concluído',message:'Nada foi gravado. Os originais foram preservados.'});else setError(m); }
     finally { onBusy(false); setProgress(undefined); }
   }
   if(result)return <main className="clothing-workspace wrap result-workspace" hidden={!active}><OperationResult group={CLOTHING_GROUP} tool={TITLE} quick={quick} onHome={onHome} title="Pronta para texturizar" description="A peça foi exportada com UVs, normais e materiais." cards={[{title:'Arquivos OBJ e MTL',badge:'LOD '+lodName(result.lod),detail:'Somente OBJ e MTL, sem subpasta.',files:[result.objFile,result.mtlFile]}]} destination={result.output} onOpen={()=>void api?.openFolder(result.output).catch(e=>toast({tone:'error',title:'Não foi possível abrir a pasta',message:userMessage(e)}))} onReset={()=>{setResult(undefined);setPreview(undefined);setError('');}} resetLabel="Exportar outra peça"><p className="pixel-result-detail">{result.vertices.toLocaleString('pt-BR')} vértices · {result.triangles.toLocaleString('pt-BR')} triângulos · OBJ para pintura, sem rig.</p>{preview&&active&&<ResultPreview data={preview}/>}</OperationResult></main>;

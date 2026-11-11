@@ -5,7 +5,7 @@ import type {DesktopBridge,Launch,NeonResult,Progress} from '../lib/desktop';
 import {OperationProgress} from './operation-progress';
 import {ClothingSetup,CLOTHING_GROUP,useProPlan} from './clothing-setup';
 import {useToast} from './toast';
-import {userMessage} from '../lib/user-message';
+import {isCancellation,userMessage} from '../lib/user-message';
 import {lodName,plural} from '../lib/text';
 const basename=(file:string)=>file.split(/[\\/]/).pop()||file;
 const TITLE='Roupas para Neon';
@@ -20,7 +20,7 @@ export function NeonWorkspace({api,active,busy,launch,onBusy,onHome}:{api?:Deskt
  }
  async function convert(){
   if(!api||busy)return;onBusy(true);setError('');setResult(undefined);setProgress(undefined);
-  try{setResult(await api.convertClothingNeon({model,texture,destination}));}catch(e){setError(userMessage(e));}finally{onBusy(false);setProgress(undefined);}
+  try{setResult(await api.convertClothingNeon({model,texture,destination}));}catch(e){const m=userMessage(e);if(isCancellation(m))toast({tone:'info',title:'Cancelamento concluído',message:'Nada foi gravado. Os originais foram preservados.'});else setError(m);}finally{onBusy(false);setProgress(undefined);}
  }
  if(result)return <main className="clothing-workspace wrap result-workspace" hidden={!active}><OperationResult group={CLOTHING_GROUP} tool={TITLE} quick={quick} onHome={onHome} title="Versão Neon criada" description="Uma nova versão emissiva da roupa foi salva." cards={[{title:'Roupa Neon',badge:'ID '+result.drawableId,detail:'Material ped_emissive.',files:result.files}]} destination={result.output} onOpen={()=>void api?.openFolder(result.output).catch(e=>toast({tone:'error',title:'Não foi possível abrir a pasta',message:userMessage(e)}))} onReset={()=>{setResult(undefined);setError('');}} resetLabel="Converter outra peça"><p className="pixel-result-detail">Geometria, UVs, pesos, esqueleto e texturas embutidas conferidos após reabrir o YDD. Confira a aparência no FiveM antes de usar no servidor.</p><details className="pixel-result-diagnostics"><summary>Detalhes dos níveis de detalhe (LOD)</summary>{result.lods.filter(l=>l.vertices>0).map(l=><p key={l.lod}>{lodName(l.lod)}: {plural(l.vertices,'vértice','vértices')} · {plural(l.triangles,'triângulo','triângulos')}</p>)}</details></OperationResult></main>;
  return <main className={`clothing-workspace wrap${quick?' clothing-quick':''}`} hidden={!active}>

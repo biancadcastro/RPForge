@@ -6,7 +6,7 @@ import "./atelier.css";
 import "./controls.css";
 export const metadata: Metadata = {
   title: "RPForge",
-  description: "Suas criações, prontas para o servidor.",
+  description: "Você cria. O RPForge organiza.",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

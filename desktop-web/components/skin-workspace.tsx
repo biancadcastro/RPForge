@@ -9,7 +9,7 @@ import {ClothingSetup,useProPlan} from './clothing-setup';
 import {Notice} from './notice';
 import {ConfirmDialog} from './confirm-dialog';
 import {useToast} from './toast';
-import {userMessage} from '../lib/user-message';
+import {isCancellation,userMessage} from '../lib/user-message';
 import {mergeFaceSelection,type SelectionOperation,type SelectionTool} from '../lib/face-selection';
 const basename=(file:string)=>file.split(/[\\/]/).pop()||file;
 export function SkinWorkspace({api,active,busy,launch,onBusy,onEditorState,onHome}:{api?:DesktopBridge;active:boolean;busy:boolean;launch:Launch;onBusy:(value:boolean)=>void;onEditorState?:(active:boolean)=>void;onHome?:()=>void}){
@@ -41,7 +41,7 @@ export function SkinWorkspace({api,active,busy,launch,onBusy,onEditorState,onHom
  async function perform(action:'inspect'|'split'){
   if(!api||busy)return;setOperation(action);onBusy(true);setError('');setProgress('');
   try{const selection={model,texture,destination};if(action==='inspect'){setReview(await api.inspectClothingSkin(selection));setResult(undefined);setOverrides({});setHistory([]);setLod('high');setTool('face');}else{if(!review)return;setResult(await api.separateClothingSkin(selection,review.reviewId,overrides));setReview(undefined);}}
-  catch(e){setError(userMessage(e));}finally{onBusy(false);setProgress('');}
+  catch(e){const m=userMessage(e);if(isCancellation(m))toast({tone:'info',title:'Cancelamento concluído',message:'Nada foi gravado. Os originais foram preservados.'});else setError(m);}finally{onBusy(false);setProgress('');}
  }
  function selectFaces(ids:string[],operation:SelectionOperation){if(busy||!meshes)return;const faces=tool==='face'&&region&&ids.length===1?uncertainRegion(meshes,ids[0],overrides):ids;setSelected(previous=>{const next=mergeFaceSelection(previous,faces.filter(id=>validFaces.has(id)),operation);return next.size===previous.size&&[...next].every(id=>previous.has(id))?previous:next;});}
  function mark(role:'skin'|'cloth'){if(busy||!selected.size)return;setHistory(h=>[...h.slice(-49),overrides]);setOverrides(previous=>{const next={...previous};for(const face of selected)next[face]=role;return next;});}

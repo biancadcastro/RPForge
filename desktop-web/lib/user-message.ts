@@ -16,3 +16,5 @@ export function splitUserMessage(text:string){
  const at=text.indexOf(DETAIL_MARKER);
  return at<0?{message:text,detail:''}:{message:text.slice(0,at),detail:text.slice(at+DETAIL_MARKER.length)};
 }
+/** A cancellation the person asked for is feedback, not an error. */
+export const isCancellation=(text:string)=>/^(?:Operação|Exportação|Conversão|Separação|Análise) cancelada\.?$/.test(text.trim());
