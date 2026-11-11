@@ -64,3 +64,17 @@ test('rejects offsets into table and mismatched decompression lengths', () => {
   mismatch.writeUInt32LE(100, 40);
   assert.throws(() => [...readRpf(mismatch)], /divergente/);
 });
+
+test('stored nested RPF uses the archive limit and counts only its leaf files', () => {
+  const limits = { archiveBytes: 64 * 1024, fileBytes: 2 * 1024, totalBytes: 2 * 1024, entries: 1000, depth: 16 };
+  const inner = makeRpf([{ name: 'car.meta', data: Buffer.alloc(1800, 65) }]);
+  assert.ok(inner.length > limits.fileBytes);
+  const outer = makeRpf([{ name: 'dlc.rpf', data: inner }]);
+  const files = [...readRpf(outer, '', { bytes: 0, entries: 0, limits })];
+  assert.deepEqual(files.map(f => f.path), ['dlc.rpf/car.meta']);
+  const leaf = makeRpf([{ name: 'big.meta', data: Buffer.alloc(3 * 1024, 66) }]);
+  assert.throws(() => [...readRpf(leaf, '', { bytes: 0, entries: 0, limits })], /Tamanho ou offset inválido/);
+  const compressedNested = makeRpf([{ name: 'dlc.rpf', data: makeRpf([{ name: 'a.meta', data: Buffer.alloc(4096, 1) }]), compressed: true }]);
+  assert.throws(() => [...readRpf(compressedNested, '', { bytes: 0, entries: 0, limits })]);
+  assert.equal(LIMITS.archiveBytes, 768 * 1024 * 1024);
+});

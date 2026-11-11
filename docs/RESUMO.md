@@ -54,7 +54,7 @@ E um produto independente do RedHorn Studio e do RedHorn Garage, com processamen
 
 ## Limites e desenvolvimento
 
-- Suporte atual: veículos, roupas, mapas/interiores, props, animações, texturas, peds, armas e formatos de áudio reconhecidos em RPFs abertos, até 512 MiB por arquivo externo.
+- Suporte atual: veículos, roupas, mapas/interiores, props, animações, texturas, peds, armas e formatos de áudio reconhecidos em RPFs abertos, até 768 MiB por arquivo externo.
 - Sem suporte a RPF criptografado, GTA V Enhanced ou metas não reconhecidos. Consulte CONTEUDOS_E_YTYP.md para a matriz de suporte e limites.
 - A validacao estrutural nao substitui o teste no FiveM nem confirma dependencias de outros recursos.
 - Interface de desenvolvimento para Windows, usando o runtime ja incluido na instalacao local.

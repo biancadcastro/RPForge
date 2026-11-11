@@ -1,7 +1,7 @@
 import { inflateRawSync } from 'node:zlib';
 
-// Desktop profile: unchanged limits of the existing local application.
-export const LIMITS = { archiveBytes: 512 * 1024 * 1024, fileBytes: 256 * 1024 * 1024, totalBytes: 1024 * 1024 * 1024, entries: 100_000, depth: 16 };
+// Desktop profile: limits of the local application.
+export const LIMITS = { archiveBytes: 768 * 1024 * 1024, fileBytes: 256 * 1024 * 1024, totalBytes: 1024 * 1024 * 1024, entries: 100_000, depth: 16 };
 // Remote Workers profile (128 MB per isolate, shared with runtime, copies and concurrent requests).
 // Initial conservative proposal pending remote measurement; NOT a compatibility claim for larger archives.
 export const WORKER_LIMITS = Object.freeze({ archiveBytes: 16 * 1024 * 1024, fileBytes: 16 * 1024 * 1024, totalBytes: 32 * 1024 * 1024, entries: 20_000, depth: 4 });
@@ -63,7 +63,11 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
     if (!resource && buffer.readUInt32LE(at + 12) !== 0) throw new Error(`Entrada criptografada não suportada: ${current}`);
     const unpacked = resource ? size : buffer.readUInt32LE(at + 8);
     const stored = resource ? size : size || unpacked;
-    if (stored > limits.fileBytes || unpacked > limits.fileBytes || offset < headerEnd || offset + stored > buffer.length) throw new Error(`Tamanho ou offset inválido: ${current}`);
+    const nestedArchive = name.toLowerCase().endsWith('.rpf');
+    // A stored nested RPF is a view of its parent buffer.
+    const storedNestedArchive = limits !== WORKER_LIMITS && nestedArchive && !resource && !size;
+    const entryLimit = storedNestedArchive ? limits.archiveBytes : limits.fileBytes;
+    if (stored > entryLimit || unpacked > entryLimit || offset < headerEnd || offset + stored > buffer.length) throw new Error(`Tamanho ou offset inválido: ${current}`);
     let data = buffer.subarray(offset, offset + stored);
     if (resource) {
       if (size < 16) throw new Error(`Resource sem cabeçalho: ${current}`);
@@ -80,9 +84,9 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
       data = inflateRawSync(data, { maxOutputLength: Math.max(1, unpacked) });
       if (data.length !== unpacked) throw new Error(`Tamanho descompactado divergente: ${current}`);
     }
-    state.bytes += data.length;
+    if (!storedNestedArchive) state.bytes += data.length;
     if (state.bytes > limits.totalBytes) throw new Error('Limite total de extração excedido.');
-    if (name.toLowerCase().endsWith('.rpf')) yield* readRpf(data, `${current}/`, state, depth + 1);
+    if (nestedArchive) yield* readRpf(data, `${current}/`, state, depth + 1);
     else yield { path: current, data };
   }
   yield* visit(0, prefix, 0);
