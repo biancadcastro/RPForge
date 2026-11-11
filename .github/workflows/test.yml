@@ -1,32 +1,27 @@
 name: Tests
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - "dependabot/**"
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
-  desktop:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: '24'
-          cache: npm
-          cache-dependency-path: desktop-web/package-lock.json
-      - run: npm ci --ignore-scripts
-      - run: npm ci --prefix desktop-web
-      - run: npm run desktop:typecheck
-      - run: npm run desktop:build
-      - run: npm run desktop:test
-      - run: node desktop-web/scripts/check-login-gate.mjs
-      - run: node desktop-web/scripts/check-visual.mjs
   test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
-        node: [22, 24]
+        include:
+          - { os: windows-latest, node: 22 }
+          - { os: windows-latest, node: 24 }
+          - { os: ubuntu-latest, node: 24 }
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,3 +37,72 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: ./scripts/Test-MenuMigration.ps1
+      - name: Tracked files stay unchanged and nothing new is left untracked
+        shell: bash
+        run: |
+          changes="$(git status --porcelain)"
+          if [ -n "$changes" ]; then
+            echo "::error::The checks changed the working tree. Commit the generated files or ignore them."
+            echo "$changes"
+            git diff --stat
+            exit 1
+          fi
+  desktop:
+    name: desktop (windows, electron)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop-web/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm ci --prefix desktop-web
+      - run: npm run desktop:typecheck
+      - run: npm run desktop:build
+      - run: npm run desktop:test
+      - run: node desktop-web/scripts/check-login-gate.mjs
+      - run: node desktop-web/scripts/check-window-chrome.mjs
+      - run: node desktop-web/scripts/check-visual.mjs
+      - name: Tracked files stay unchanged and nothing new is left untracked
+        shell: bash
+        run: |
+          changes="$(git status --porcelain)"
+          if [ -n "$changes" ]; then
+            echo "::error::The checks changed the working tree. Commit the generated files or ignore them."
+            echo "$changes"
+            git diff --stat
+            exit 1
+          fi
+      - name: Keep the interface captures when a check fails
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: desktop-captures
+          path: |
+            output/electron/
+            output/window-chrome/
+            output/visual-website/
+          if-no-files-found: ignore
+          retention-days: 7
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [test, desktop]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every required job succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = "success" ] || exit 1
+          done
