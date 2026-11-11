@@ -10,7 +10,7 @@
 //   C bool, Y i16, I i32, L i64, F f32, D f64, S string, R raw, and arrays b/i/l/f/d as
 //   {u32 count, u32 encoding (0 raw, 1 zlib), u32 byteLength, data}.
 import {inflateSync} from 'node:zlib';
-import {ErrorCode, ensure, fail} from '../errors.js';
+import {ErrorCode, ensure, fail} from './errors.js';
 
 export const FBX_LIMITS = Object.freeze({
   maxFbxBytes: 96 * 1024 * 1024,        // whole file (characters with meshes and textures are large)
@@ -33,7 +33,7 @@ export function resolveFbxLimits(overrides) {
   if (typeof overrides !== 'object') throw new TypeError('limits must be an object');
   const out = {...FBX_LIMITS};
   for (const [key, value] of Object.entries(overrides)) {
-    if (!(key in FBX_LIMITS)) continue; // limits of other stages (YCD writer) travel in the same object
+    if (!(key in FBX_LIMITS)) throw new TypeError(`Unknown limit ${key}`);
     if (!Number.isSafeInteger(value) || value < 1 || value > FBX_LIMITS[key]) throw new RangeError(`Invalid limit ${key}`);
     out[key] = value;
   }

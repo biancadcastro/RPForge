@@ -11,7 +11,7 @@
 // Outside the key range the curve holds its first/last value (no pre/post extrapolation).
 // Evidence level: constant/linear are exercised against Blender-exported files; the cubic
 // path follows the public description of the format and is covered by synthetic tests only.
-import {ErrorCode, ensure} from '../errors.js';
+import {ErrorCode, ensure} from './errors.js';
 
 export const KTIME_PER_SECOND = 46186158000;
 const CONSTANT = 0x2, LINEAR = 0x4, CUBIC = 0x8, TCB = 0x200, CONSTANT_NEXT = 0x100, WEIGHTED_RIGHT = 0x01000000, WEIGHTED_NEXT_LEFT = 0x02000000;

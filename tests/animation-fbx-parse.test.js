@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {deflateSync} from 'node:zlib';
-import {parseFbx, readArray, child, FBX_LIMITS, resolveFbxLimits} from '../src/animation-engine/fbx/parse.js';
-import {buildScene, prepareTake, worldTransforms, localTransform} from '../src/animation-engine/fbx/scene.js';
-import {prepareCurve, evaluateCurve, KTIME_PER_SECOND} from '../src/animation-engine/fbx/curve.js';
-import {eulerToMatrix, mul3, axisRotation, rotationOf, quatFromMatrix, matrixFromQuat, shortestArc} from '../src/animation-engine/fbx/math.js';
+import {parseFbx, readArray, child, FBX_LIMITS, resolveFbxLimits} from '../src/animation-engine/fbx-parse.js';
+import {buildScene, prepareTake, worldTransforms, localTransform} from '../src/animation-engine/fbx-scene.js';
+import {prepareCurve, evaluateCurve, KTIME_PER_SECOND} from '../src/animation-engine/fbx-curve.js';
+import {eulerToMatrix, mul3, axisRotation, rotationOf, quatFromMatrix, matrixFromQuat, shortestArc} from '../src/animation-engine/fbx-math.js';
 import {EngineError, ErrorCode} from '../src/animation-engine/errors.js';
 import {buildFbx, sceneNodes, encodeBinary, encodeAscii, node, I, L, D, S, A, P} from './animation-engine/fbx-builder.js';
 

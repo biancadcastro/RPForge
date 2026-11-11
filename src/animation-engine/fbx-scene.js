@@ -1,10 +1,10 @@
 // FBX node tree -> scene model for the animation import: global settings, node hierarchy
 // (bones, nulls and their ancestors), rest pose (bind pose matrices), takes and curves.
 // Only what skeletal animation needs is read; meshes, materials and deformers are ignored.
-import {ErrorCode, ensure} from '../errors.js';
-import {child, children, isArray, readArray} from './parse.js';
-import {prepareCurve, evaluateCurve, KTIME_PER_SECOND} from './curve.js';
-import {IDENTITY3, mul3, transpose3, mulVec3, add, sub, eulerToMatrix, affineMul} from './math.js';
+import {ErrorCode, ensure} from './errors.js';
+import {child, children, isArray, readArray} from './fbx-parse.js';
+import {prepareCurve, evaluateCurve, KTIME_PER_SECOND} from './fbx-curve.js';
+import {IDENTITY3, mul3, transpose3, mulVec3, add, sub, eulerToMatrix, affineMul} from './fbx-math.js';
 
 // GlobalSettings.TimeMode -> frames per second (public enum of the format).
 const TIME_MODES = {1: 120, 2: 100, 3: 60, 4: 50, 5: 48, 6: 30, 7: 30, 8: 29.97, 9: 29.97, 10: 25, 11: 24, 12: 1000, 13: 23.976, 15: 96, 16: 72, 17: 59.94, 18: 119.88};
