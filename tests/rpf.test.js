@@ -46,8 +46,8 @@ test('preserves real resource page flags and Legacy drawable version when rebuil
 test('rejects encrypted, truncated, cyclical and unsafe archives', () => {
   const encrypted = vehicleArchive();
   encrypted.writeUInt32LE(0x0ffffff9, 12);
-  assert.throws(() => [...readRpf(encrypted)], /criptografado/);
-  assert.throws(() => [...readRpf(vehicleArchive().subarray(0, 50))], /truncada/);
+  assert.throws(() => [...readRpf(encrypted)], /O RPForge aceita somente RPFs abertos \(não criptografados\)/);
+  assert.throws(() => [...readRpf(vehicleArchive().subarray(0, 50))], error => error.code === 'RPF_CORRUPT' && /truncada/.test(error.message));
   const cyclic = vehicleArchive();
   cyclic.writeUInt32LE(0, 24);
   assert.throws(() => [...readRpf(cyclic)], /cíclica/);

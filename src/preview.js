@@ -2,6 +2,7 @@ import { readdir, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { prepareArchive, convertArchive } from './convert.js';
 import { outputName } from './output.js';
+import { formatUserError } from './user-error.js';
 
 export async function listArchives(folder) {
   const root = path.resolve(folder);
@@ -27,7 +28,7 @@ export async function inspectFolder(folder, options = {}) {
       const name = outputName(selected.outputName || plan.defaultName);
       const output = path.join(root, name);
       results.push({ archive, selected: selected.selected !== false, ok: true, kind: plan.kind, models: plan.originalModels, finalModels: plan.models, defaultName: plan.defaultName, outputName: name, output, exists: await exists(output), sourceHash: plan.sourceHash, sourceBytes: plan.sourceBytes, mergedSources: plan.mergedSources, removedTuning: plan.removedTuning, skipped: plan.skipped, audit: plan.audit, files: [...plan.files.values()].map(f => ({ path: f.destination, diskBytes: f.data.length })) });
-    } catch (error) { results.push({ archive, ok: false, error: error.message }); }
+    } catch (error) { results.push({ archive, ok: false, error: formatUserError(error) }); }
   }
   return results;
 }
@@ -43,7 +44,7 @@ export async function convertSelected(folder, options = {}) {
     try {
       if (!selected.expectedSource) throw new Error('Analise o RPF antes de converter.');
       results.push({ archive, ok: true, ...await convertArchive(path.join(root, archive), { ...selected, onProgress: options.onProgress }) });
-    } catch (error) { results.push({ archive, ok: false, cancelled: error.code === 'CANCELLED', error: error.message }); }
+    } catch (error) { results.push({ archive, ok: false, cancelled: error.code === 'CANCELLED', error: formatUserError(error) }); }
   }
   if (!results.length) throw new Error('Selecione pelo menos um RPF para converter.');
   return results;

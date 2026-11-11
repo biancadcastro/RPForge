@@ -111,7 +111,7 @@ export function prepareContent(entries, archive, options, sourceHash, sourceByte
     types.add('clothing');
     for (const collection of collections) {
       const canonical = collection.replace(/_freemode_01_p(?=_|$)/i, '_freemode_01');
-      if (!['mp_m_freemode_01', 'mp_f_freemode_01'].includes(canonical) && !ymts.has(canonical)) throw new Error(`Coleção addon sem YMT correspondente: ${canonical}.`);
+      if (!['mp_m_freemode_01', 'mp_f_freemode_01'].includes(canonical) && !ymts.has(canonical)) throw new Error(`Coleção de roupas do recurso sem YMT correspondente: ${canonical}.`);
     }
   }
   const drawables = [...files.values()].filter(f => /\.ydr$/i.test(f.destination));

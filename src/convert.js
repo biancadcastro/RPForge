@@ -8,6 +8,7 @@ import { readRpf, LIMITS, safeName } from './rpf.js';
 import { renameSpawns } from './spawns.js';
 import { organizeTuning, cleanMissingTuning } from './tuning.js';
 import { prepareContent } from './content.js';
+import { formatUserError } from './user-error.js';
 
 const STREAM = new Set(['.yft', '.ytd', '.ydr', '.ydd', '.ybn', '.ycd']);
 const ADMIN = new Set(['content.xml', 'setup2.xml']);
@@ -72,7 +73,7 @@ export async function prepareArchive(archive, options = {}) {
     if (declaredModels.has(model)) throw new Error(`Modelo declarado mais de uma vez: ${model}`);
     declaredModels.add(model);
   }
-  if (!models.size || !metas.some(m => m.type === 'VEHICLE_METADATA_FILE')) throw new Error('Não foi encontrado um addon de veículo com YFT base e vehicles.meta.');
+  if (!models.size || !metas.some(m => m.type === 'VEHICLE_METADATA_FILE')) throw new Error('Não foi encontrado um recurso de veículo com YFT base e vehicles.meta.');
   if (!declaredModels.size) throw new Error('vehicles.meta não declara nenhum modelName.');
   for (const model of declaredModels) {
     if (!models.has(model)) throw new Error(`YFT base ausente para o modelo declarado: ${model}`);
@@ -109,7 +110,7 @@ export async function convertFolder(folder, options = {}) {
   const results = [];
   for (const archive of archives) {
     try { results.push({ archive: archive.name, ok: true, ...await convertArchive(path.join(root, archive.name), options) }); }
-    catch (error) { results.push({ archive: archive.name, ok: false, cancelled: error.code === 'CANCELLED', error: error.message }); }
+    catch (error) { results.push({ archive: archive.name, ok: false, cancelled: error.code === 'CANCELLED', error: formatUserError(error) }); }
   }
   return results;
 }

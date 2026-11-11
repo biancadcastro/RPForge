@@ -6,6 +6,7 @@ import {
   net,
   safeStorage,
   protocol,
+  screen,
   shell,
   utilityProcess,
 } from "electron";
@@ -27,6 +28,7 @@ import { encryptedSessionStorage } from "./session-storage.mjs";
 import {createAuthDiagnostics} from './auth-diagnostics.mjs';
 import {desktopAccountStorage} from './account-storage.mjs';
 import {desktopProfile} from './desktop-profile.mjs';
+import {formatUserError,internalError,userError} from '../../src/user-error.js';
 const auth = createAuthClient((...args) => net.fetch(...args));
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -51,7 +53,44 @@ function launchFromArgv(argv) {
     const entry = args.findIndex((arg) => !arg.startsWith("--"));
     if (entry >= 0) args.splice(entry, 1);
   }
-  return parseLaunch(args);
+  try { return parseLaunch(args); }
+  catch (error) {
+    // An invalid Explorer/shortcut request still opens the app; the renderer shows the notice.
+    console.error('[RPForge launch]', error);
+    return { mode: 'full', action: 'preview', folder: '', notice: userError(error).message };
+  }
+}
+// Quick tools never maximize; sizes follow the work area of the monitor in use.
+function fitSize(width, height, minWidth, minHeight, display) {
+  const area = display.workAreaSize;
+  return {
+    width: Math.max(minWidth, Math.min(width, Math.floor(area.width * 0.92))),
+    height: Math.max(minHeight, Math.min(height, Math.floor(area.height * 0.92))),
+  };
+}
+function windowSize(launch, display) {
+  const quick = launch.mode === 'quick', clothing = quick && ['obj','neon','skin'].includes(launch.action);
+  const min = clothing ? [740, 560] : quick ? [620, 400] : [1000, 680];
+  const preferred = clothing ? launch.action === 'skin' ? [1280, 820] : [820, 720] : quick ? [720, 490] : [1280, 860];
+  return { ...fitSize(...preferred, ...min, display), minWidth: min[0], minHeight: min[1] };
+}
+function resizeQuick(win, launch, preferred) {
+  if (win.isDestroyed() || win.isMaximized()) return;
+  const display = screen.getDisplayMatching(win.getBounds());
+  const { minWidth, minHeight, ...size } = windowSize(launch, display);
+  const target = preferred ? fitSize(preferred[0], preferred[1], Math.min(minWidth, preferred[0]), Math.min(minHeight, preferred[1]), display) : size;
+  win.setSize(target.width, target.height);
+}
+function reportError(scope, error) {
+  console.error('[RPForge ' + scope + ']', error);
+  logAuth({ event: 'error', action: scope, code: typeof error?.code === 'string' ? error.code : undefined, error: error?.name });
+}
+// Every IPC failure is logged in full and reaches the renderer only as translated text.
+function handle(channel, listener) {
+  ipcMain.handle(channel, async (event, ...args) => {
+    try { return await listener(event, ...args); }
+    catch (error) { reportError(channel, error); throw new Error(formatUserError(error)); }
+  });
 }
 if (testMode && process.env.RPF_TEST_USER_DATA)
   app.setPath("userData", process.env.RPF_TEST_USER_DATA);
@@ -94,7 +133,7 @@ async function refreshAccount() {
 
 }
 async function startOAuth(context,provider){
-  if(!['discord','google','github'].includes(provider))throw new Error('Provedor inválido.');
+  if(!['discord','google','github'].includes(provider))throw internalError('Provedor inválido.');
   const options=await auth.options();
   if(!options.providers?.some(item=>item.provider===provider&&item.enabled))throw new Error('Este provedor não está disponível no momento.');
   await desktopAccount().begin(provider);
@@ -117,7 +156,7 @@ const owner = (event) => {
     event.senderFrame !== event.sender.mainFrame ||
     !event.senderFrame.url.startsWith("rpforge://app/")
   )
-    throw new Error("Origem não autorizada.");
+    throw internalError("Origem não autorizada.");
   return context;
 };
 
@@ -168,6 +207,10 @@ async function run(context, action, folder, archives) {
   });
 }
 
+function launchFailed(win, error) {
+  reportError('launch', error);
+  if (!win.isDestroyed()) win.webContents.send('forge:progress', {phase:'error',label:userError(error).message});
+}
 function createWindow(launch) {
   if(launch.mode==='full'||['obj','neon','skin'].includes(launch.action))scheduleMenuAccess();
   const key = launch.mode === "quick" ? "quick" : "full";
@@ -179,22 +222,25 @@ function createWindow(launch) {
       context.launch = launch;
       context.allowed.add(path.resolve(launch.folder));
       if (['obj','neon','skin'].includes(launch.action)) {
-        if(!existing.isMaximized())existing.setSize(launch.action==='skin'?1440:820,launch.action==='skin'?900:720);
-        void prepareAuthorizedLaunch(context,true).then(value => existing.webContents.send('forge:launch', value)).catch(error => existing.webContents.send('forge:progress', {phase:'error',label:error.message}));
-      } else {context.clothingLaunchState?.reset(launch);context.clothingInitializing=false;void prepareAuthorizedLaunch(context,true).then(value=>existing.webContents.send('forge:launch',value));}
+        resizeQuick(existing, launch);
+        void prepareAuthorizedLaunch(context,true).then(value => existing.webContents.send('forge:launch', value)).catch(error => launchFailed(existing, error));
+      } else {context.clothingLaunchState?.reset(launch);context.clothingInitializing=false;void prepareAuthorizedLaunch(context,true).then(value=>existing.webContents.send('forge:launch',value)).catch(error => launchFailed(existing, error));}
     }
+    if (launch.notice) existing.webContents.send('forge:progress', {phase:'error',label:launch.notice});
     if (existing.isMinimized()) existing.restore();
     existing.show();
     existing.focus();
     return existing;
   }
   const quick = key === "quick";
-  const quickObj = quick && ['obj','neon','skin'].includes(launch.action);
+  const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  const size = windowSize(launch, display), area = display.workArea;
   const win = new BrowserWindow({
-    width: quickObj ? launch.action==='skin'?1440:820 : quick ? 720 : 1280,
-    height: quickObj ? launch.action==='skin'?900:720 : quick ? 490 : 860,
-    minWidth: quickObj ? 740 : quick ? 620 : 1000,
-    minHeight: quickObj ? 560 : quick ? 400 : 680,
+    ...size,
+    x: area.x + Math.max(0, Math.round((area.width - size.width) / 2)),
+    y: area.y + Math.max(0, Math.round((area.height - size.height) / 2)),
+    maximizable: !quick,
+    fullscreenable: !quick,
     show: false,
     backgroundColor: "#121218",
     title: quick ? "RPForge — ação rápida" : "RPForge",
@@ -222,7 +268,7 @@ function createWindow(launch) {
   contexts.set(contentsId, context);
   windows.set(key, win);
   win.removeMenu();
-  const publishWindowState=()=>{if(!win.isDestroyed())win.webContents.send('forge:window-state',{maximized:win.isMaximized()});};
+  const publishWindowState=()=>{if(!win.isDestroyed())win.webContents.send('forge:window-state',{maximized:win.isMaximized(),maximizable:win.isMaximizable()});};
   win.on('maximize',publishWindowState);win.on('unmaximize',publishWindowState);
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event) => event.preventDefault());
@@ -279,27 +325,29 @@ async function prepareAuthorizedLaunch(context,fresh=false){
   logAuth({event:'launch_ready',loggedIn:!context.loginRequired,action:context.launch.action,mode:context.launch.mode,packaged:!!process.windowsStore});
   if(context.loginRequired){
     if(!testMode)await writeMenuAccess(null).catch(()=>{});
-    if(!context.window.isMaximized())context.window.setSize(1000,760);
+    resizeQuick(context.window,context.launch,[1000,760]);
     return {...context.launch,loginRequired:true};
   }
-  if(wasLoginRequired&&context.launch.mode==='quick'&&!context.window.isMaximized()){
-    const clothing=['obj','neon','skin'].includes(context.launch.action);context.window.setSize(clothing?context.launch.action==='skin'?1440:820:720,clothing?context.launch.action==='skin'?900:720:490);
-  }
+  if(wasLoginRequired&&context.launch.mode==='quick')resizeQuick(context.window,context.launch);
   if(!['obj','neon','skin'].includes(context.launch.action))return context.launch;
   const prepared=await (!fresh&&context.clothingLaunchState?context.clothingLaunchState.ready():initializeClothingLaunch(context));
   const selection=context[prepared.action==='obj'?'clothing':prepared.action];
   return selection&&prepared.clothing?{...prepared,clothing:{...prepared.clothing,...selection}}:prepared;
 }
-ipcMain.handle('forge:window-control',(event,action)=>{
+handle('forge:window-control',(event,action)=>{
  const {window}=owner(event);
- if(!['state','minimize','maximize','close'].includes(action))throw Error('Controle de janela inválido.');
+ if(!['state','minimize','maximize','close'].includes(action))throw internalError('Controle de janela inválido.');
  if(action==='minimize')window.minimize();
- if(action==='maximize'){if(window.isMaximized())window.unmaximize();else window.maximize();}
- const state={maximized:window.isMaximized()};if(action==='close')window.close();return state;
+ // Quick tool windows are compact by design: maximize requests are ignored.
+ if(action==='maximize'&&window.isMaximizable()){if(window.isMaximized())window.unmaximize();else window.maximize();}
+ const state={maximized:window.isMaximized(),maximizable:window.isMaximizable()};if(action==='close')window.close();return state;
 });
-ipcMain.handle("forge:bootstrap", async (event) => {
+handle("forge:bootstrap", async (event) => {
  const context=owner(event);
- return prepareAuthorizedLaunch(context);
+ const value=await prepareAuthorizedLaunch(context);
+ // A launch notice is shown once; later launches of this window must not repeat it.
+ if(context.launch.notice){const {notice,...launch}=context.launch;context.launch=launch;}
+ return value;
 });
 const clothingContext = (event,tool) => {
   const context = owner(event);
@@ -309,19 +357,19 @@ const clothingContext = (event,tool) => {
   if ((context.launch.mode !== 'full' && !['obj','neon','skin'].includes(context.launch.action)) || context.workflow.busy) throw Error('Aguarde a operação terminar.');
   return context;
 };
-ipcMain.handle('forge:clothing-texture', (event, texture, tool='obj') => {
+handle('forge:clothing-texture', (event, texture, tool='obj') => {
   const context = clothingContext(event);
-  if(!['obj','neon','skin'].includes(tool))throw Error('Ferramenta inválida.');
+  if(!['obj','neon','skin'].includes(tool))throw internalError('Ferramenta inválida.');
   const key=tool==='obj'?'clothing':tool;
   if (typeof texture !== 'string' || !context[key+'Candidates']?.has(texture)) throw Error('Selecione uma textura sugerida ou use o seletor de arquivos.');
   context[key].texture = texture;
   return texture;
 });
-ipcMain.handle('forge:clothing-select', async (event, kind, tool='obj') => {
+handle('forge:clothing-select', async (event, kind, tool='obj') => {
   const context = clothingContext(event,tool);
-  if(!['obj','neon','skin'].includes(tool))throw Error('Ferramenta inválida.');
+  if(!['obj','neon','skin'].includes(tool))throw internalError('Ferramenta inválida.');
   const key=tool==='obj'?'clothing':tool;
-  if (!['model', 'texture', 'destination'].includes(kind)) throw Error('Seleção inválida.');
+  if (!['model', 'texture', 'destination'].includes(kind)) throw internalError('Seleção inválida.');
   const directory = kind === 'destination';
   const launchAtSelection=context.launch;
   const selection = await dialog.showOpenDialog(context.window, {
@@ -339,14 +387,14 @@ ipcMain.handle('forge:clothing-select', async (event, kind, tool='obj') => {
   context[key][kind] = path.resolve(selection.filePaths[0]);
   return context[key][kind];
 });
-ipcMain.handle('forge:clothing-neon',async(event,shown)=>{
+handle('forge:clothing-neon',async(event,shown)=>{
  const context=clothingContext(event,'neon');
  verifyClothingSelection(context.neon,shown);
  context.workflow.busy=true;context.clothingBusy=true;
  try {const result=await run(context,'neon','',{...context.neon});context.outputs.add(path.resolve(result.output));return result;}
  finally{context.workflow.busy=false;context.clothingBusy=false;}
 });
-ipcMain.handle('forge:skin-inspect',async(event,shown)=>{
+handle('forge:skin-inspect',async(event,shown)=>{
  const context=clothingContext(event,'skin');verifyClothingSelection(context.skin,shown);
  context.workflow.busy=true;context.clothingBusy=true;context.skinReview=null;
  try{
@@ -355,7 +403,7 @@ ipcMain.handle('forge:skin-inspect',async(event,shown)=>{
   return {...data,reviewId:id};
  }finally{context.workflow.busy=false;context.clothingBusy=false;}
 });
-ipcMain.handle('forge:skin-split',async(event,shown,reviewId,overrides)=>{
+handle('forge:skin-split',async(event,shown,reviewId,overrides)=>{
  const context=clothingContext(event,'skin');verifyClothingSelection(context.skin,shown);
  const review=context.skinReview;
  if(!review||review.id!==reviewId||review.model!==context.skin.model||review.texture!==(context.skin.texture||''))throw Error('Refaça a análise antes de separar.');
@@ -365,9 +413,9 @@ ipcMain.handle('forge:skin-split',async(event,shown,reviewId,overrides)=>{
   context.outputs.add(path.resolve(result.output));context.skinReview=null;return result;
  }finally{context.workflow.busy=false;context.clothingBusy=false;}
 });
-ipcMain.handle('forge:clothing-export', async (event, lod, shown) => {
+handle('forge:clothing-export', async (event, lod, shown) => {
   const context = clothingContext(event,'obj');
-  if (!['high', 'medium', 'low', 'verylow'].includes(lod)) throw Error('LOD inválido.');
+  if (!['high', 'medium', 'low', 'verylow'].includes(lod)) throw internalError('LOD inválido.');
   verifyClothingSelection(context.clothing,shown);
   context.workflow.busy = true;
   context.clothingBusy = true;
@@ -378,7 +426,7 @@ ipcMain.handle('forge:clothing-export', async (event, lod, shown) => {
     return result;
   } finally { context.workflow.busy = false; context.clothingBusy = false; }
 });
-ipcMain.handle('forge:clothing-cancel', event => {
+handle('forge:clothing-cancel', event => {
   const context = owner(event);
   const child = context.clothingWorker;
   if (context.clothingBusy && child) {
@@ -386,14 +434,14 @@ ipcMain.handle('forge:clothing-cancel', event => {
     if (child.forgeRequestSent) child.postMessage({ cancel: true });
   }
 });
-ipcMain.handle('forge:clothing-preview', async event => {
+handle('forge:clothing-preview', async event => {
   const context = owner(event), result = context.clothingResult;
   if (!result || !context.outputs.has(path.resolve(result.output))) throw Error('Exporte uma peça antes de abrir a prévia.');
   const objFile = result.objFile;
   if ((await stat(objFile)).size > 16 * 1024 * 1024) throw Error('OBJ exportado. Esta peça excede o limite da prévia 3D.');
   return { obj: await readFile(objFile, 'utf8'), textures:{}, groups: result.groups };
 });
-ipcMain.handle("forge:select-folder", async (event) => {
+handle("forge:select-folder", async (event) => {
   const context = owner(event);
   if (context.workflow.busy) throw new Error("Aguarde a operação terminar.");
   const selected = await dialog.showOpenDialog(context.window, {
@@ -406,14 +454,14 @@ ipcMain.handle("forge:select-folder", async (event) => {
   context.launch = { ...context.launch, folder };
   return folder;
 });
-ipcMain.handle("forge:operation", async (event, request) => {
+handle("forge:operation", async (event, request) => {
   const context = owner(event);
   if (
     !request ||
     !["preview", "convert", "ytyp"].includes(request.action) ||
     typeof request.folder !== "string"
   )
-    throw new Error("Operação inválida.");
+    throw internalError("Operação inválida.");
   const folder = path.resolve(request.folder);
   if (!context.allowed.has(folder))
     throw new Error("Selecione a pasta no aplicativo antes de continuar.");
@@ -428,7 +476,7 @@ ipcMain.handle("forge:operation", async (event, request) => {
       Array.isArray(request.archives) ||
       typeof request.archives !== "object")
   )
-    throw new Error("Configuração inválida.");
+    throw internalError("Configuração inválida.");
   const response = await context.workflow.execute(
     request.action,
     folder,
@@ -441,15 +489,15 @@ ipcMain.handle("forge:operation", async (event, request) => {
         context.outputs.add(path.resolve(result.output));
   return response;
 });
-ipcMain.handle("forge:open-folder", async (event, folder) => {
+handle("forge:open-folder", async (event, folder) => {
   const context = owner(event);
   const resolved = path.resolve(String(folder));
   if (!context.outputs.has(resolved))
     throw new Error("Nenhum resultado disponível nesta pasta.");
   const error = await shell.openPath(resolved);
-  if (error) throw new Error(error);
+  if (error) { const failure = new Error('Não foi possível abrir a pasta.'); failure.detail = error; throw failure; }
 });
-ipcMain.handle("forge:open-full", (event) => {
+handle("forge:open-full", (event) => {
   const context = owner(event);
   if (context.workflow.busy) throw new Error("Aguarde a operação terminar.");
   if(context.launch.mode==='full'){
@@ -460,45 +508,45 @@ ipcMain.handle("forge:open-full", (event) => {
   createWindow({ ...context.launch, mode: "full" });
   context.window.close();
 });
-ipcMain.handle("forge:profile", (event) => {owner(event);return accountProfile();});
+handle("forge:profile", (event) => {owner(event);return accountProfile();});
 const fullAccount = (event) => {
   const context = owner(event);
   if ((context.launch.mode === "quick"&&!context.loginRequired) || context.workflow.busy)
     throw new Error("A conta fica disponível no aplicativo completo.");
   return context;
 };
-ipcMain.handle("forge:auth-options", async (event) => {
+handle("forge:auth-options", async (event) => {
   fullAccount(event);
   return auth.options();
 });
-ipcMain.handle("forge:sign-in", async (event, input) => {
+handle("forge:sign-in", async (event, input) => {
   fullAccount(event);
   const result = await desktopAccount().signIn(input?.email,input?.password);
   if (!result.mfaRequired) await refreshAccount();
   return result;
 });
-ipcMain.handle("forge:mfa", async (event, input) => {
+handle("forge:mfa", async (event, input) => {
   fullAccount(event);
   await desktopAccount().verifyMfa(input?.challengeToken,input?.code);
   await refreshAccount();
 });
-ipcMain.handle("forge:oauth", async (event, provider) => {
+handle("forge:oauth", async (event, provider) => {
   const context = fullAccount(event);
   await startOAuth(context, provider);
 });
-ipcMain.handle('forge:browser-auth-state',event=>{fullAccount(event);return desktopAccount().resume();});
-ipcMain.handle('forge:sign-out',async event=>{
+handle('forge:browser-auth-state',event=>{fullAccount(event);return desktopAccount().resume();});
+handle('forge:sign-out',async event=>{
   fullAccount(event);await desktopAccount().disconnect();await refreshAccount();
 });
-ipcMain.handle('forge:open-account',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/dashboard/');});
-ipcMain.handle('forge:app-info',event=>{fullAccount(event);return {version:app.getVersion(),development:!app.isPackaged,electron:process.versions.electron,platform:process.platform+'-'+process.arch};});
-ipcMain.handle('forge:open-downloads',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/docs/instalar/');});
-ipcMain.handle('forge:license-info',async event=>{
+handle('forge:open-account',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/dashboard/');});
+handle('forge:app-info',event=>{fullAccount(event);return {version:app.getVersion(),development:!app.isPackaged,electron:process.versions.electron,platform:process.platform+'-'+process.arch};});
+handle('forge:open-downloads',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/docs/instalar/');});
+handle('forge:license-info',async event=>{
   fullAccount(event);const account=desktopAccount(),license=await account.license();
   return {plan:license?.plan||null,validUntil:license?.exp?license.exp*1000:null,issue:license?null:account.lastLicenseIssue,installationId:account.record?.installationId||null};
 });
-ipcMain.handle('forge:cancel-browser-auth',event=>{fullAccount(event);return nativeAccount?.cancel();});
-ipcMain.handle("forge:close", (event) => {
+handle('forge:cancel-browser-auth',event=>{fullAccount(event);return nativeAccount?.cancel();});
+handle("forge:close", (event) => {
   const context = owner(event);
   if (!context.workflow.busy) context.window.close();
 });

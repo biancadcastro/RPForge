@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createAuthClient } from '../desktop-web/electron/auth.mjs';
+import { formatUserError } from '../src/user-error.js';
 
 test('integrated sign-in returns only MFA state, not server session fields', async () => {
   const requests = [];
@@ -30,5 +31,10 @@ test('integrated sign-in shows actionable errors without raw server internals', 
   const denied = createAuthClient(async () => new Response(JSON.stringify({ code: 'INVALID_CREDENTIALS', stack: 'private-internals' }), { status: 401 }));
   await assert.rejects(denied.login({ email: 'test@example.invalid', password: 'synthetic' }), /Confira o e-mail e a senha/);
   const offline = createAuthClient(async () => { throw new Error('private-network-details'); });
-  await assert.rejects(offline.options(), /Confira sua conexão/);
+  await assert.rejects(offline.options(), error => {
+    assert.equal(error.code, 'NETWORK');
+    assert.equal(formatUserError(error), 'Sem conexão com o RPForge. Verifique a internet e tente de novo.');
+    assert.doesNotMatch(formatUserError(error), /private-network-details/);
+    return true;
+  });
 });

@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { inspectFolder, convertSelected } from './preview.js';
 import { generateFolderYtyp } from './ytyp.js';
+import { formatUserError } from './user-error.js';
 
 export async function runBridge(requestPath) {
   const emit = event => process.stdout.write(JSON.stringify(event) + '\n');
@@ -12,5 +13,5 @@ export async function runBridge(requestPath) {
     const options = { archives: request.archives, onProgress: progress => emit({ type: 'progress', ...progress }) };
     const data = request.action === 'ytyp' ? await generateFolderYtyp(request.folder, options) : request.action === 'preview' ? await inspectFolder(request.folder, options) : await convertSelected(request.folder, options);
     emit({ type: 'result', data });
-  } catch (error) { emit({ type: 'error', message: error.message }); process.exitCode = 1; }
+  } catch (error) { emit({ type: 'error', message: formatUserError(error) }); process.exitCode = 1; }
 }

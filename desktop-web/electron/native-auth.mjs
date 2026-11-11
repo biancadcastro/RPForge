@@ -3,6 +3,7 @@ import {hostname} from 'node:os';
 import { promisify } from 'node:util';
 import { publicProfile } from './profile.mjs';
 import { verifyLicense } from './license.mjs';
+import { internalError, networkError } from '../../src/user-error.js';
 const keyPair = promisify(generateKeyPair);
 const API = 'https://api.rpforge.dev';
 const providers = new Set(['discord','google','github']);
@@ -26,7 +27,13 @@ export class NativeAuth {
   update(value){this.state=value;this.onState?.(value);}
   async request(endpoint,body,signal){
     const timeout=AbortSignal.timeout(10000);
-    const response=await this.fetcher(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:signal?AbortSignal.any([signal,timeout]):timeout});
+    let response;
+    try{response=await this.fetcher(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:signal?AbortSignal.any([signal,timeout]):timeout});}
+    catch(error){
+      // A caller-cancelled request keeps its abort; everything else is a connection failure.
+      if(signal?.aborted)throw error;
+      this.onDiagnostic?.({event:'request_unreachable',error:error?.name});throw networkError(error);
+    }
     const data=response.status===204?{}:await response.json().catch(()=>({}));
     if(!response.ok){const error=new Error(messages[data.code]||'Não foi possível conectar a conta. Tente novamente.');error.status=response.status;error.code=data.code;this.onDiagnostic?.({event:'request_failed',status:response.status,code:data.code});throw error;}
     return {data,pending:response.status===202};
@@ -75,7 +82,7 @@ export class NativeAuth {
     }catch(error){
       if(this.pendingSave){this.onDiagnostic?.({event:'session_save_failed'});throw new Error('Não foi possível salvar a renovação da conta neste computador. Tente novamente.');}
       if(error.status===401&&['DESKTOP_AUTHENTICATION_REQUIRED','DESKTOP_TOKEN_REUSED'].includes(error.code)){
-        this.lastLicenseIssue='revoked';await this.forgetSession(record);return null;
+        this.lastLicenseIssue='revoked';this.revoked=true;await this.forgetSession(record);return null;
       }
       if(['DEVICE_CLOCK_SKEW','INVALID_DEVICE_PROOF'].includes(error.code)){
         const {pendingRenewal,...preserved}=record;this.record=preserved;await this.storage.write(preserved);
@@ -90,7 +97,8 @@ export class NativeAuth {
   async license(){
     this.lastLicenseIssue=null;
     const record=await this.load();
-    if(!record?.refreshToken){this.lastLicenseIssue='missing';return null;}
+    // A session revoked by the server stays reported as revoked until the account connects again.
+    if(!record?.refreshToken){this.lastLicenseIssue=this.revoked?'revoked':'missing';return null;}
     if(!record.license)record.checkedAt=0;
     await this.profile();const current=this.record;
     if(!current?.license){this.lastLicenseIssue ||= 'missing';return null;}
@@ -158,11 +166,11 @@ export class NativeAuth {
     const {pendingAuthorization,pendingRenewal,...identity}=this.record;
     const record={...identity,refreshToken:data.refreshToken,profile,checkedAt:0};
     const save=()=>this.storage.write(record);await (this.storage.withLock?this.storage.withLock(save):save());
-    this.record=record;this.loaded=true;this.pendingSave=false;this.pending=null;
+    this.record=record;this.loaded=true;this.pendingSave=false;this.pending=null;this.revoked=false;
     this.update({status:'connected',provider:pending.provider});this.onProfile?.(profile);
   }
   async begin(provider){
-    if(!providers.has(provider))throw new Error('Provedor inválido.');
+    if(!providers.has(provider))throw internalError('Provedor inválido.');
     if(this.starting)return this.starting;
     if(this.pending)return this.state;
     const generation=this.generation=(this.generation||0)+1;

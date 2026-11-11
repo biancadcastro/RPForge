@@ -86,7 +86,8 @@ test('revocation invalidates even a signed cached Pro license, while outages do 
  let cleared=0;const record={refreshToken:'refresh',installationId:'device',privateKey:privateKey.export({format:'pem',type:'pkcs8'}),checkedAt:now-61000,profile:{displayName:'Test'},license:token(),licenseKeys:keys};
  const revoked=new NativeAuth({now:()=>now,storage:{read:async()=>record,write:async value=>{if(!value.refreshToken)cleared++;}},fetcher:async()=>new Response(JSON.stringify({code:'DESKTOP_AUTHENTICATION_REQUIRED'}),{status:401})});
  assert.equal(await revoked.license(),null);assert.equal(cleared,1);assert.equal(revoked.record.installationId,'device');assert.equal(revoked.lastLicenseIssue,'revoked');
- await assert.rejects(requireToolAccess('skin-inspect',revoked),/sessão|autorização/);
+ await assert.rejects(requireToolAccess('skin-inspect',revoked),/autorização deste computador não está mais válida/);
+ assert.equal(await revoked.license(),null);assert.equal(revoked.lastLicenseIssue,'revoked');
  const outage=new NativeAuth({now:()=>now,storage:{read:async()=>({...record,checkedAt:now,licenseKeys:undefined})},fetcher:async()=>{throw Error('offline');}});
  await assert.rejects(requireToolAccess('skin-inspect',outage),/validar sua licença/);
 });

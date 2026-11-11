@@ -6,6 +6,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {engineFiles,inputFile} from './clothing.js';
 import {publication,recoverPublications} from './publication.js';
+import {engineError,internalError} from './user-error.js';
 const execute=promisify(execFile),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const required=['ClothingSkin.exe','SharpDX.dll','skin-triangles.json'];
 export function skinIdentity(model,texture=''){
@@ -16,12 +17,12 @@ export function skinIdentity(model,texture=''){
  return {prefix,component,sourceId:id,suffix,variation};
 }
 export function skinOverrides(values={}){
- if(!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length>200000)throw Error('Seleção de faces inválida.');
- for(const [key,value] of Object.entries(values))if(!/^(high|medium|low|verylow):\d{1,5}:\d{1,7}$/.test(key)||!['skin','cloth'].includes(value))throw Error('Seleção de faces inválida.');
+ if(!values||typeof values!=='object'||Array.isArray(values)||Object.keys(values).length>200000)throw internalError('Seleção de faces inválida.');
+ for(const [key,value] of Object.entries(values))if(!/^(high|medium|low|verylow):\d{1,5}:\d{1,7}$/.test(key)||!['skin','cloth'].includes(value))throw internalError('Seleção de faces inválida.');
  return values;
 }
 async function inputs(model,texture){skinIdentity(model,texture);const files=[await inputFile(model,'.ydd',165)];if(texture)files.push(await inputFile(texture,'.ytd',13));return files;}
-async function run(engine,args,signal){try{await execute(path.join(engine,'ClothingSkin.exe'),args,{windowsHide:true,signal,timeout:60000,maxBuffer:1024*1024,encoding:'utf8'});}catch(e){throw Error(e.code==='ABORT_ERR'?'Separação cancelada.':e.stderr?.trim()||'Não foi possível analisar esta peça.');}}
+async function run(engine,args,signal){try{await execute(path.join(engine,'ClothingSkin.exe'),args,{windowsHide:true,signal,timeout:60000,maxBuffer:1024*1024,encoding:'utf8'});}catch(e){throw engineError(e,args[0]==='--split'?'Não foi possível separar esta peça.':'Não foi possível analisar esta peça.','Separação cancelada.');}}
 export async function inspectClothingSkin({model,texture='',signal,onProgress=()=>{}}){
  const sources=await inputs(model,texture),engine=await engineFiles(required),stage=await mkdtemp(path.join(os.tmpdir(),'rpforge-skin-analysis-'));
  try{

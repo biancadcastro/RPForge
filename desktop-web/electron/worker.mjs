@@ -3,6 +3,7 @@ import { generateFolderYtyp } from "../../src/ytyp.js";
 import { exportClothingObj } from "../../src/clothing.js";
 import { convertClothingNeon } from '../../src/clothing-neon.js';
 import {inspectClothingSkin,separateClothingSkin} from '../../src/clothing-skin.js';
+import { formatUserError, internalError } from '../../src/user-error.js';
 
 // Resolve relative to the desktop project, not a caller-controlled working directory.
 // Electron utility processes expose parentPort without enabling Node in the UI.
@@ -34,11 +35,13 @@ process.parentPort.once("message", async ({ data: request }) => {
           : request.action === "ytyp"
             ? await generateFolderYtyp(request.folder, options)
             : (() => {
-                throw new Error("Operação inválida.");
+                throw internalError("Operação inválida.");
               })();
     process.parentPort.postMessage({ type: "result", data });
   } catch (error) {
-    process.parentPort.postMessage({ type: "error", message: error.message });
+    // Full detail stays in the process log; the main process only relays the translated text.
+    console.error('[RPForge worker]', request?.action, error);
+    process.parentPort.postMessage({ type: "error", message: formatUserError(error) });
   }
   // Wait until main has received the terminal message before exiting. Exiting
   // immediately after postMessage can drop the result under scheduling pressure.

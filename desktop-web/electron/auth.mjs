@@ -1,3 +1,4 @@
+import { networkError } from "../../src/user-error.js";
 const API = "https://api.rpforge.dev";
 const messages = {
   INVALID_CREDENTIALS:
@@ -26,10 +27,8 @@ export function createAuthClient(fetcher) {
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
-    } catch {
-      throw new Error(
-        "Não foi possível conectar. Confira sua conexão e tente novamente.",
-      );
+    } catch (error) {
+      throw networkError(error);
     }
     const result =
       response.status === 204 ? {} : await response.json().catch(() => ({}));

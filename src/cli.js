@@ -1,6 +1,7 @@
 import { convertFolder } from './convert.js';
 import { createPrompts } from './prompts.js';
 import { runBridge } from './bridge.js';
+import { formatUserError } from './user-error.js';
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -17,12 +18,12 @@ const developmentGui = fileURLToPath(new URL('../.tools/desktop/RPFForge.exe', i
 const gui = existsSync(installedGui) ? installedGui : developmentGui;
 if (interactive && process.platform === 'win32' && existsSync(gui) && process.env.RPF_FORGE_CONSOLE !== '1') {
   const child = spawn(gui, args, { detached: true, stdio: 'ignore', windowsHide: false, cwd: path.dirname(gui) });
-  child.on('error', error => { console.error(error.message); process.exitCode = 1; });
+  child.on('error', error => { console.error(formatUserError(error)); process.exitCode = 1; });
   child.unref();
 } else {
 const prompts = interactive ? createPrompts() : null;
 if (args.length !== 1 || args[0] === '--help') {
-  console.log('RPForge\nUso: node src/cli.js "pasta contendo .rpf"\nAceita GTA V Legacy RPF7 OPEN/NONE. Preserva os originais.');
+  console.log('RPForge\nUso: node src/cli.js "pasta contendo .rpf"\nAceita RPFs GTA V Legacy (RPF7) abertos (não criptografados). Preserva os originais.');
   process.exitCode = args[0] === '--help' ? 0 : 1;
 } else {
   try {
@@ -39,7 +40,7 @@ if (args.length !== 1 || args[0] === '--help') {
       else console.error(`ERRO: ${result.archive}: ${result.error}`);
     }
     process.exitCode = results.some(r => !r.ok) ? 1 : 0;
-  } catch (error) { console.error(`ERRO: ${error.message}`); process.exitCode = 1; }
+  } catch (error) { console.error(`ERRO: ${formatUserError(error)}`); process.exitCode = 1; }
 }
 if (interactive) {
   await prompts.finish();

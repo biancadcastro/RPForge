@@ -5,6 +5,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { engineFiles, inputFile } from './clothing.js';
 import {publication,recoverPublications} from './publication.js';
+import {engineError} from './user-error.js';
 const execute=promisify(execFile),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 
 export function neonIdentity(model, texture) {
@@ -43,7 +44,7 @@ export async function convertClothingNeon({model,texture='',destination,signal,o
    const short=`${naming.component}_${drawableId}_${naming.suffix}`,stem=naming.prefix+short;
    const ydd=path.join(dest,stem+'.ydd'),ytd=texture?path.join(dest,`${naming.prefix}${naming.component}_diff_${drawableId}_${naming.variation}.ytd`):null;
    onProgress({phase:'convert',label:'Aplicando Neon e validando todos os LODs…'});
-   const native=await execute(path.join(engine,'ClothingNeon.exe'),[model,path.join(stage,'model.ydd'),short,path.join(engine,'neon-shader.xml'),path.join(engine,'skin-triangles.json')],{windowsHide:true,timeout:60000,signal,maxBuffer:2*1024*1024,encoding:'utf8'}).catch(error=>{throw Error(error.code==='ABORT_ERR'?'Conversão cancelada.':error.stderr?.trim()||'Não foi possível converter esta peça.');});
+   const native=await execute(path.join(engine,'ClothingNeon.exe'),[model,path.join(stage,'model.ydd'),short,path.join(engine,'neon-shader.xml'),path.join(engine,'skin-triangles.json')],{windowsHide:true,timeout:60000,signal,maxBuffer:2*1024*1024,encoding:'utf8'}).catch(error=>{throw engineError(error,'Não foi possível converter esta peça.','Conversão cancelada.');});
    const validation=JSON.parse(native.stdout);
    if(!validation.geometryPreserved||!validation.rigPreserved||!validation.embeddedPreserved)throw Error('Validação Neon não foi aprovada.');
    if(texture)await writeFile(path.join(stage,'texture.ytd'),await readFile(texture));

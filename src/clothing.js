@@ -6,6 +6,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {publication,recoverPublications} from './publication.js';
 import { isRsc7 } from './rsc7.js';
+import { engineError, internalError } from './user-error.js';
 
 const execute = promisify(execFile);
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -63,16 +64,16 @@ export async function engineFiles(additional = []) {
   const directory = await stat(installed).then(() => installed, () => path.join(root, '.tools/clothing-engine'));
   let manifest;
   try { manifest = JSON.parse((await readFile(path.join(directory, 'manifest.json'), 'utf8')).replace(/^\uFEFF/, '')); }
-  catch { throw Error('O motor de roupas ainda não foi preparado nesta cópia de desenvolvimento.'); }
+  catch { throw Error('Componentes das ferramentas de roupas ausentes ou alterados. Reinstale o RPForge.'); }
   for (const name of ['ClothingDecoder.exe', 'CodeWalker.Core.dll', 'SharpDX.Mathematics.dll', ...additional]) {
     const record = manifest.files?.find(item => item.name === name);
-    if (!record || digest(await readFile(path.join(directory, name))) !== record.sha256) throw Error('Motor de roupas alterado. Prepare novamente os componentes verificados.');
+    if (!record || digest(await readFile(path.join(directory, name))) !== record.sha256) throw Error('Componentes das ferramentas de roupas ausentes ou alterados. Reinstale o RPForge.');
   }
   return directory;
 }
 
 export async function exportClothingObj({ model, texture = '', destination, lod = 'high', signal, onProgress = () => {} }) {
-  if (!lods.includes(lod)) throw Error('LOD inválido.');
+  if (!lods.includes(lod)) throw internalError('LOD inválido.');
   const started = performance.now();
   const inputs = [await inputFile(model, '.ydd', 165)];
   if (texture) inputs.push(await inputFile(texture, '.ytd', 13));
@@ -85,7 +86,7 @@ export async function exportClothingObj({ model, texture = '', destination, lod 
   let output,journal;
   try {
     onProgress({ phase: 'read', label: 'Lendo malha, UVs e materiais…' });
-    await execute(path.join(engine, 'ClothingDecoder.exe'), [model, texture, stage, lod], { windowsHide: true, timeout: 60000, signal, maxBuffer: 1024 * 1024, encoding: 'utf8' }).catch(error => { throw Error(error.code === 'ABORT_ERR' ? 'Exportação cancelada.' : error.stderr?.trim() || 'Não foi possível ler esta peça.'); });
+    await execute(path.join(engine, 'ClothingDecoder.exe'), [model, texture, stage, lod], { windowsHide: true, timeout: 60000, signal, maxBuffer: 1024 * 1024, encoding: 'utf8' }).catch(error => { throw engineError(error, 'Não foi possível ler esta peça.', 'Exportação cancelada.'); });
     if ((await stat(path.join(stage, 'decoded.json'))).size > 128 * 1024 * 1024) throw Error('Geometria decodificada excede o limite.');
     const data = JSON.parse(await readFile(path.join(stage, 'decoded.json'), 'utf8'));
     const files = buildObjPackage(data);

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { inflateRawSync, deflateRawSync } from 'node:zlib';
 import path from 'node:path';
 import { LIMITS, safeName } from './rpf.js';
+import { corruptError } from './user-error.js';
 import { isRsc7, rsc7DeclaredSize } from './rsc7.js';
 import {publication,recoverPublications} from './publication.js';
 
@@ -19,14 +20,14 @@ export function readDrawable(data, name, limits = LIMITS) {
   if (!isRsc7(data, 165)) throw new Error(`YDR Legacy inválido ou versão não suportada: ${name}`);
   // Inflate at most what the header declares (bounded by the runtime profile), never a blanket 256 MiB.
   const declared = rsc7DeclaredSize(data);
-  if (declared < 0xa8 || declared > limits.fileBytes) throw new Error(`Modelo ${name} declara tamanho inválido ou acima do limite de leitura.`);
+  if (declared < 0xa8 || declared > limits.fileBytes) throw corruptError(`Modelo ${name} declara tamanho inválido ou acima do limite de leitura.`, 'MODEL_CORRUPT');
   let raw;
   try { raw = inflateRawSync(data.subarray(16), { maxOutputLength: declared }); }
   catch { throw new Error(`Não foi possível descompactar o modelo ${name}. O arquivo pode estar corrompido ou acima do limite de leitura.`); }
-  if (raw.length < 0xa8) throw new Error(`Drawable truncado: ${name}`);
+  if (raw.length < 0xa8) throw corruptError(`Drawable truncado: ${name}`, 'MODEL_CORRUPT');
   const vector = offset => [0, 4, 8].map(at => raw.readFloatLE(offset + at));
   const min = vector(0x30), max = vector(0x40), center = vector(0x20), radius = raw.readFloatLE(0x2c);
-  if (![...min, ...max, ...center, radius].every(Number.isFinite) || radius <= 0 || radius > 1e7 || min.some((n, i) => n > max[i])) throw new Error(`Limites geométricos inválidos: ${name}`);
+  if (![...min, ...max, ...center, radius].every(Number.isFinite) || radius <= 0 || radius > 1e7 || min.some((n, i) => n > max[i])) throw corruptError(`Limites geométricos inválidos: ${name}`, 'MODEL_CORRUPT');
   return { name: path.basename(name, path.extname(name)), min, max, center, radius };
 }
 export function buildYtyp(models, name, siblings = new Set()) {
@@ -108,7 +109,7 @@ export async function generateFolderYtyp(folder, options = {}) {
       try {
         const current = await lstat(target);
         if (current.dev === identity.dev && current.ino === identity.ino && !current.isSymbolicLink() && bytes.equals(await readFile(target))) await rm(target);
-      } catch (cleanupError) { if (cleanupError.code !== 'ENOENT') {preserve=true;error.message += ` Não foi possível limpar ${path.basename(target)}: ${cleanupError.message}`;} }
+      } catch (cleanupError) { if (cleanupError.code !== 'ENOENT') {preserve=true;error.message += ` Não foi possível limpar ${path.basename(target)}.`;error.detail=[error.detail,cleanupError.code||cleanupError.message].filter(Boolean).join('; ');} }
     }
     if(!preserve)await journal?.abort();
     throw error;
