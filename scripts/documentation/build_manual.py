@@ -69,7 +69,8 @@ c.drawString(M,H-275,'Guia do usuário')
 y=para('Do seu pacote ao primeiro addon.',M,H-306,WIDTH,'head',PAPER)
 y=para(DATA['intro'],M,y-20,WIDTH-85,'body','#BDB9C6')
 # Product image as a controlled inset, never redrawn.
-img=ImageReader(str(ASSETS/'04-previa.png'));iw,ih=img.getSize();dh=290;dw=dh*iw/ih
+cover_image=next(section['image'] for section in DATA['sections'] if section['id']=='revisar')
+img=ImageReader(str(ASSETS/cover_image));iw,ih=img.getSize();dh=290;dw=dh*iw/ih
 c.drawImage(img,(W-dw)/2,142,dw,dh,mask='auto')
 c.setFillColor(HexColor(ORANGE));c.rect(0,0,W,102,fill=1,stroke=0)
 c.setFillColor(HexColor(DARK));c.setFont('BodyBold',12);c.drawString(M,68,'RPFORGE '+VERSION)
@@ -86,11 +87,11 @@ y=para('Leia na ordem para começar ou vá direto ao assunto. Os títulos abaixo
 y-=22
 for i,s in enumerate(DATA['sections']):
     num=i+3
-    c.setFillColor(HexColor('#E8E4DC' if i%2==0 else PAPER));c.roundRect(M,y-27,WIDTH,30,4,fill=1,stroke=0)
+    c.setFillColor(HexColor('#E8E4DC' if i%2==0 else PAPER));c.roundRect(M,y-24,WIDTH,26,4,fill=1,stroke=0)
     c.setFont('Body',10.3);c.setFillColor(HexColor(INK));c.drawString(M+12,y-16,s['label'])
     c.setFont('BodyBold',10);c.setFillColor(HexColor('#B84715'));c.drawRightString(W-M-12,y-16,f'{num:02d}')
     c.linkRect('',s['id'],(M,y-27,W-M,y+3),relative=0,thickness=0)
-    y-=34
+    y-=28
 para('Sobre as imagens: telas do aplicativo com nomes e dados fictícios para demonstração. A imagem de YTYP mostra uma geração feita com um modelo de teste.',M,y-14,WIDTH,'small')
 finish(2,'Índice',y-50)
 

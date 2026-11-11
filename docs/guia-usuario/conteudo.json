@@ -1,142 +1,542 @@
 {
   "title": "RPForge · Guia do usuário",
-  "version": "0.3.1",
-  "date": "1 de novembro de 2026",
-  "edition": "Edição local de testes",
+  "version": "1.0.0",
+  "date": "3 de novembro de 2026",
+  "edition": "RPForge v1",
   "intro": "Converta seus pacotes para o FiveM e gere YTYPs pelo botão direito do Windows. Este guia acompanha você da instalação ao primeiro resultado.",
   "sections": [
     {
-      "id": "comece", "label": "Comece aqui", "title": "Seu primeiro addon", "lead": "Você escolhe a pasta, confere o que será criado e manda converter. O arquivo RPF original permanece no lugar.",
+      "id": "comece",
+      "label": "Comece aqui",
+      "title": "Seu primeiro addon",
+      "lead": "Você escolhe a pasta, confere o que será criado e manda converter. O arquivo RPF original permanece no lugar.",
       "blocks": [
-        {"heading": "O caminho mais curto", "steps": ["Coloque o arquivo .rpf em uma pasta fácil de encontrar.", "Clique com o botão direito nessa pasta e escolha Converter com RPForge.", "Em Configurar, mantenha os nomes ou edite o spawn do veículo.", "Clique em Revisar conversão. Confira o resumo e use Converter agora.", "Ao terminar, clique em Abrir resultado para encontrar o addon."]},
-        {"heading": "Antes de usar no servidor", "body": "Abra o recurso no seu ambiente de testes do FiveM. O RPForge confere a estrutura dos arquivos, mas o teste no jogo é que confirma aparência, colisões, sons e dependências."},
-        {"kind": "tip", "heading": "Sem conta e sem terminal", "body": "Para usar o aplicativo, você não precisa criar um login, instalar Node.js ou abrir comandos. O instalador inclui o necessário para o funcionamento do RPForge."}
+        {
+          "heading": "O caminho mais curto",
+          "steps": [
+            "Coloque o arquivo .rpf em uma pasta fácil de encontrar.",
+            "Clique com o botão direito nessa pasta e escolha Converter com RPForge.",
+            "Na janela rápida, confira os nomes e os destinos; pelo app completo, use Ferramentas > Converter RPFs.",
+            "Use Revisar conversão quando estiver no app completo. Na revisão, confira o resumo e clique em Converter agora.",
+            "Ao terminar, clique em Abrir resultado para encontrar o addon."
+          ]
+        },
+        {
+          "heading": "Antes de usar no servidor",
+          "body": "Abra o recurso no seu ambiente de testes do FiveM. O RPForge confere a estrutura dos arquivos, mas o teste no jogo é que confirma aparência, colisões, sons e dependências."
+        },
+        {
+          "kind": "tip",
+          "heading": "Sem conta e sem terminal",
+          "body": "Para usar o aplicativo, você não precisa criar um login, instalar Node.js ou abrir comandos. O instalador inclui o necessário para o funcionamento do RPForge."
+        }
       ]
     },
     {
-      "id": "instalar", "label": "Instalar", "title": "Instale e abra o RPForge", "lead": "Use o instalador RPForge-Setup-0.3.1-x64.exe fornecido pela equipe.",
+      "id": "instalar",
+      "label": "Instalar",
+      "title": "Instale e abra o RPForge",
+      "lead": "O instalador da v1 inclui a interface, o runtime e os documentos de uso. Baixe somente pelos canais oficiais do RPForge.",
       "blocks": [
-        {"heading": "Instalação no Windows", "steps": ["Feche a janela do RPForge antes de instalar uma atualização.", "Abra o instalador e leia a licença apresentada.", "Confira a pasta sugerida. O nome atual da pasta é RPForge.", "Conclua a instalação e abra RPForge pelo menu Iniciar."]},
-        {"heading": "Pasta padrão", "code": "%LOCALAPPDATA%\\Programs\\RPForge", "body": "Esse é o endereço usado pelo Windows para a pasta do aplicativo no seu usuário. Você pode mantê-lo durante a instalação."},
-        {"heading": "O que você precisa", "items": ["Windows 11 em um computador compatível com aplicativos x64.", "Espaço disponível para o aplicativo, os pacotes e os addons que serão criados.", "Arquivos de GTA V Legacy em um dos tipos aceitos pelo RPForge."]},
-        {"kind": "note", "heading": "Sobre esta edição", "body": "A versão 0.3.1 é uma edição local de testes. Em outro computador, o Windows pode precisar reconhecer o certificado de teste fornecido pela equipe. Se a instalação for bloqueada, confirme a origem do arquivo e peça orientação à equipe antes de continuar."}
+        {
+          "heading": "Instalação no Windows",
+          "steps": [
+            "Feche a janela do RPForge antes de instalar uma atualização.",
+            "Abra o instalador, leia os termos de uso e a licença e aceite para continuar.",
+            "Consulte a privacidade e os avisos completos dos componentes no seletor de documentos do instalador, mesmo sem conexão com a internet.",
+            "Leia a etapa de confiança local. Para habilitar o menu moderno, autorize a instalação do certificado e confirme o administrador. Se recusar, o app e o menu clássico continuam disponíveis.",
+            "Confira a pasta sugerida. O nome atual da pasta é RPForge.",
+            "Conclua a instalação. A opção Abrir o RPForge inicia o app; depois, você também pode usar o menu Iniciar."
+          ]
+        },
+        {
+          "heading": "Pasta padrão",
+          "code": "%LOCALAPPDATA%\\Programs\\RPForge",
+          "body": "Esse é o endereço usado pelo Windows para a pasta do aplicativo no seu usuário. Você pode mantê-lo durante a instalação."
+        },
+        {
+          "heading": "O que você precisa",
+          "items": [
+            "Windows 11 em um computador compatível com aplicativos x64.",
+            "Espaço disponível para o aplicativo, os pacotes e os addons que serão criados.",
+            "Arquivos de GTA V Legacy em um dos tipos aceitos pelo RPForge."
+          ]
+        },
+        {
+          "kind": "note",
+          "heading": "Sobre esta edição",
+          "body": "A v1 usa certificado local, sem validação pública de identidade. A autorização adiciona confiança em TrustedPeople para todos os usuários do computador e também vale para outros arquivos assinados com a mesma chave. Não há garantia de remover alertas. A instalação em um Windows sem versões anteriores ainda precisa ser validada. A desinstalação não remove automaticamente a confiança."
+        }
       ]
     },
     {
-      "id": "conhecer", "label": "Conhecer a janela", "title": "Tudo começa pela pasta", "lead": "A janela tem um fluxo de três etapas. Ajuda fica disponível no menu lateral quando você precisar consultar as instruções.",
-      "image": "01-inicio.png", "caption": "Tela inicial do RPForge 0.3.1. As capturas deste guia usam exemplos fictícios.",
+      "id": "conhecer",
+      "label": "Conhecer a janela",
+      "title": "Tudo começa pela pasta",
+      "lead": "Use o menu Ferramentas para abrir Converter RPFs ou Gerar YTYP. A página Como usar fica disponível na navegação superior.",
       "blocks": [
-        {"heading": "Como se orientar", "items": ["Selecionar pasta: abre o seletor de pastas do Windows e inicia a análise ao confirmar.", "Configurar: mostra os itens encontrados e os nomes que você pode editar.", "Revisar: reúne o que será criado e os avisos para conferir.", "Resultado: mostra o que deu certo, o que foi cancelado e eventuais falhas."]}
+        {
+          "heading": "Como se orientar",
+          "items": [
+            "Início: mostra as ferramentas disponíveis. Ferramentas permite buscar e alternar entre elas sem perder as escolhas de cada fluxo.",
+            "Selecionar pasta: abre o seletor de pastas do Windows e inicia a análise ao confirmar.",
+            "Configurar: mostra os itens encontrados e os nomes que você pode editar.",
+            "Revisar: reúne o que será criado e os avisos para conferir.",
+            "Resultado: mostra o que deu certo, o que foi cancelado e eventuais falhas."
+          ]
+        }
+      ],
+      "image": "v1-inicio.png",
+      "caption": "Tela inicial da interface atual, com dados fictícios de demonstração."
+    },
+    {
+      "id": "acoes-rapidas",
+      "label": "Ações rápidas",
+      "title": "Direto pelo botão direito",
+      "lead": "As ações rápidas abrem uma janela compacta para a tarefa escolhida.",
+      "image": "v1-acao-rapida.png",
+      "caption": "Revisão compacta de um pacote de demonstração.",
+      "blocks": [
+        {
+          "heading": "Converter RPF",
+          "body": "Clique com o botão direito na pasta com os arquivos RPF e escolha Converter com RPForge. Confira a revisão e confirme a conversão."
+        },
+        {
+          "heading": "Gerar YTYP",
+          "body": "Em uma pasta com arquivos YDR, escolha Gerar YTYP com RPForge. A geração começa automaticamente e o resultado informa os arquivos criados."
+        },
+        {
+          "kind": "note",
+          "body": "As ações rápidas não carregam sua conta nem consultam versão. Elas mantêm a validação local dos arquivos e a proteção das saídas existentes."
+        }
       ]
     },
     {
-      "id": "converter", "label": "Converter um RPF", "title": "Escolha a pasta do pacote", "lead": "O RPForge procura os arquivos diretamente na pasta escolhida. Você pode reunir vários RPFs nela para analisar de uma vez.",
-      "image": "02-veiculos.png", "caption": "Configurar exibe os itens encontrados. Um mesmo RPF pode conter mais de um veículo.",
+      "id": "conta",
+      "label": "Conta e login",
+      "title": "Seu perfil, quando você quiser",
+      "lead": "A conta é opcional para as ferramentas atuais de conversão e geração de YTYP.",
+      "image": "v1-conta.png",
+      "caption": "Tela de entrada integrada ao app, sem credenciais reais.",
       "blocks": [
-        {"heading": "Pelo botão direito", "body": "No Explorador de Arquivos, clique com o botão direito na pasta e escolha Converter com RPForge. Você também pode clicar no espaço vazio dentro da pasta. A janela abre e começa a análise."},
-        {"heading": "Pelo aplicativo", "body": "Abra o RPForge e use Selecionar pasta. Escolha a pasta que contém o .rpf, não uma pasta acima dela. Se digitar o caminho no campo, pressione Enter para continuar."},
-        {"kind": "tip", "body": "Não é preciso extrair o RPF antes. Pacotes RPF que estejam dentro de outro RPF são lidos pelo aplicativo."}
+        {
+          "heading": "Entrar no aplicativo",
+          "body": "Use Entrar no cabeçalho. Você pode informar e-mail e senha ou escolher Discord, Google ou GitHub. Se sua conta usa segundo fator, confirme com o autenticador ou um código de recuperação."
+        },
+        {
+          "heading": "Entrar com um provedor",
+          "body": "O provedor abre no navegador padrão do Windows. Depois de entrar, confira a conta e o computador na página rpforge.dev/conectar-app/ e autorize a conexão. Volte ao aplicativo: o perfil aparece automaticamente."
+        },
+        {
+          "heading": "Computadores conectados",
+          "body": "A confirmação mostra os computadores autorizados. Se o limite estiver completo, você pode desconectar um deles antes de continuar. Não autorize pedidos que você não iniciou no app."
+        }
       ]
     },
     {
-      "id": "spawn", "label": "Alterar o spawn", "title": "Escolha o nome do carro", "lead": "Spawn é o nome usado para chamar o veículo no jogo. Se quiser manter o original, deixe o campo como está.",
-      "image": "02-veiculos.png", "caption": "Clique na célula da coluna Nome no jogo para editar o spawn.",
+      "id": "converter",
+      "label": "Converter um RPF",
+      "title": "Escolha a pasta do pacote",
+      "lead": "O RPForge procura os arquivos diretamente na pasta escolhida. Você pode reunir vários RPFs nela para analisar de uma vez.",
       "blocks": [
-        {"heading": "Para alterar", "steps": ["Encontre o veículo na lista de Configurar.", "Clique no nome em Nome no jogo e digite o novo spawn.", "Clique em Revisar conversão. O RPForge confere a alteração antes de liberar a conversão."]},
-        {"heading": "Exemplo de nome válido", "code": "MIAMIGT", "body": "Use letras, números ou _. Comece com uma letra e limite o nome a 63 caracteres. Maiúsculas e minúsculas são aceitas e mantidas. Evite espaços e acentos."},
-        {"kind": "note", "body": "Em roupas, mapas e outros conteúdos, editar o nome muda a pasta do recurso. As coleções de roupas e os nomes internos desses arquivos são preservados."}
+        {
+          "heading": "Pelo botão direito",
+          "body": "No Explorador de Arquivos, clique com o botão direito na pasta e escolha Converter com RPForge. Você também pode clicar no espaço vazio dentro da pasta. A janela abre e começa a análise."
+        },
+        {
+          "heading": "Pelo aplicativo",
+          "body": "Abra o RPForge, entre em Ferramentas > Converter RPFs e use Selecionar pasta. Escolha a pasta que contém os arquivos .rpf. A análise começa ao confirmar a pasta."
+        },
+        {
+          "kind": "tip",
+          "body": "Não é preciso extrair o RPF antes. Pacotes RPF que estejam dentro de outro RPF são lidos pelo aplicativo."
+        }
+      ],
+      "image": "v1-configurar.png",
+      "caption": "Análise de um pacote sintético, com edição do spawn antes da revisão."
+    },
+    {
+      "id": "spawn",
+      "label": "Alterar o spawn",
+      "title": "Escolha o nome do carro",
+      "lead": "Spawn é o nome usado para chamar o veículo no jogo. Se quiser manter o original, deixe o campo como está.",
+      "blocks": [
+        {
+          "heading": "Para alterar",
+          "steps": [
+            "Encontre o veículo na lista de Configurar.",
+            "Edite o campo Nome no jogo do veículo e digite o novo spawn.",
+            "Clique em Revisar conversão. O RPForge confere a alteração antes de liberar a conversão."
+          ]
+        },
+        {
+          "heading": "Exemplo de nome válido",
+          "code": "MIAMIGT",
+          "body": "Use letras, números ou _. Comece com uma letra e limite o nome a 63 caracteres. Maiúsculas e minúsculas são aceitas e mantidas. Evite espaços e acentos."
+        },
+        {
+          "kind": "note",
+          "body": "Em roupas, mapas e outros conteúdos, editar o nome muda a pasta do recurso. As coleções de roupas e os nomes internos desses arquivos são preservados."
+        }
+      ],
+      "image": "v1-configurar.png",
+      "caption": "O nome escolhido é conferido antes da conversão."
+    },
+    {
+      "id": "conflitos",
+      "label": "Pastas existentes",
+      "title": "Decida o que fazer com a pasta",
+      "lead": "Se já existir uma pasta com o nome de saída, o RPForge pede uma escolha antes de continuar.",
+      "blocks": [
+        {
+          "table": [
+            [
+              "Escolha",
+              "O que acontece"
+            ],
+            [
+              "Cancelar",
+              "Preserva a pasta existente e não converte esse RPF."
+            ],
+            [
+              "Usar outro nome",
+              "Permite criar a saída com outro nome. Confira a pasta escolhida na revisão."
+            ],
+            [
+              "Backup e substituir",
+              "Guarda a pasta antiga em um backup e cria uma nova saída no lugar."
+            ]
+          ]
+        },
+        {
+          "kind": "tip",
+          "body": "Na primeira tentativa, prefira uma pasta livre. Mantenha os backups até terminar o teste do addon no jogo."
+        }
       ]
     },
     {
-      "id": "conflitos", "label": "Pastas existentes", "title": "Decida o que fazer com a pasta", "lead": "Se já existir uma pasta com o nome de saída, o RPForge pede uma escolha antes de continuar.",
-      "image": "03-destinos.png", "caption": "A área de destino aparece quando há conflito com uma pasta existente.",
+      "id": "revisar",
+      "label": "Revisar e converter",
+      "title": "Confira antes de gravar",
+      "lead": "Revisar mostra o resumo da operação. O addon só é gravado quando você clica em Converter agora.",
       "blocks": [
-        {"table": [["Escolha", "O que acontece"], ["Cancelar", "Preserva a pasta existente e não converte esse RPF."], ["Usar outro nome", "Permite criar a saída com outro nome. Confira a pasta escolhida na revisão."], ["Backup e substituir", "Guarda a pasta antiga em um backup e cria uma nova saída no lugar."]]},
-        {"kind": "tip", "body": "Na primeira tentativa, prefira uma pasta livre. Mantenha os backups até terminar o teste do addon no jogo."}
+        {
+          "heading": "O que conferir",
+          "items": [
+            "O nome no jogo ou o nome do recurso está correto?",
+            "A pasta de saída é a que você esperava?",
+            "Há avisos sobre arquivos que não vieram no pacote?",
+            "A escolha para pastas existentes está correta?"
+          ]
+        },
+        {
+          "heading": "Se precisar corrigir",
+          "body": "Clique em Voltar, faça a alteração e avance novamente. Os campos serão validados ao revisar. Quando estiver tudo certo, use Converter agora e aguarde o resultado."
+        }
+      ],
+      "image": "v1-revisao.png",
+      "caption": "Resumo real da conversão de um pacote de demonstração."
+    },
+    {
+      "id": "resultado",
+      "label": "Encontrar o addon",
+      "title": "Seu addon está na pasta de saída",
+      "lead": "Depois da conversão, o resultado informa o que foi criado. Falhas e cancelamentos aparecem separadamente.",
+      "blocks": [
+        {
+          "heading": "Abrir resultado",
+          "body": "Use Abrir pasta no resultado para localizar o recurso criado. Quando houver vários RPFs, confira o resultado de cada saída."
+        },
+        {
+          "heading": "Nova conversão",
+          "body": "Limpa o fluxo da janela e permite escolher outra pasta. Os addons que já foram criados permanecem no disco."
+        },
+        {
+          "kind": "tip",
+          "body": "O RPF original fica preservado ao lado da saída. O RPForge não coloca um relatório JSON dentro do addon."
+        }
+      ],
+      "image": "v1-resultado.png",
+      "caption": "Resultado de uma conversão executada com um pacote sintético."
+    },
+    {
+      "id": "fivem",
+      "label": "Levar ao FiveM",
+      "title": "Teste o recurso no servidor",
+      "lead": "Ao terminar, você terá uma pasta de recurso com os arquivos organizados para o FiveM.",
+      "blocks": [
+        {
+          "heading": "Exemplo de saída de um veículo",
+          "code": "MIAMIGT/\n  fxmanifest.lua\n  data/\n  stream/\n    mods/",
+          "body": "fxmanifest.lua é o arquivo que apresenta o recurso ao FiveM. data guarda as configurações; stream guarda modelos e texturas. As peças de tuning ficam em stream/mods quando houver essas peças no pacote."
+        },
+        {
+          "heading": "Para colocar no servidor",
+          "steps": [
+            "Copie a pasta completa do addon para a área de recursos do seu servidor.",
+            "Peça ao responsável pelo servidor para ativar o recurso com o nome da pasta. A tela Resultado mostra o nome usado no comando ensure.",
+            "Entre no ambiente de testes e confira o conteúdo. Para veículos, use o spawn que você manteve ou escolheu.",
+            "Confira aparência, texturas, tuning e sons antes de usar em produção."
+          ]
+        },
+        {
+          "kind": "note",
+          "body": "O RPForge não altera sua base de testes nem o arquivo server.cfg. A ativação no servidor é feita por você ou pela equipe que administra a base."
+        }
       ]
     },
     {
-      "id": "revisar", "label": "Revisar e converter", "title": "Confira antes de gravar", "lead": "Revisar mostra o resumo da operação. O addon só é gravado quando você clica em Converter agora.",
-      "image": "04-previa.png", "caption": "A revisão reúne nomes, pasta de saída, avisos e ajustes que serão feitos.",
+      "id": "conteudos",
+      "label": "Tipos de conteúdo",
+      "title": "Além dos veículos",
+      "lead": "O RPForge identifica o conteúdo encontrado. Você não precisa escolher um modo de conversão antes de analisar o RPF.",
       "blocks": [
-        {"heading": "O que conferir", "items": ["O nome no jogo ou o nome do recurso está correto?", "A pasta de saída é a que você esperava?", "Há avisos sobre arquivos que não vieram no pacote?", "A escolha para pastas existentes está correta?"]},
-        {"heading": "Se precisar corrigir", "body": "Clique em Voltar, faça a alteração e avance novamente. Os campos serão validados ao revisar. Quando estiver tudo certo, use Converter agora e aguarde o resultado."}
+        {
+          "table": [
+            [
+              "Conteúdo",
+              "O que conferir"
+            ],
+            [
+              "Veículos",
+              "Spawn, tuning, texturas, sons e funcionamento no jogo."
+            ],
+            [
+              "Roupas",
+              "Coleção identificada e arquivos necessários. O app não inventa coleções ausentes."
+            ],
+            [
+              "Mapas e interiores",
+              "Arquivos do mapa e dependências. Salas e portais precisam vir no conteúdo original."
+            ],
+            [
+              "Props e objetos",
+              "Modelos, texturas e arquivo YTYP quando necessário."
+            ],
+            [
+              "Animações e texturas",
+              "O recurso é organizado para streaming; o uso depende da configuração do servidor."
+            ],
+            [
+              "Peds, armas e áudio",
+              "Somente os tipos e arquivos reconhecidos pelo aplicativo."
+            ]
+          ]
+        },
+        {
+          "heading": "Quando o app recusa um pacote",
+          "body": "Um arquivo pode depender de configurações que o RPForge ainda não reconhece. Nesse caso, confira o erro. Evite apagar arquivos do pacote apenas para forçar a conversão."
+        },
+        {
+          "kind": "note",
+          "body": "Pacotes que misturam veículos com conteúdos especiais podem precisar ser separados. Um addon criado sem erro ainda deve ser testado no FiveM."
+        }
       ]
     },
     {
-      "id": "resultado", "label": "Encontrar o addon", "title": "Seu addon está na pasta de saída", "lead": "Depois da conversão, o resultado informa o que foi criado. Falhas e cancelamentos aparecem separadamente.",
-      "image": "09-resultado.png", "caption": "Resultado permite abrir o último addon concluído e começar outra conversão.",
+      "id": "ytyp",
+      "label": "Gerar YTYP",
+      "title": "Gere YTYPs dos seus modelos",
+      "lead": "YTYP é um arquivo usado pelo jogo para reconhecer objetos. O RPForge pode gerar um YTYP básico a partir de modelos .ydr.",
       "blocks": [
-        {"heading": "Abrir resultado", "body": "Abre a pasta do último addon criado com sucesso nessa operação. Quando houver vários RPFs, confira os cartões de cada resultado para localizar as outras saídas."},
-        {"heading": "Nova conversão", "body": "Limpa o fluxo da janela e permite escolher outra pasta. Os addons que já foram criados permanecem no disco."},
-        {"kind": "tip", "body": "O RPF original fica preservado ao lado da saída. O RPForge não coloca um relatório JSON dentro do addon."}
+        {
+          "heading": "Pelo app ou pelo botão direito",
+          "steps": [
+            "Coloque os arquivos .ydr diretamente na pasta escolhida.",
+            "Pelo app, abra Ferramentas > Gerar YTYP, selecione a pasta e clique em Gerar YTYP.",
+            "Pelo botão direito, use Gerar YTYP com RPForge. A janela rápida inicia a geração automaticamente.",
+            "Ao terminar, abra a pasta indicada no resultado."
+          ]
+        },
+        {
+          "kind": "note",
+          "body": "YTYPs existentes são preservados e a nova saída recebe um sufixo quando necessário. Um YTYP básico não recria salas, portais ou outros detalhes de um interior complexo."
+        }
+      ],
+      "image": "v1-ytyp.png",
+      "caption": "Resultado de uma geração executada com um modelo sintético."
+    },
+    {
+      "id": "cuidados",
+      "label": "Arquivos e backups",
+      "title": "Cuide dos seus originais",
+      "lead": "O RPForge preserva o pacote de origem. Ainda assim, mantenha uma cópia dos seus arquivos de trabalho antes de organizar um acervo grande.",
+      "blocks": [
+        {
+          "heading": "Durante uma conversão de RPF",
+          "items": [
+            "A análise e a revisão não criam o addon.",
+            "A conversão prepara a saída e confere os arquivos gravados antes de entregar a pasta.",
+            "Pastas existentes exigem uma escolha explícita.",
+            "O backup fica ao lado da saída, com um nome que identifica a cópia preservada."
+          ]
+        },
+        {
+          "heading": "Na geração de YTYP",
+          "body": "Os modelos originais e os YTYPs que já existem permanecem intactos. Se houver muitos modelos, o aplicativo divide a saída em mais de um YTYP."
+        },
+        {
+          "heading": "O que pode mudar no veículo",
+          "body": "Ao trocar o spawn, o app ajusta os nomes de arquivos e as referências correspondentes. Opções visuais de tuning sem o modelo necessário no RPF são removidas para evitar escolhas quebradas no jogo. Confira esses ajustes na revisão."
+        },
+        {
+          "kind": "tip",
+          "body": "Mantenha o backup até testar. Se precisar voltar, preserve a saída atual e use a cópia anterior como ponto de partida."
+        }
       ]
     },
     {
-      "id": "fivem", "label": "Levar ao FiveM", "title": "Teste o recurso no servidor", "lead": "Ao terminar, você terá uma pasta de recurso com os arquivos organizados para o FiveM.",
+      "id": "avisos",
+      "label": "Resolver avisos",
+      "title": "Leia o motivo antes de tentar de novo",
+      "lead": "Um aviso pede atenção; um erro pode impedir aquela conversão. Quando vários RPFs são analisados, confira o resultado de cada um.",
       "blocks": [
-        {"heading": "Exemplo de saída de um veículo", "code": "MIAMIGT/\n  fxmanifest.lua\n  data/\n  stream/\n    mods/", "body": "fxmanifest.lua é o arquivo que apresenta o recurso ao FiveM. data guarda as configurações; stream guarda modelos e texturas. As peças de tuning ficam em stream/mods quando houver essas peças no pacote."},
-        {"heading": "Para colocar no servidor", "steps": ["Copie a pasta completa do addon para a área de recursos do seu servidor.", "Peça ao responsável pelo servidor para ativar o recurso com o nome da pasta. A tela Resultado mostra o nome usado no comando ensure.", "Entre no ambiente de testes e confira o conteúdo. Para veículos, use o spawn que você manteve ou escolheu.", "Confira aparência, texturas, tuning e sons antes de usar em produção."]},
-        {"kind": "note", "body": "O RPForge não altera sua base de testes nem o arquivo server.cfg. A ativação no servidor é feita por você ou pela equipe que administra a base."}
+        {
+          "table": [
+            [
+              "Mensagem ou situação",
+              "O que fazer"
+            ],
+            [
+              "O RPF mudou depois da prévia",
+              "Analise novamente a pasta antes de converter."
+            ],
+            [
+              "Nome inválido",
+              "Corrija o campo e use Revisar conversão novamente."
+            ],
+            [
+              "Destino já existe",
+              "Escolha uma ação para a pasta existente."
+            ],
+            [
+              "Dependência externa",
+              "Confira se o servidor tem o recurso ou arquivo mencionado."
+            ]
+          ]
+        },
+        {
+          "kind": "tip",
+          "body": "Ao pedir ajuda, informe a versão do app, o texto do erro e o passo em que ele apareceu. Não envie credenciais nem seu acervo em relatos públicos."
+        }
       ]
     },
     {
-      "id": "conteudos", "label": "Tipos de conteúdo", "title": "Além dos veículos", "lead": "O RPForge identifica o conteúdo encontrado. Você não precisa escolher um modo de conversão antes de analisar o RPF.",
+      "id": "duvidas",
+      "label": "Dúvidas frequentes",
+      "title": "Quando algo não aparece",
+      "lead": "Estas verificações resolvem os problemas mais comuns antes de repetir a operação.",
       "blocks": [
-        {"table": [["Conteúdo", "O que conferir"], ["Veículos", "Spawn, tuning, texturas, sons e funcionamento no jogo."], ["Roupas", "Coleção identificada e arquivos necessários. O app não inventa coleções ausentes."], ["Mapas e interiores", "Arquivos do mapa e dependências. Salas e portais precisam vir no conteúdo original."], ["Props e objetos", "Modelos, texturas e arquivo YTYP quando necessário."], ["Animações e texturas", "O recurso é organizado para streaming; o uso depende da configuração do servidor."], ["Peds, armas e áudio", "Somente os tipos e arquivos reconhecidos pelo aplicativo."]]},
-        {"heading": "Quando o app recusa um pacote", "body": "Um arquivo pode depender de configurações que o RPForge ainda não reconhece. Nesse caso, confira o erro. Evite apagar arquivos do pacote apenas para forçar a conversão."},
-        {"kind": "note", "body": "Pacotes que misturam veículos com conteúdos especiais podem precisar ser separados. Um addon criado sem erro ainda deve ser testado no FiveM."}
+        {
+          "heading": "O menu do botão direito não apareceu",
+          "body": "Confira se você clicou em uma única pasta. Converter com RPForge aparece quando ela contém um .rpf; Gerar YTYP com RPForge aparece quando há um .ydr. A busca não percorre subpastas do Windows. Se necessário, procure a entrada clássica em Mostrar mais opções ou abra o app pelo menu Iniciar."
+        },
+        {
+          "heading": "A pasta parece vazia no aplicativo",
+          "body": "Escolha a pasta que contém os arquivos, não uma pasta acima. Verifique as extensões. Um ZIP ou RAR precisa ser extraído antes; o arquivo .rpf dentro dele é o que o conversor lê."
+        },
+        {
+          "heading": "O RPF foi recusado",
+          "body": "A versão atual aceita arquivos abertos de GTA V Legacy. Pacotes criptografados e conteúdo de GTA V Enhanced não são aceitos. Use uma origem compatível e confira o texto do erro."
+        },
+        {
+          "heading": "O carro converteu, mas não funciona no jogo",
+          "body": "Confira se o recurso foi ativado e se você está usando o spawn correto. Texturas, sons ou configurações compartilhadas podem depender de outros recursos. O RPForge não corrige problemas do modelo original."
+        },
+        {
+          "heading": "O tamanho em disco é o FPS ou o uso de VRAM?",
+          "body": "Não. O tamanho mostra quanto os arquivos ocupam no disco. Esta versão não promete ganho de FPS nem otimiza texturas automaticamente."
+        }
       ]
     },
     {
-      "id": "ytyp", "label": "Gerar YTYP", "title": "Gere YTYPs dos seus modelos", "lead": "YTYP é um arquivo usado pelo jogo para reconhecer objetos. O RPForge pode gerar um YTYP básico a partir de modelos .ydr.",
-      "image": "11-ytyp.png", "caption": "Resultado de uma geração feita pelo aplicativo com um modelo de exemplo.",
+      "id": "atualizar",
+      "label": "Atualizar ou remover",
+      "title": "Mantenha a versão certa",
+      "lead": "Use os arquivos fornecidos pela equipe do RPForge. O nome atual do aplicativo e da pasta de instalação é RPForge.",
       "blocks": [
-        {"heading": "Em um clique", "steps": ["Coloque os arquivos .ydr diretamente na pasta escolhida.", "Clique com o botão direito na pasta e use Gerar YTYP com RPForge.", "Aguarde a geração. Use Abrir resultado para localizar os arquivos criados."]},
-        {"kind": "note", "body": "A geração começa automaticamente. YTYPs existentes são preservados e a nova saída recebe um sufixo quando necessário. Um YTYP básico não recria salas, portais ou outros detalhes de um interior complexo."}
+        {
+          "heading": "Atualizar",
+          "steps": [
+            "Feche a janela do aplicativo e aguarde qualquer operação terminar.",
+            "Abra o instalador da nova versão e confira o nome e a origem do arquivo.",
+            "Mantenha seus RPFs, addons e backups nas suas pastas de trabalho.",
+            "Depois de instalar, abra o app e teste um pacote conhecido."
+          ]
+        },
+        {
+          "heading": "Remover do Windows",
+          "body": "Abra Configurações > Aplicativos > Aplicativos instalados, encontre RPForge e escolha desinstalar. Os RPFs e addons criados nas suas pastas de trabalho permanecem no disco."
+        },
+        {
+          "heading": "Versão e licença",
+          "body": "Este guia acompanha o RPForge v1.0.0, com licença proprietária. Os documentos de uso e os avisos de terceiros acompanham o instalador e a pasta legal da instalação. As versões antigas continuam sujeitas às licenças originais."
+        },
+        {
+          "kind": "note",
+          "body": "Esta edição não faz upload dos seus assets nem exige login para converter. Nada é publicado no seu servidor automaticamente."
+        }
       ]
     },
     {
-      "id": "cuidados", "label": "Arquivos e backups", "title": "Cuide dos seus originais", "lead": "O RPForge preserva o pacote de origem. Ainda assim, mantenha uma cópia dos seus arquivos de trabalho antes de organizar um acervo grande.",
+      "id": "consulta",
+      "label": "Consulta rápida",
+      "title": "Os nomes que você vai encontrar",
+      "lead": "Você não precisa decorar as extensões. Use esta página quando surgir uma palavra nova durante a conversão.",
       "blocks": [
-        {"heading": "Durante uma conversão de RPF", "items": ["A análise e a revisão não criam o addon.", "A conversão prepara a saída e confere os arquivos gravados antes de entregar a pasta.", "Pastas existentes exigem uma escolha explícita.", "O backup fica ao lado da saída, com um nome que identifica a cópia preservada."]},
-        {"heading": "Na geração de YTYP", "body": "Os modelos originais e os YTYPs que já existem permanecem intactos. Se houver muitos modelos, o aplicativo divide a saída em mais de um YTYP."},
-        {"heading": "O que pode mudar no veículo", "body": "Ao trocar o spawn, o app ajusta os nomes de arquivos e as referências correspondentes. Opções visuais de tuning sem o modelo necessário no RPF são removidas para evitar escolhas quebradas no jogo. Confira esses ajustes na revisão."},
-        {"kind": "tip", "body": "Mantenha o backup até testar. Se precisar voltar, preserve a saída atual e use a cópia anterior como ponto de partida."}
-      ]
-    },
-    {
-      "id": "avisos", "label": "Resolver avisos", "title": "Leia o motivo antes de tentar de novo", "lead": "Um aviso pede atenção; um erro pode impedir aquela conversão. Quando vários RPFs são analisados, confira o resultado de cada um.",
-      "image": "08-erro.png", "caption": "Exemplo de erro: o arquivo de origem mudou depois da análise.",
-      "blocks": [
-        {"table": [["Mensagem ou situação", "O que fazer"], ["O RPF mudou depois da prévia", "Analise novamente a pasta antes de converter."], ["Nome inválido", "Corrija o campo e use Revisar conversão novamente."], ["Destino já existe", "Escolha uma ação para a pasta existente."], ["Dependência externa", "Confira se o servidor tem o recurso ou arquivo mencionado."]]},
-        {"kind": "tip", "body": "Ao pedir ajuda, envie a versão do app, o texto do erro e o passo em que ele apareceu. Use Ver detalhes técnicos se precisar copiar o diagnóstico. Não envie seu acervo inteiro sem combinar antes."}
-      ]
-    },
-    {
-      "id": "duvidas", "label": "Dúvidas frequentes", "title": "Quando algo não aparece", "lead": "Estas verificações resolvem os problemas mais comuns antes de repetir a operação.",
-      "blocks": [
-        {"heading": "O menu do botão direito não apareceu", "body": "Confira se você clicou em uma única pasta. Converter com RPForge aparece quando ela contém um .rpf; Gerar YTYP com RPForge aparece quando há um .ydr. A busca não percorre subpastas do Windows. Se necessário, procure a entrada clássica em Mostrar mais opções ou abra o app pelo menu Iniciar."},
-        {"heading": "A pasta parece vazia no aplicativo", "body": "Escolha a pasta que contém os arquivos, não uma pasta acima. Verifique as extensões. Um ZIP ou RAR precisa ser extraído antes; o arquivo .rpf dentro dele é o que o conversor lê."},
-        {"heading": "O RPF foi recusado", "body": "A versão atual aceita arquivos abertos de GTA V Legacy. Pacotes criptografados e conteúdo de GTA V Enhanced não são aceitos. Use uma origem compatível e confira o texto do erro."},
-        {"heading": "O carro converteu, mas não funciona no jogo", "body": "Confira se o recurso foi ativado e se você está usando o spawn correto. Texturas, sons ou configurações compartilhadas podem depender de outros recursos. O RPForge não corrige problemas do modelo original."},
-        {"heading": "O tamanho em disco é o FPS ou o uso de VRAM?", "body": "Não. O tamanho mostra quanto os arquivos ocupam no disco. Esta versão não promete ganho de FPS nem otimiza texturas automaticamente."}
-      ]
-    },
-    {
-      "id": "atualizar", "label": "Atualizar ou remover", "title": "Mantenha a versão certa", "lead": "Use os arquivos fornecidos pela equipe do RPForge. O nome atual do aplicativo e da pasta de instalação é RPForge.",
-      "blocks": [
-        {"heading": "Atualizar", "steps": ["Feche a janela do aplicativo e aguarde qualquer operação terminar.", "Abra o instalador da nova versão e confira o nome e a origem do arquivo.", "Mantenha seus RPFs, addons e backups nas suas pastas de trabalho.", "Depois de instalar, abra o app e teste um pacote conhecido."]},
-        {"heading": "Remover do Windows", "body": "Abra Configurações > Aplicativos > Aplicativos instalados, encontre RPForge e escolha desinstalar. Os RPFs e addons criados nas suas pastas de trabalho permanecem no disco."},
-        {"heading": "Versão e licença", "body": "Este guia acompanha o RPForge 0.3.1. O código próprio usa GPLv3. As licenças podem ser consultadas em Ajuda > Licenças e nos arquivos fornecidos com o aplicativo. O instalador inclui o código-fonte correspondente."},
-        {"kind": "note", "body": "Esta edição não faz upload dos seus assets nem exige login para converter. Nada é publicado no seu servidor automaticamente."}
-      ]
-    },
-    {
-      "id": "consulta", "label": "Consulta rápida", "title": "Os nomes que você vai encontrar", "lead": "Você não precisa decorar as extensões. Use esta página quando surgir uma palavra nova durante a conversão.",
-      "blocks": [
-        {"table": [["Nome", "Em poucas palavras"], ["RPF", "Pacote que reúne arquivos de conteúdo do GTA V."], ["Addon ou recurso", "Pasta organizada para adicionar conteúdo ao FiveM."], ["Spawn", "Nome usado para chamar um veículo no jogo."], ["Stream", "Pasta que reúne modelos, texturas e outros arquivos carregados pelo jogo."], ["Meta / data", "Arquivos de configuração do conteúdo."], ["YDR", "Arquivo de modelo usado por objetos."], ["YTD", "Arquivo que reúne texturas."], ["YTYP", "Arquivo que apresenta objetos ao jogo."], ["Backup", "Cópia preservada da pasta anterior."], ["Dependência", "Outro recurso ou arquivo necessário para o conteúdo funcionar."]]},
-        {"kind": "tip", "heading": "Antes de encerrar", "body": "Confira o resultado, teste o addon no FiveM e mantenha seus originais. Para rever um passo, volte ao índice deste guia."}
+        {
+          "table": [
+            [
+              "Nome",
+              "Em poucas palavras"
+            ],
+            [
+              "RPF",
+              "Pacote que reúne arquivos de conteúdo do GTA V."
+            ],
+            [
+              "Addon ou recurso",
+              "Pasta organizada para adicionar conteúdo ao FiveM."
+            ],
+            [
+              "Spawn",
+              "Nome usado para chamar um veículo no jogo."
+            ],
+            [
+              "Stream",
+              "Pasta que reúne modelos, texturas e outros arquivos carregados pelo jogo."
+            ],
+            [
+              "Meta / data",
+              "Arquivos de configuração do conteúdo."
+            ],
+            [
+              "YDR",
+              "Arquivo de modelo usado por objetos."
+            ],
+            [
+              "YTD",
+              "Arquivo que reúne texturas."
+            ],
+            [
+              "YTYP",
+              "Arquivo que apresenta objetos ao jogo."
+            ],
+            [
+              "Backup",
+              "Cópia preservada da pasta anterior."
+            ],
+            [
+              "Dependência",
+              "Outro recurso ou arquivo necessário para o conteúdo funcionar."
+            ]
+          ]
+        },
+        {
+          "kind": "tip",
+          "heading": "Antes de encerrar",
+          "body": "Confira o resultado, teste o addon no FiveM e mantenha seus originais. Para rever um passo, volte ao índice deste guia."
+        }
       ]
     }
   ]

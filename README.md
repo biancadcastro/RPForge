@@ -28,9 +28,14 @@ Converta RPFs, altere o spawn dos veículos e gere YTYPs pelo botão direito do 
 | 🧱 Gerar YTYPs | Criar YTYPs básicos a partir de modelos `.ydr`, sem substituir os arquivos que já existem. |
 | 🛡️ Conferir antes de gravar | Revisar a saída, decidir como tratar pastas existentes e preservar backups. |
 
-O aplicativo funciona **sem login, sem terminal e sem instalar Node.js separadamente**. Seus arquivos não são enviados para um servidor de conversão.
+Converter RPFs e gerar YTYPs funciona **sem conta, sem terminal e sem instalar Node.js separadamente**; as ferramentas de roupas (OBJ, Neon e separar pele) exigem uma conta RPForge Pro. Seus arquivos não são enviados para um servidor de conversão.
 
 ## 🖼️ Conheça o aplicativo
+
+**Interface em desenvolvimento:** a migração para Electron + Next.js está em
+`desktop-web/`, com a identidade visual do site e ações rápidas em janela compacta.
+Veja [arquitetura e execução local](docs/DESKTOP_ARCHITECTURE.md). Essa mudança não
+foi empacotada no instalador público descrito abaixo.
 
 ### Configure, revise e converta
 

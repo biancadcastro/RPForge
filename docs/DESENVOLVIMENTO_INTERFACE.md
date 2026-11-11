@@ -1,5 +1,9 @@
 # Desenvolvimento e validação da interface
 
+> Este documento descreve a interface WinForms legada. A interface atual em
+> Electron + Next.js e os comandos de desenvolvimento estão em
+> [DESKTOP_ARCHITECTURE.md](DESKTOP_ARCHITECTURE.md).
+
 ## Estrutura
 
 | Arquivo | Responsabilidade |

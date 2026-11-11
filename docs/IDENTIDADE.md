@@ -21,11 +21,15 @@ O manifest gerado identifica a ferramenta com `-- Convertido com RPForge`. A jan
 | Error | `#FF7676` | Falhas |
 | Success | `#4ADE80` | Conclusão |
 
-O botão laranja usa texto grafite. Estados têm mensagens além da cor.
+Na interface Electron + Next.js, o botão laranja usa texto marfim e o relevo discreto
+definido nos controles atuais do site. Estados têm mensagens além da cor.
 
 ## Tipografia
 
-**Pixelify Sans Regular/Bold**, os mesmos arquivos usados no portfólio, em títulos, navegação, botões, resumos e ajuda. Os TTFs originais estão em `desktop/fonts`, acompanhados de `OFL.txt`. A cópia embutida no executável evita instalação global e dependência de internet. A licença completa também aparece em Ajuda.
+**Pixelify Sans Regular/Bold**, os mesmos arquivos usados no site, em títulos e
+botões. **Atkinson Hyperlegible Regular/Bold** nos textos, campos e navegação. Os
+arquivos e licenças OFL locais estão em `desktop-web/public/fonts`; não há
+instalação global de fontes nem carregamento pela internet.
 
 **Consolas** em caminhos, spawns e diagnóstico técnico. Os códigos de caracteres precisam permanecer fáceis de distinguir.
 
@@ -33,7 +37,7 @@ O botão laranja usa texto grafite. Estados têm mensagens além da cor.
 
 - Botão primário: laranja, relevo inferior discreto, hover e pressionamento visíveis.
 - Secundário: superfície grafite, contorno e foco explícito.
-- Navegação: item selecionado com fundo quente e marcador lateral.
+- Navegação: cabeçalho como o do site, menu de ferramentas com busca e estado selecionado em laranja.
 - Campo de origem: espaço interno e moldura que acompanha o foco.
 - Tabelas: cabeçalho Pixelify, valores técnicos monoespaçados e campos editáveis demarcados.
 - Checkbox: marca laranja com confirmação gráfica; mantém o controle nativo por baixo.
