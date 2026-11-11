@@ -36,7 +36,8 @@ Converter RPFs e gerar YTYPs funciona **sem conta, sem internet, sem terminal e 
 A interface atual usa Electron + Next.js (`desktop-web/`), com a identidade visual do
 site e ações rápidas em janela compacta, e é incluída no instalador. A janela WinForms
 antiga (`desktop/`) permanece apenas como alternativa legada. Veja
-[arquitetura e execução local](docs/DESKTOP_ARCHITECTURE.md).
+[arquitetura e execução local](docs/DESKTOP_ARCHITECTURE.md). Para desenvolver contra a
+API local, sem tocar em produção, siga o [ambiente local de testes](docs/LOCAL_ENVIRONMENT.md).
 
 ### Configure, revise e converta
 

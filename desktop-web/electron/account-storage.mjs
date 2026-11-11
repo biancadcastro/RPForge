@@ -1,8 +1,9 @@
 import path from 'node:path';
 import {access,mkdir,writeFile} from 'node:fs/promises';
 import {encryptedSessionStorage} from './session-storage.mjs';
-export function desktopAccountStorage(userData,localData,safeStorage,onDiagnostic){
- const directory=path.join(localData,'RPForge','account'),marker=path.join(directory,'.migrated');
+// `folder` isolates an environment; with `migrate:false` the older per-profile session is never read.
+export function desktopAccountStorage(userData,localData,safeStorage,onDiagnostic,{folder='RPForge',migrate=true}={}){
+ const directory=path.join(localData,folder,'account'),marker=path.join(directory,'.migrated');
  const shared=encryptedSessionStorage(directory,safeStorage,onDiagnostic);
  const legacy=encryptedSessionStorage(userData,safeStorage);
  const exists=async file=>{try{await access(file);return true;}catch{return false;}};
@@ -14,6 +15,7 @@ export function desktopAccountStorage(userData,localData,safeStorage,onDiagnosti
    const record=await shared.read();if(record)return record;
    // Never revive an old refresh token after logout, revocation or a failed decryption.
    if(await exists(marker)||await exists(path.join(directory,'desktop-session.bin')))return null;
+   if(!migrate)return null;
    const old=await legacy.read();return old?{...old,migrateStorage:true}:null;
   }
  };

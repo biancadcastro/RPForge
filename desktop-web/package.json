@@ -8,6 +8,7 @@
     "build": "next build",
     "typecheck": "tsc --noEmit",
     "start": "electron .",
+    "start:local": "node scripts/start-local.mjs",
     "test:desktop": "node scripts/check-desktop.mjs",
     "test:visual": "node scripts/check-visual.mjs"
   },

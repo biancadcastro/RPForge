@@ -14,6 +14,7 @@
     "signpath:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-UnsignedBinaries.ps1",
     "desktop:build": "npm --prefix desktop-web run build",
     "desktop:start": "npm --prefix desktop-web start",
+    "desktop:local": "npm --prefix desktop-web run start:local",
     "desktop:typecheck": "npm --prefix desktop-web run typecheck",
     "desktop:test": "npm --prefix desktop-web run test:desktop",
     "desktop:legacy:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Desktop.ps1",

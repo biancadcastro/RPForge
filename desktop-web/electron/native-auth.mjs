@@ -5,7 +5,7 @@ import { publicProfile } from './profile.mjs';
 import { verifyLicense } from './license.mjs';
 import { internalError, networkError } from '../../src/user-error.js';
 const keyPair = promisify(generateKeyPair);
-const API = 'https://api.rpforge.dev';
+import { PRODUCTION } from './environment.mjs';
 const providers = new Set(['discord','google','github']);
 const messages = {
   DEVICE_CLOCK_SKEW:'Sincronize o relógio do Windows e tente novamente. A identidade deste computador foi preservada.',
@@ -19,8 +19,8 @@ const messages = {
   TOO_MANY_ATTEMPTS:'Muitas tentativas. Aguarde antes de conectar novamente.',
 };
 export class NativeAuth {
-  constructor({fetcher,openExternal,storage,onState,onProfile,onDiagnostic,deviceName=hostname().replace(/[\p{C}<>]/gu,'').slice(0,60)||'Computador Windows',now=Date.now,delay=setTimeout,clearDelay=clearTimeout}) {
-    Object.assign(this,{fetcher,openExternal,storage,onState,onProfile,deviceName,now,delay,clearDelay});
+  constructor({fetcher,openExternal,storage,onState,onProfile,onDiagnostic,environment=PRODUCTION,deviceName=hostname().replace(/[\p{C}<>]/gu,'').slice(0,60)||'Computador Windows',now=Date.now,delay=setTimeout,clearDelay=clearTimeout}) {
+    Object.assign(this,{environment,fetcher,openExternal,storage,onState,onProfile,deviceName,now,delay,clearDelay});
     this.pending=null;this.record=null;this.loaded=false;this.state={status:'idle'};
     this.onDiagnostic=onDiagnostic;
   }
@@ -28,7 +28,7 @@ export class NativeAuth {
   async request(endpoint,body,signal){
     const timeout=AbortSignal.timeout(10000);
     let response;
-    try{response=await this.fetcher(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:signal?AbortSignal.any([signal,timeout]):timeout});}
+    try{response=await this.fetcher(this.environment.api+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:signal?AbortSignal.any([signal,timeout]):timeout});}
     catch(error){
       // A caller-cancelled request keeps its abort; everything else is a connection failure.
       if(signal?.aborted)throw error;
@@ -103,14 +103,14 @@ export class NativeAuth {
     await this.profile();const current=this.record;
     if(!current?.license){this.lastLicenseIssue ||= 'missing';return null;}
     this.licenseKeys ||= current.licenseKeys;
-    let license=verifyLicense(current.license,this.licenseKeys,current.installationId,this.now());
+    let license=verifyLicense(current.license,this.licenseKeys,current.installationId,this.now(),this.environment);
     if(!license){
       try{
-        if(!this.fetchingKeys)this.fetchingKeys=this.fetcher(API+'/v1/desktop/licenses/keys',{signal:AbortSignal.timeout(10000),cache:'no-store'}).then(async response=>{
+        if(!this.fetchingKeys)this.fetchingKeys=this.fetcher(this.environment.api+'/v1/desktop/licenses/keys',{signal:AbortSignal.timeout(10000),cache:'no-store'}).then(async response=>{
           if(!response.ok)throw new Error('keys_unavailable');const data=await response.json();if(!Array.isArray(data.keys)||data.keys.length>10)throw new Error('invalid_keys');return data.keys;
         });
         this.licenseKeys=await this.fetchingKeys;
-        license=verifyLicense(current.license,this.licenseKeys,current.installationId,this.now());
+        license=verifyLicense(current.license,this.licenseKeys,current.installationId,this.now(),this.environment);
       }catch(error){this.lastLicenseIssue='unavailable';this.onDiagnostic?.({event:'license_unavailable',error:error.name});return null;}finally{this.fetchingKeys=null;}
     }
     if(!license){this.lastLicenseIssue='invalid';this.onDiagnostic?.({event:'license_verified',valid:false});return null;}
@@ -183,7 +183,7 @@ export class NativeAuth {
       const pending=await this.grant(provider);
       if(generation!==this.generation){await this.cancel();return this.state;}
       this.pending=pending;
-      await this.openExternal(`${API}/v1/auth/oauth/${provider}/start?desktop=${encodeURIComponent(pending.id)}`);
+      await this.openExternal(`${this.environment.api}/v1/auth/oauth/${provider}/start?desktop=${encodeURIComponent(pending.id)}`);
       if(this.pending!==pending)return this.state;
       this.update({status:'waiting',provider,message:'Conclua a autorização no navegador. O app se conecta automaticamente depois.'});
       pending.timer=this.delay(()=>void this.poll(pending),pending.interval);

@@ -16,6 +16,7 @@ existente em `src/` é preservado.
 | `components/tool-workspace.tsx` | Configuração, revisão, resultado e versão compacta das operações. |
 | `lib/desktop.ts` | Contratos tipados e registro de ferramentas usado pela home e pela navegação. |
 | `electron/main.mjs` | Janelas, instância única, pastas autorizadas, diálogos e IPC. |
+| `electron/environment.mjs` | Único ponto que resolve API, site e emissor da licença. Produção é o padrão; o [ambiente local de testes](LOCAL_ENVIRONMENT.md) só liga fora do app instalado. |
 | `electron/preload.cjs` | API restrita exposta à interface; sem Node.js no renderer. |
 | `electron/workflow.mjs` | Revisões, snapshots das escolhas e autorização da conversão. |
 | `electron/worker.mjs` | Executa o motor Node em um processo temporário e encerra ao terminar. |
@@ -109,6 +110,7 @@ npm run desktop:build
 npm run desktop:test
 npm run desktop:legacy:build
 npm run desktop:start
+npm run desktop:local   # app ligado à API local: ver LOCAL_ENVIRONMENT.md
 ```
 
 O teste desktop usa fixtures sintéticas, verifica conversão com spawn editado,

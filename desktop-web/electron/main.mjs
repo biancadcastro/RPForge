@@ -28,15 +28,30 @@ import { encryptedSessionStorage } from "./session-storage.mjs";
 import {createAuthDiagnostics} from './auth-diagnostics.mjs';
 import {desktopAccountStorage} from './account-storage.mjs';
 import {desktopProfile} from './desktop-profile.mjs';
+import {EnvironmentError,dataRoot,guardFetch,publicEnvironment,resolveEnvironment} from './environment.mjs';
 import {formatUserError,internalError,userError} from '../../src/user-error.js';
-const auth = createAuthClient((...args) => net.fetch(...args));
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const project = path.resolve(here, ".."),
   output = path.join(project, "out");
 const testMode = process.argv.includes("--test-mode");
-const logAuth=testMode?()=>{}:createAuthDiagnostics(path.join(process.env.LOCALAPPDATA||os.tmpdir(),'RPForge','logs'));
-const writeMenuAccess=createMenuAccessWriter({installRoot:path.dirname(project),platform:testMode?'test':process.platform});
+// Production unless this is an unpackaged run that explicitly asked for the loopback test API.
+let environment;
+try { environment = resolveEnvironment({isPackaged:app.isPackaged,env:process.env,argv:process.argv,testMode}); }
+catch (error) {
+  if (!(error instanceof EnvironmentError)) throw error;
+  dialog.showErrorBox('RPForge — ambiente local de testes', error.message+'\n\nO aplicativo não foi iniciado para não usar a produção por engano.');
+  app.exit(1);
+  throw error;
+}
+// Session, license, logs and the menu cache of the local environment never share a folder with production.
+const storageRoot=environment.local
+  ?dataRoot(environment,process.env.LOCALAPPDATA||path.join(app.getPath('userData')+'-local','data'))
+  :path.join(process.env.LOCALAPPDATA||os.tmpdir(),'RPForge');
+const auth = createAuthClient(guardFetch(environment,(...args) => net.fetch(...args)),environment);
+const logAuth=testMode?()=>{}:createAuthDiagnostics(path.join(storageRoot,'logs'));
+// The local environment keeps its own menu cache and never changes HKCU or the installed Explorer menus.
+const writeMenuAccess=createMenuAccessWriter({installRoot:path.dirname(project),platform:testMode?'test':process.platform,...(environment.local?{directory:storageRoot,registry:false}:{})});
 async function refreshMenuAccess(){try{await writeMenuAccess(await desktopAccount().license());}catch{await writeMenuAccess(null).catch(()=>{});}}
 let menuTimer;
 function scheduleMenuAccess(){if(testMode)return;void refreshMenuAccess();if(!menuTimer){menuTimer=setInterval(()=>void refreshMenuAccess(),5*60*1000);menuTimer.unref();}}
@@ -94,6 +109,11 @@ function handle(channel, listener) {
 }
 if (testMode && process.env.RPF_TEST_USER_DATA)
   app.setPath("userData", process.env.RPF_TEST_USER_DATA);
+else if(environment.local){
+  // A fresh profile of its own: nothing is imported from, or written to, the production profile.
+  const localProfile=process.platform==='win32'&&process.env.LOCALAPPDATA?desktopProfile(null,process.env.LOCALAPPDATA,environment.dataFolder):app.getPath('userData')+'-local';
+  app.setPath('userData',localProfile);app.setPath('sessionData',localProfile);
+}
 else if(process.platform==='win32'){
   const sharedProfile=desktopProfile(app.getPath('userData'),process.env.LOCALAPPDATA);
   app.setPath('userData',sharedProfile);app.setPath('sessionData',sharedProfile);
@@ -107,11 +127,12 @@ let nativeAccount,
   profileRequests = 0;
 function desktopAccount() {
   if(!nativeAccount)nativeAccount=new NativeAuth({
+    environment,
     fetcher:(...args)=>{
       if(testMode){if(!globalThis.__forgeTestFetch)throw Error('Configure uma API isolada para o teste de autenticação.');return globalThis.__forgeTestFetch(...args);}
-      return fetch(...args);
+      return guardFetch(environment,fetch)(...args);
     },openExternal:url=>shell.openExternal(url),
-    storage:testMode?encryptedSessionStorage(app.getPath('userData'),safeStorage):desktopAccountStorage(app.getPath('userData'),process.env.LOCALAPPDATA,safeStorage,logAuth),
+    storage:testMode?encryptedSessionStorage(app.getPath('userData'),safeStorage):environment.local?desktopAccountStorage(app.getPath('userData'),path.dirname(storageRoot),safeStorage,logAuth,{folder:environment.dataFolder,migrate:false}):desktopAccountStorage(app.getPath('userData'),process.env.LOCALAPPDATA,safeStorage,logAuth),
     onDiagnostic:event=>{console.info('[RPForge auth]',JSON.stringify(event));logAuth(event);},
     onState:state=>{for(const context of contexts.values())if(!context.window.isDestroyed())context.window.webContents.send('forge:browser-auth',state);},
     onProfile:profile=>{profileCache=profile;profileFetchedAt=Date.now();for(const context of contexts.values())if(!context.window.isDestroyed())context.window.webContents.send('forge:profile',profile);if(!testMode)void refreshMenuAccess();},
@@ -243,7 +264,7 @@ function createWindow(launch) {
     fullscreenable: !quick,
     show: false,
     backgroundColor: "#121218",
-    title: quick ? "RPForge — ação rápida" : "RPForge",
+    title: (quick ? "RPForge — ação rápida" : "RPForge")+(environment.local?" — ambiente local de testes":""),
     icon: path.join(project, "public/rpforge.ico"),
     autoHideMenuBar: true,
     frame:false,
@@ -268,6 +289,8 @@ function createWindow(launch) {
   contexts.set(contentsId, context);
   windows.set(key, win);
   win.removeMenu();
+  // The page title would otherwise hide the environment from the taskbar and Alt+Tab.
+  if(environment.local)win.on('page-title-updated',(event,title)=>{event.preventDefault();win.setTitle(title+' — ambiente local de testes');});
   const publishWindowState=()=>{if(!win.isDestroyed())win.webContents.send('forge:window-state',{maximized:win.isMaximized(),maximizable:win.isMaximizable()});};
   win.on('maximize',publishWindowState);win.on('unmaximize',publishWindowState);
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
@@ -322,7 +345,7 @@ async function initializeClothingLaunch(context) {
 async function prepareAuthorizedLaunch(context,fresh=false){
   const wasLoginRequired=context.loginRequired;
   context.loginRequired=['obj','neon','skin'].includes(context.launch.action)&&!await accountProfile();
-  logAuth({event:'launch_ready',loggedIn:!context.loginRequired,action:context.launch.action,mode:context.launch.mode,packaged:!!process.windowsStore});
+  logAuth({event:'launch_ready',loggedIn:!context.loginRequired,action:context.launch.action,mode:context.launch.mode,packaged:!!process.windowsStore,environment:environment.name});
   if(context.loginRequired){
     if(!testMode)await writeMenuAccess(null).catch(()=>{});
     resizeQuick(context.window,context.launch,[1000,760]);
@@ -342,6 +365,8 @@ handle('forge:window-control',(event,action)=>{
  if(action==='maximize'&&window.isMaximizable()){if(window.isMaximized())window.unmaximize();else window.maximize();}
  const state={maximized:window.isMaximized(),maximizable:window.isMaximizable()};if(action==='close')window.close();return state;
 });
+// Every window (quick ones included) shows which backend it talks to.
+handle('forge:environment',event=>{owner(event);return publicEnvironment(environment);});
 handle("forge:bootstrap", async (event) => {
  const context=owner(event);
  const value=await prepareAuthorizedLaunch(context);
@@ -538,9 +563,9 @@ handle('forge:browser-auth-state',event=>{fullAccount(event);return desktopAccou
 handle('forge:sign-out',async event=>{
   fullAccount(event);await desktopAccount().disconnect();await refreshAccount();
 });
-handle('forge:open-account',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/dashboard/');});
-handle('forge:app-info',event=>{fullAccount(event);return {version:app.getVersion(),development:!app.isPackaged,electron:process.versions.electron,platform:process.platform+'-'+process.arch};});
-handle('forge:open-downloads',event=>{fullAccount(event);return shell.openExternal('https://rpforge.dev/docs/instalar/');});
+handle('forge:open-account',event=>{fullAccount(event);return shell.openExternal(environment.site+'/dashboard/');});
+handle('forge:app-info',event=>{fullAccount(event);return {version:app.getVersion(),development:!app.isPackaged,environment:publicEnvironment(environment),electron:process.versions.electron,platform:process.platform+'-'+process.arch};});
+handle('forge:open-downloads',event=>{fullAccount(event);return shell.openExternal(environment.site+'/docs/instalar/');});
 handle('forge:license-info',async event=>{
   fullAccount(event);const account=desktopAccount(),license=await account.license();
   return {plan:license?.plan||null,validUntil:license?.exp?license.exp*1000:null,issue:license?null:account.lastLicenseIssue,installationId:account.record?.installationId||null};

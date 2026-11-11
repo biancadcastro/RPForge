@@ -5,6 +5,7 @@ import {useEffect,useState} from 'react';
 import type {DesktopBridge} from "../lib/desktop";
 import {useToast} from './toast';
 import {userMessage} from '../lib/user-message';
+import {Notice} from './notice';
 export function HelpScreen({api}:{api?:DesktopBridge}) {
   const toast=useToast();
   const [info,setInfo]=useState<Awaited<ReturnType<DesktopBridge['appInfo']>>>(),[failed,setFailed]=useState(false);
@@ -12,6 +13,7 @@ export function HelpScreen({api}:{api?:DesktopBridge}) {
   return (
     <main className="help-page wrap">
 <PageHeading title="Ajuda" description="Escolha, revise e crie. Seus arquivos originais ficam preservados."/>
+      {info?.environment?.local&&<Notice tone="warning" className="environment-notice" title={info.environment.label}><p>Este app está conectado à API local {info.environment.api} e ao site local {info.environment.site}. A conta, a licença e os dados deste modo ficam em um perfil separado e não valem em produção.</p></Notice>}
       <div className="help-grid">
         <section>
           <span className="step-number">01</span>
@@ -56,7 +58,7 @@ export function HelpScreen({api}:{api?:DesktopBridge}) {
         <section><h2>Se houver uma interrupção</h2><p>Repita a operação com o mesmo destino para recuperar uma gravação interrompida. Backups e arquivos modificados são preservados. Se a recuperação pedir revisão manual, mantenha os temporários até conferir os resultados.</p></section>
       </div>
       <section className="help-version" aria-labelledby="help-version-title">
-        <div><h2 id="help-version-title">Versão e suporte</h2><p>{info?`RPForge ${info.version}${info.development?' · ambiente de desenvolvimento':''} · ${info.platform}`:failed?'Não foi possível ler a versão instalada.':'Carregando versão…'}</p><p>Para suporte, informe a versão, a ferramenta e a mensagem de erro. Nunca envie senha, códigos de recuperação ou arquivos de sessão.</p></div>
+        <div><h2 id="help-version-title">Versão e suporte</h2><p>{info?`RPForge ${info.version}${info.development?' · ambiente de desenvolvimento':''}${info.environment?.local?' · '+info.environment.label.toLowerCase():''} · ${info.platform}`:failed?'Não foi possível ler a versão instalada.':'Carregando versão…'}</p><p>Para suporte, informe a versão, a ferramenta e a mensagem de erro. Nunca envie senha, códigos de recuperação ou arquivos de sessão.</p></div>
         <button className="button secondary" onClick={()=>void api?.openDownloads().catch(e=>toast({tone:'error',title:'Não foi possível abrir o site',message:userMessage(e)}))}>Instalação e atualização manual</button>
       </section>
     </main>

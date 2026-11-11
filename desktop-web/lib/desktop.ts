@@ -77,6 +77,8 @@ export const emptyDraft = (): Draft => ({
   results: [],
   error: "",
 });
+/** Which backend this process talks to. `local` is the loopback test API, never production. */
+export type AppEnvironment = {name:'production'|'local';local:boolean;label:string;api:string;site:string};
 export interface DesktopBridge {
   windowControl(action:'state'|'minimize'|'maximize'|'close'):Promise<{maximized:boolean;maximizable?:boolean}>;
   onWindowState(callback:(state:{maximized:boolean;maximizable?:boolean})=>void):()=>void;
@@ -98,7 +100,8 @@ export interface DesktopBridge {
   profile(): Promise<AccountProfile | null>;
   signOut(): Promise<void>;
   openAccount(): Promise<void>;
-  appInfo(): Promise<{version:string;development:boolean;electron:string;platform:string}>;
+  appInfo(): Promise<{version:string;development:boolean;electron:string;platform:string;environment?:AppEnvironment}>;
+  environment(): Promise<AppEnvironment>;
   openDownloads(): Promise<void>;
   licenseInfo(): Promise<{plan:string|null;validUntil:number|null;issue:string|null;installationId:string|null}>;
   authOptions(): Promise<AuthOptions>;

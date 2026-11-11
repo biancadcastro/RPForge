@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld("rpforge", {
   signOut: () => invoke('forge:sign-out'),
   openAccount: () => invoke('forge:open-account'),
   appInfo: () => invoke('forge:app-info'),
+  environment: () => invoke('forge:environment'),
   openDownloads: () => invoke('forge:open-downloads'),
   licenseInfo: () => invoke('forge:license-info'),
   authOptions: () => invoke("forge:auth-options"),

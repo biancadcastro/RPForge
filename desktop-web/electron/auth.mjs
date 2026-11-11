@@ -1,5 +1,5 @@
 import { networkError } from "../../src/user-error.js";
-const API = "https://api.rpforge.dev";
+import { PRODUCTION } from "./environment.mjs";
 const messages = {
   INVALID_CREDENTIALS:
     "Confira o e-mail e a senha. Sua conta precisa ter o e-mail confirmado.",
@@ -12,17 +12,17 @@ const messages = {
   INVALID_CHALLENGE: "Este acesso expirou. Entre novamente.",
   OAUTH_NOT_CONFIGURED: "Este provedor não está disponível no momento.",
 };
-export function createAuthClient(fetcher) {
+export function createAuthClient(fetcher, environment = PRODUCTION) {
   async function request(endpoint, body) {
     let response;
     try {
-      response = await fetcher(API + endpoint, {
+      response = await fetcher(environment.api + endpoint, {
         method: body === undefined ? "GET" : "POST",
         credentials: "include",
         cache: "no-store",
         signal: AbortSignal.timeout(10000),
         headers: {
-          Origin: "https://rpforge.dev",
+          Origin: environment.site,
           ...(body === undefined ? {} : { "Content-Type": "application/json" }),
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),

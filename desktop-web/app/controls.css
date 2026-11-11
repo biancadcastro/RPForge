@@ -188,3 +188,7 @@ h1[tabindex="-1"]:focus { outline: none; }
 .desktop .breadcrumb > button { color: var(--muted); }
 .desktop .breadcrumb > button:hover:not(:disabled) { color: var(--orange); }
 .desktop .pixel-result > .breadcrumb { margin-top: 22px; }
+
+/* Local test environment: always visible so nobody mistakes it for production. */
+.environment-badge { flex-shrink: 0; margin-left: 6px; padding: 2px 8px; border: 1px solid var(--warning); border-radius: var(--control-radius); background: var(--warning-bg); color: var(--warning); font: 700 11px/1.5 var(--font-body); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.desktop .environment-notice { margin-bottom: 20px; }
