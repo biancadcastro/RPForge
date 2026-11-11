@@ -85,3 +85,14 @@ test('saving a result verifies SHA-256, never overwrites, and refuses links and 
   // data/vehicles.meta is saved by its file name only.
   assert.equal(path.basename(await saveArtifact({ api, artifact: { ...artifact, name: 'data/vehicles.meta' }, destination: dest })), 'vehicles.meta');
 });
+
+test('a folder reached through its 8.3 short name is not mistaken for a link', { skip: process.platform !== 'win32' }, async (t) => {
+  const { execFileSync } = await import('node:child_process');
+  const long = path.join(await tmp(t), 'pasta com nome bem longo');
+  await mkdir(long);
+  await writeFile(path.join(long, 'a.meta'), 'x');
+  const short = execFileSync('cmd.exe', ['/d', '/c', `for %I in ("${long}") do @echo %~sI`], { encoding: 'utf8', windowsVerbatimArguments: true }).trim();
+  if (short.toLowerCase() === long.toLowerCase()) return t.skip('8.3 names are disabled on this volume');
+  assert.deepEqual((await inventory([path.join(short, 'a.meta')])).map((f) => f.name), ['a.meta']);
+  assert.deepEqual((await inventory([short], { recursive: true })).map((f) => f.name), ['a.meta']);
+});

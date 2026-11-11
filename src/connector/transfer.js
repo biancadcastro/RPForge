@@ -21,7 +21,12 @@ export class TransferError extends Error { constructor(code, detail) { super(det
 async function plainEntry(target) {
   const info = await lstat(target);
   if (info.isSymbolicLink()) throw new TransferError('LINK_NOT_ALLOWED', path.basename(target));
-  if (path.resolve(await realpath(target)).toLowerCase() !== path.resolve(target).toLowerCase()) throw new TransferError('LINK_NOT_ALLOWED', path.basename(target));
+  // The entry must really live in its parent folder. Compare canonical forms on both sides, never the
+  // literal path: the same folder can be spelled with 8.3 short names (C:\Users\RUNNER~1\..., PASTAC~1)
+  // and would otherwise be mistaken for a link.
+  const resolved = path.resolve(target);
+  const [real, parent] = await Promise.all([realpath(resolved), realpath(path.dirname(resolved))]);
+  if (path.dirname(path.resolve(real)).toLowerCase() !== path.resolve(parent).toLowerCase()) throw new TransferError('LINK_NOT_ALLOWED', path.basename(target));
   return info;
 }
 
