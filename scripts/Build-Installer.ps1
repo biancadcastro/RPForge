@@ -127,8 +127,9 @@ Dúvidas: abra Ajuda no RPForge ou consulte o site.
 Para remover, use Configurações > Aplicativos > RPForge.
 Seus recursos e arquivos originais não são apagados na desinstalação.
 
-Código próprio sob licença proprietária. Veja legal\TERMOS-E-LICENCA.txt e
-legal\AVISOS-DE-TERCEIROS.txt na pasta de instalação.
+Código próprio sob licença proprietária. Veja legal\TERMOS-E-LICENCA.txt,
+legal\PRIVACIDADE.txt e legal\AVISOS-DE-TERCEIROS.txt na pasta de instalação.
+Suporte: suporte@rpforge.dev. Privacidade: privacidade@rpforge.dev.
 As dependências mantêm suas licenças próprias.
 Versão de testes com certificado local. A confiança requer autorização explícita.
 A primeira instalação em máquina limpa ainda não foi validada.

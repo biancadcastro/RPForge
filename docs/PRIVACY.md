@@ -3,6 +3,20 @@
 Esta descricao corresponde ao codigo atual (versao 1.0.1, interface Electron em
 `desktop-web/`). O texto exibido no instalador fica em `installer/legal/PRIVACY.txt`.
 
+> Aviso interno (nao publicado): este documento e os textos do instalador sao minutas
+> alinhadas a Politica de Privacidade versao 1.0 (2026-11-11) e precisam de revisao por
+> advogado(a). Este arquivo e a fonte tecnica; a politica publicada fica em
+> <https://rpforge.dev/docs/privacidade/> e os dados variaveis (identificacao, contatos,
+> prazos) tem um unico ponto de preenchimento, `lib/legal.ts` no repositorio do site.
+
+## Responsavel e canal
+
+- Controladora: Bianca de Castro, que mantem o RPForge. Identificacao completa: nos Termos
+  de Uso publicados no site.
+- Canal de privacidade e de pedidos de titulares: `privacidade@rpforge.dev`. Suporte:
+  `suporte@rpforge.dev`.
+- O RPForge e destinado a pessoas com 18 anos ou mais.
+
 ## Arquivos do usuario
 
 - A leitura, extracao, verificacao e conversao de RPFs, a geracao de YTYP e as
@@ -61,6 +75,29 @@ Esta descricao corresponde ao codigo atual (versao 1.0.1, interface Electron em
 - A instalacao configura o menu do Explorer e os dados de desinstalacao. A remocao do
   programa nao deve apagar os recursos ou arquivos de trabalho do usuario. Desinstalar
   nao exclui a conta no servico.
+
+## O que a API guarda sobre o computador
+
+- O nome do computador (nome de host do Windows, ate 60 caracteres) e enviado a API na
+  autorizacao do computador, fica associado a conta junto com o identificador de
+  instalacao e a chave publica, aparece no painel da conta e no e-mail de aviso de novo
+  computador conectado. Base legal: execucao de contrato.
+- Cada conta mantem ate 2 computadores conectados. O usuario remove computadores no
+  painel; o registro de um computador removido e apagado 90 dias depois.
+- A API nao guarda o endereco IP dos acessos em forma legivel; ele e usado apenas como
+  codigo irreversivel, por cerca de 15 minutos, para limitar tentativas.
+
+## Prazos e direitos do titular
+
+- Dados da conta: enquanto a conta existir. Registro de acoes de seguranca: 12 meses.
+  Cadastro sem e-mail confirmado: 30 dias. Conta sem acesso: aviso por e-mail aos 24
+  meses e exclusao 30 dias depois. A tabela completa e o que ja e aplicado pelo codigo
+  estao em `docs/RETENCAO.md` do repositorio da API.
+- Acesso, correcao, copia dos dados e exclusao da conta: pela propria conta, quando a
+  opcao estiver disponivel no painel, ou por `privacidade@rpforge.dev`, com resposta em
+  ate 15 dias.
+- Os dados locais (`%LOCALAPPDATA%\RPForge`) permanecem apos a desinstalacao e sao
+  apagados pelo proprio usuario.
 
 Os scripts de desenvolvimento podem baixar dependencias e ferramentas dos seus
 fornecedores oficiais. Esse e um fluxo separado da conversao local de assets.

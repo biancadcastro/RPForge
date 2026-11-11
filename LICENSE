@@ -1,10 +1,36 @@
 RPForge - Licenca de uso proprietaria
 Copyright (c) 2026 Bianca de Castro. Todos os direitos reservados.
 Aplicavel as versoes 0.3.2 e posteriores fornecidas sob esta licenca.
+Versao 2.0 da licenca (2026-11-11).
 
-1. Uso. E concedida uma licenca nao exclusiva para instalar e utilizar esta versao de testes do RPForge, gratuitamente, inclusive em atividades comerciais. Nao ha transferencia de titularidade sobre o software.
-2. Distribuicao. E permitido compartilhar links para os canais oficiais. A redistribuicao, venda, sublicenciamento, modificacao e disponibilizacao do codigo proprio ou de versoes derivadas exigem autorizacao escrita da titular, ressalvados os direitos que a legislacao aplicavel nao permita restringir.
-3. Seus arquivos. Esta licenca nao concede direitos sobre mods, marcas ou arquivos de terceiros. Os arquivos de entrada e os recursos gerados permanecem sujeitos aos direitos de seus respectivos titulares.
-4. Versao de testes. O aplicativo e fornecido no estado em que se encontra. Preserve backups e valide os resultados no FiveM. A instalacao em maquina limpa ainda nao foi validada nesta distribuicao. As limitacoes de garantia e responsabilidade aplicam-se somente na extensao permitida pela legislacao, sem afastar direitos obrigatorios do usuario.
-5. Assinatura local. Esta versao usa certificado local, sem validacao publica de identidade. A ativacao do menu moderno pode exigir consentimento para confiar nesse certificado em TrustedPeople para todos os usuarios do computador. Isso abrange outros arquivos assinados com a mesma chave e nao garante ausencia de alertas do Windows. A desinstalacao nao remove automaticamente essa confianca.
-6. Terceiros e versoes anteriores. Componentes de terceiros mantem suas proprias licencas e avisos, disponiveis em THIRD_PARTY_NOTICES.md e licenses/. Esta licenca nao revoga os direitos concedidos sobre versoes anteriores publicadas sob GPLv3 ou outras licencas.
+Esta licenca faz parte dos Termos de Uso do RPForge (https://rpforge.dev/docs/termos/). A identificacao completa de quem oferece o RPForge, os contatos e o foro constam nos Termos de Uso publicados no site.
+
+1. Concessao. E concedida uma licenca nao exclusiva, intransferivel e revogavel nos casos desta licenca para instalar e utilizar o aplicativo RPForge para Windows. O software e licenciado, nao vendido. Nao ha transferencia de titularidade sobre o software, que permanece com a autora.
+
+2. Planos Free e Pro. O plano Free (conversao de RPF, revisao e geracao de YTYP) pode ser usado gratuitamente e sem conta. O plano Pro inclui as ferramentas de roupas (OBJ, Neon e Separar pele) e exige uma conta RPForge conectada com acesso Pro vigente. Hoje o acesso Pro nao e vendido: e concedido por prazo determinado, sem cobranca, e nao gera direito a renovacao. Quando houver cobranca, o preco e as condicoes constarao da oferta, antes da compra, e valerao as regras do plano pago descritas nos Termos de Uso.
+
+3. Conta e computadores. Cada conta pode manter ate 2 (dois) computadores conectados ao mesmo tempo. O usuario pode remover computadores no painel da conta. A conta e pessoal; o acesso Pro nao pode ser revendido nem compartilhado.
+
+4. Verificacao online da licenca. As ferramentas Pro dependem de uma licenca assinada, emitida pela API do RPForge (api.rpforge.dev) para a conta e para o computador conectados. O aplicativo renova essa licenca periodicamente pela internet. Sem conexao, a licenca ja emitida continua valida por ate 72 horas; depois disso, as ferramentas Pro ficam indisponiveis ate a proxima renovacao. As ferramentas Free nao dependem dessa verificacao. Os dados enviados nesse fluxo estao descritos na Politica de Privacidade (https://rpforge.dev/docs/privacidade/).
+
+5. Uso comercial. O uso em atividades comerciais e permitido nos planos Free e Pro, por exemplo para preparar recursos para o proprio servidor ou para clientes.
+
+6. Restricoes. Sem autorizacao escrita da titular, nao e permitido: redistribuir, vender, alugar ou sublicenciar o aplicativo; modificar ou disponibilizar o codigo proprio ou versoes derivadas; remover avisos de autoria; burlar a verificacao de licenca ou o limite de computadores; acessar a API por meios automatizados que nao sejam o site e o aplicativo oficiais. E permitido compartilhar links para os canais oficiais. Ficam ressalvados os direitos que a legislacao aplicavel nao permita restringir.
+
+7. Seus arquivos. Esta licenca nao concede direitos sobre mods, marcas ou arquivos de terceiros. Os arquivos de entrada e os recursos gerados permanecem sujeitos aos direitos de seus respectivos titulares. O usuario e responsavel por ter as permissoes necessarias sobre o conteudo que processa. O RPForge e um projeto independente, sem afiliacao a Rockstar Games, a Take-Two Interactive ou a Cfx.re.
+
+8. Atualizacoes e suporte. Versoes podem ser lancadas, alteradas ou descontinuadas. Cada versao do aplicativo recebe suporte por 12 meses a partir do lancamento, em regime de melhor esforco e pelos canais oficiais; correcoes sao entregues em versoes novas. Nao ha atualizacao automatica.
+
+9. Garantia. O aplicativo e fornecido no estado em que se encontra. Nao ha garantia de que todo arquivo sera aceito nem de que o resultado funcionara em qualquer servidor. Preserve backups e valide os resultados no FiveM antes de usar em producao. A instalacao em maquina limpa ainda nao foi validada nesta distribuicao.
+
+10. Responsabilidade. Na extensao permitida em lei, a titular nao responde por perda de arquivos sem backup, por resultados nao testados colocados em producao, pelo uso de conteudo de terceiros sem autorizacao, por sancoes aplicadas por terceiros, por lucros cessantes nem por danos indiretos. Para quem usa o aplicativo profissionalmente ou em nome de uma empresa, e nao como consumidor, a responsabilidade total fica limitada, na extensao permitida em lei, ao valor pago ao RPForge nos 12 meses anteriores ao fato. Nada nesta licenca exclui ou limita direitos que a lei garante de forma obrigatoria, em especial os do Codigo de Defesa do Consumidor, nem a responsabilidade por dolo ou culpa grave.
+
+11. Assinatura local. Esta versao usa certificado local, sem validacao publica de identidade. A ativacao do menu moderno pode exigir consentimento para confiar nesse certificado em TrustedPeople para todos os usuarios do computador. Isso abrange outros arquivos assinados com a mesma chave e nao garante ausencia de alertas do Windows. A desinstalacao nao remove automaticamente essa confianca. Essa autorizacao e separada do aceite desta licenca e pode ser recusada.
+
+12. Terceiros e versoes anteriores. Componentes de terceiros mantem suas proprias licencas e avisos, disponiveis em THIRD_PARTY_NOTICES.md e licenses/. Esta licenca nao revoga os direitos concedidos sobre versoes anteriores publicadas sob GPLv3 ou outras licencas.
+
+13. Encerramento. A licenca termina se o usuario descumprir estas condicoes ou os Termos de Uso; nesse caso, o uso do aplicativo deve cessar. O acesso Pro tambem termina ao fim do prazo concedido ou contratado. O usuario pode encerrar a licenca a qualquer momento desinstalando o aplicativo; desinstalar nao exclui a conta RPForge.
+
+14. Lei aplicavel e foro. Aplica-se a lei brasileira. Se o usuario e consumidor, vale o foro do seu domicilio. Nos demais casos, vale o foro indicado nos Termos de Uso publicados em https://rpforge.dev/docs/termos/ e, enquanto nenhum estiver indicado, as regras gerais de competencia da legislacao brasileira.
+
+15. Contato. Suporte: suporte@rpforge.dev. Privacidade e direitos autorais: privacidade@rpforge.dev. Canais oficiais: https://rpforge.dev e https://github.com/biancadcastro/RPForge.

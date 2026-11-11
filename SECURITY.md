@@ -7,9 +7,10 @@ Quando o recurso estiver habilitado no repositório público, use
 [Report a vulnerability](https://github.com/biancadcastro/RPForge/security/advisories/new)
 na aba Security para enviar um relato privado à mantenedora.
 
-Enquanto esse canal não estiver disponível, combine um canal privado com a mantenedora
-pelos contatos que ela já tiver fornecido. Não existe um endereço de suporte externo
-adicional anunciado por este documento.
+Se esse canal não estiver disponível, escreva para `privacidade@rpforge.dev` com o assunto
+"Segurança". O mesmo endereço recebe avisos de suspeita de vazamento de dados pessoais e
+pedidos de titulares de dados. Dúvidas de uso e problemas comuns vão para
+`suporte@rpforge.dev` ou para as issues do repositório.
 
 Informe a versão afetada, o impacto, os passos mínimos para reproduzir e, se possível,
 uma reprodução sintética. Remova tokens, caminhos pessoais e conteúdo de terceiros dos anexos.
@@ -17,9 +18,17 @@ Não faça testes em servidores, contas ou arquivos de outras pessoas sem autori
 
 ## Escopo atual
 
-O RPForge 1.0.1 é uma versão de testes assinada com certificado local. O projeto procura manter a versão atual
-do código, mas não oferece suporte de segurança de longo prazo a versões antigas.
+O RPForge 1.0.1 é uma versão de testes assinada com certificado local. Cada versão do
+aplicativo recebe suporte por 12 meses a partir do lançamento, em regime de melhor esforço;
+as correções são entregues em versões novas, não em versões antigas.
 Não há prazo de resposta ou correção garantido.
+
+## Dados pessoais e incidentes
+
+O tratamento de dados está descrito em [PRIVACY.md](docs/PRIVACY.md) e na política publicada em
+<https://rpforge.dev/docs/privacidade/>. Se um relato indicar exposição de dados pessoais de
+contas, ele é tratado como incidente de segurança: contenção, avaliação de risco e, quando
+houver risco ou dano relevante, comunicação aos titulares e à ANPD nos prazos legais.
 
 O conversor aceita RPFs abertos de GTA V Legacy e não oferece descriptografia,
 execução de scripts de addons ou envio de assets para serviços de conversão.

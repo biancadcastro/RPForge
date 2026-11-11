@@ -1,17 +1,40 @@
-RPForge — Termos de uso
+RPForge — Termos de uso e aceite
 
-Estes termos acompanham a licença de uso apresentada a seguir. A licença proprietária aplica-se ao código próprio das versões 0.3.2 e posteriores. Os direitos das versões anteriores permanecem sujeitos às licenças originais.
+Versão 1.0 dos Termos de Uso (2026-11-11). O texto completo e atualizado está em https://rpforge.dev/docs/termos/ e prevalece sobre este resumo. A licença de uso do aplicativo vem logo abaixo e faz parte dos Termos.
 
-Use apenas arquivos seus ou autorizados. O RPForge não concede direitos sobre modelos, texturas, marcas ou conteúdos de terceiros. Não utilize a ferramenta para contornar proteção ou redistribuir conteúdo sem autorização.
+O que você aceita ao instalar
+
+Ao instalar, você declara ter 18 anos ou mais e aceita os Termos de Uso e a licença do RPForge. O RPForge é um projeto mantido por Bianca de Castro; a identificação completa, os contatos e o foro constam nos Termos publicados no site.
+
+Resumo de privacidade
+
+O aplicativo processa seus arquivos no seu computador e não os envia para a internet. A conta é opcional: só ao entrar, o aplicativo envia à API do RPForge o nome deste computador, um identificador de instalação e uma chave pública, para vincular o computador à sua conta. Não há telemetria nem atualização automática. Os detalhes estão no documento Privacidade no aplicativo, neste assistente, e em https://rpforge.dev/docs/privacidade/.
+
+Planos, conta e computadores
+
+O plano Free (conversão de RPF e geração de YTYP) funciona sem conta e sem custo. As ferramentas de roupas pertencem ao plano Pro, exigem conta conectada e uma licença verificada pela internet, que continua válida por até 72 horas sem conexão. Cada conta pode manter até 2 computadores conectados ao mesmo tempo. Hoje o acesso Pro é concedido sem cobrança, por prazo determinado. O uso comercial é permitido nos planos Free e Pro.
+
+Seus arquivos e direitos de terceiros
+
+Use apenas arquivos seus ou autorizados. O RPForge não concede direitos sobre modelos, texturas, marcas ou conteúdos de terceiros. Não utilize a ferramenta para contornar proteção ou redistribuir conteúdo sem autorização. Os direitos sobre os arquivos do GTA V pertencem aos respectivos titulares.
 
 Mantenha cópias de segurança e teste os recursos antes de usá-los em produção. Confira nomes, destinos, avisos e a escolha para pastas existentes antes de iniciar. O aplicativo não publica conteúdo no servidor nem altera seu server.cfg automaticamente.
 
-Baixe somente de canais oficiais do projeto e confira a origem dos arquivos. Certificados locais de desenvolvimento não equivalem a uma assinatura pública aprovada. A autorização de confiança no certificado, quando oferecida, é separada do aceite destes termos e pode ser recusada.
+Distribuição e certificado local
 
-As condições de uso, garantia e responsabilidade constam na licença abaixo, nos limites da legislação aplicável. Componentes de terceiros mantêm suas próprias licenças. Nada aqui pretende afastar direitos legais que não possam ser excluídos.
+Baixe somente de canais oficiais do projeto e confira a origem dos arquivos. Certificados locais de desenvolvimento não equivalem a uma assinatura pública aprovada. A autorização de confiança no certificado, quando oferecida, é pedida em uma etapa separada do aceite destes termos e pode ser recusada.
 
-RPForge é um projeto independente, sem afiliação à Rockstar Games ou à Cfx.re. As marcas citadas pertencem aos respectivos titulares.
+Garantia e responsabilidade
 
+As condições de uso, garantia e responsabilidade constam na licença abaixo e nos Termos de Uso, e valem somente na extensão permitida em lei. Componentes de terceiros mantêm suas próprias licenças. Nada aqui afasta direitos do consumidor nem outros direitos que a lei não permite excluir. Aplica-se a lei brasileira; se você é consumidor, vale o foro do seu domicílio.
+
+Projeto independente
+
+RPForge é um projeto independente, sem afiliação à Rockstar Games, à Take-Two Interactive ou à Cfx.re. As marcas citadas pertencem aos respectivos titulares.
+
+Contato
+
+Suporte: suporte@rpforge.dev. Privacidade e direitos autorais: privacidade@rpforge.dev.
 Canais oficiais: https://rpforge.dev e https://github.com/biancadcastro/RPForge.
 
 ------------------------------------------------------------

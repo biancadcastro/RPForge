@@ -1,29 +1,57 @@
 RPForge — Privacidade no aplicativo
 
+Este documento resume, para o aplicativo, a Política de Privacidade do RPForge, versão 1.0 (2026-11-11). O texto completo e atualizado está em https://rpforge.dev/docs/privacidade/.
+
+Quem é responsável
+
+A controladora dos dados é Bianca de Castro, que mantém o RPForge. Canal de privacidade e de pedidos de titulares: privacidade@rpforge.dev.
+
 Processamento dos seus arquivos
 
-A leitura, a extração, a verificação e a conversão acontecem no seu computador. As ferramentas de conversão e geração de YTYP não enviam modelos, texturas, nomes de arquivos ou caminhos para a API. Seus arquivos originais e os resultados ficam sob seu controle.
+A leitura, a extração, a verificação e a conversão acontecem no seu computador. Nenhuma ferramenta envia modelos, texturas, nomes de arquivos ou caminhos para a API ou para serviços externos. Seus arquivos originais e os resultados ficam sob seu controle.
 
-Conta opcional
+Sem conta
 
-Ao entrar na sua conta, o aplicativo se comunica com a API do RPForge. Os dados necessários à autenticação incluem a identidade da conta, o nome informado para o computador, um identificador de instalação e uma chave pública. O app recebe o nome de exibição e, quando disponível, o avatar para mostrar a conta conectada.
+As ferramentas de conversão e de geração de YTYP funcionam sem conta e sem conexão. Sem conta conectada, o aplicativo não faz pedidos de rede para essas ferramentas. Não há telemetria, anúncios nem verificação automática de atualização.
 
-Discord, Google e GitHub são autorizados no navegador padrão do Windows. O provedor escolhido trata os dados segundo suas próprias políticas. A confirmação de conexão acontece no site rpforge.dev. O aplicativo não copia os cookies do navegador e não pede a senha do provedor numa janela interna.
+Conta opcional: o que é enviado à API
 
-A sessão do aplicativo e a chave privada da instalação são armazenadas localmente com a proteção do Windows, por meio do armazenamento seguro do Electron. O login por e-mail e senha usa a API; a senha não é salva pelo aplicativo. Os cookies de sessão são protegidos no processo principal e não ficam disponíveis para a interface.
+Ao entrar na sua conta pelo aplicativo, ele se comunica com a API do RPForge (api.rpforge.dev) e envia:
 
-As ações rápidas de conversão e geração de YTYP não carregam o perfil da conta nem consultam atualização de versão. As validações locais dos arquivos continuam ativas.
+- um identificador de instalação e uma chave pública gerada no seu computador;
+- o nome do computador no Windows (até 60 caracteres), para vincular o aparelho à conta, mostrá-lo no seu painel e no e-mail de aviso de novo computador conectado;
+- no login por e-mail: e-mail, senha e, quando ativo, o código da verificação em duas etapas. A senha não é salva pelo aplicativo.
 
-Comunicação com o site e a API
+Cada conta pode manter até 2 computadores conectados. Com a conta conectada, o aplicativo renova a licença periodicamente, ao abrir e a cada poucos minutos; a licença vale por até 72 horas sem conexão. A base legal desses tratamentos é a execução do contrato com você.
 
-A hospedagem na Cloudflare pode tratar dados técnicos de acesso, como endereço IP, horário, URL e informações do navegador, para entrega e segurança dos serviços. O site e a API usam os dados da conta e os registros de segurança necessários aos fluxos de autenticação e às autorizações de computadores.
+Discord, Google e GitHub são autorizados no navegador padrão do Windows. O provedor escolhido trata os dados segundo suas próprias políticas. A confirmação de conexão acontece no site rpforge.dev. O aplicativo não copia os cookies do navegador e não pede a senha do provedor numa janela interna. O avatar exibido é carregado diretamente do provedor, que por isso recebe o seu endereço IP.
+
+O que fica só no seu computador
+
+A sessão, a licença e a chave privada da instalação ficam em %LOCALAPPDATA%\RPForge\account, cifradas pela proteção do Windows. Um registro local de estado da sessão, sem tokens, senhas nem caminhos, fica em %LOCALAPPDATA%\RPForge\logs. As configurações do menu do Explorer ficam no seu perfil do Windows.
+
+Site e API
+
+A hospedagem na Cloudflare trata dados técnicos de acesso, como endereço IP, horário, URL e informações do navegador, para entrega e segurança dos serviços. A API guarda os dados da conta, os computadores conectados e um registro de ações de segurança sem endereço IP. Os fornecedores (Cloudflare, GitHub, Discord e Google) operam nos Estados Unidos e em outros países; por isso seus dados podem ser transferidos para fora do Brasil.
+
+Por quanto tempo
+
+Os dados da conta ficam guardados enquanto a conta existir. Computadores removidos são apagados 90 dias após a remoção; o registro de ações de segurança, após 12 meses; cadastros sem e-mail confirmado, após 30 dias. Contas sem acesso por 24 meses recebem um aviso por e-mail e são excluídas 30 dias depois, se não houver novo acesso.
+
+Seus direitos
+
+Você pode pedir acesso, correção, uma cópia dos seus dados e a exclusão da conta. O pedido pode ser feito pela própria conta, quando a opção estiver disponível no painel, ou pelo e-mail privacidade@rpforge.dev, com resposta em até 15 dias. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
 
 Instalação e remoção
 
 A instalação registra o aplicativo e sua integração com o Explorer. A autorização opcional de confiança em certificado local é explicada em uma etapa separada e não é pré-selecionada. Instalações silenciosas não concedem essa confiança.
 
-A desinstalação remove os arquivos do aplicativo e sua integração, preservando os arquivos de trabalho e os resultados das ferramentas. A confiança no certificado local não é removida automaticamente. Perfis locais e dados da conta exigem tratamento separado; desinstalar não deve ser interpretado como exclusão da conta no serviço.
+A desinstalação remove os arquivos do aplicativo e sua integração, preservando os arquivos de trabalho e os resultados das ferramentas. A confiança no certificado local não é removida automaticamente. Desinstalar não apaga os dados locais da conta (pasta %LOCALAPPDATA%\RPForge) nem exclui a sua conta no serviço.
+
+Idade
+
+O RPForge é destinado a pessoas com 18 anos ou mais.
 
 Informações e suporte
 
-A documentação de privacidade e os canais oficiais estão em https://rpforge.dev/docs/privacidade/ e https://github.com/biancadcastro/RPForge. Não envie senhas, códigos de autenticação, chaves, sessões ou mods pagos em relatos públicos.
+Política completa: https://rpforge.dev/docs/privacidade/. Suporte: suporte@rpforge.dev. Não envie senhas, códigos de autenticação, chaves, sessões ou mods pagos em relatos públicos.
