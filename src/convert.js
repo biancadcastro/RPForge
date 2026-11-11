@@ -31,8 +31,23 @@ export async function prepareArchive(archive, options = {}) {
   const source = await readFile(archive);
   const sourceHash = createHash('sha256').update(source).digest('hex');
   if (options.expectedSource && options.expectedSource !== sourceHash) throw new Error('O RPF mudou desde a prévia. Analise novamente antes de converter.');
-  const entries = [...readRpf(source)];
-  if (!entries.some(e => path.posix.basename(e.path).toLowerCase() === 'vehicles.meta')) return prepareContent(entries, archive, options, sourceHash, stat.size);
+  const readState = { bytes: 0, entries: 0 };
+  const entries = [...readRpf(source, '', readState)];
+  const ignoredArchives = readState.ignoredArchives ?? [];
+  const ignoredWarnings = [
+    ...ignoredArchives.map(file => ({ severity: 'warning', code: 'IGNORED_INNER_ARCHIVE', file, message: `O pacote interno ${path.posix.basename(file)} está vazio ou ilegível e foi ignorado.` })),
+    ...(readState.duplicateArchives ?? []).map(item => ({ severity: 'warning', code: 'DUPLICATE_INNER_ARCHIVE', file: item.path, message: `O pacote interno ${item.path} é uma cópia idêntica de ${item.original} e foi lido uma vez só.` })),
+  ];
+  // When nothing usable is found, say that an ignored inner package may have been the source.
+  const ignoredNote = ignoredArchives.length ? ` ${ignoredArchives.length === 1 ? 'O pacote interno ' + path.posix.basename(ignoredArchives[0]) + ' estava vazio ou ilegível e foi ignorado' : 'Os pacotes internos ' + ignoredArchives.map(file => path.posix.basename(file)).join(', ') + ' estavam vazios ou ilegíveis e foram ignorados'}; se o conteúdo estava nele, o RPF de origem está danificado.` : '';
+  if (!entries.some(e => path.posix.basename(e.path).toLowerCase() === 'vehicles.meta')) {
+    let plan;
+    try { plan = prepareContent(entries, archive, options, sourceHash, stat.size); }
+    catch (error) { if (ignoredNote && !error.code) error.message += ignoredNote; throw error; }
+    plan.audit.issues.push(...ignoredWarnings);
+    plan.audit.warnings += ignoredWarnings.length;
+    return plan;
+  }
   function add(destination, data) {
     const key = destination.toLowerCase();
     if (files.has(key)) {
@@ -73,7 +88,7 @@ export async function prepareArchive(archive, options = {}) {
     if (declaredModels.has(model)) throw new Error(`Modelo declarado mais de uma vez: ${model}`);
     declaredModels.add(model);
   }
-  if (!models.size || !metas.some(m => m.type === 'VEHICLE_METADATA_FILE')) throw new Error('Não foi encontrado um recurso de veículo com YFT base e vehicles.meta.');
+  if (!models.size || !metas.some(m => m.type === 'VEHICLE_METADATA_FILE')) throw new Error('Não foi encontrado um recurso de veículo com YFT base e vehicles.meta.' + ignoredNote);
   if (!declaredModels.size) throw new Error('vehicles.meta não declara nenhum modelName.');
   for (const model of declaredModels) {
     if (!models.has(model)) throw new Error(`YFT base ausente para o modelo declarado: ${model}`);
@@ -91,6 +106,8 @@ export async function prepareArchive(archive, options = {}) {
   const manifest = ['-- Convertido com RPForge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
   const audit = auditAddon(files);
+  audit.issues.push(...ignoredWarnings);
+  audit.warnings += ignoredWarnings.length;
   options.onProgress?.({ phase: 'audit', current: 1, total: 1, label: path.basename(archive) });
   return { archive, files, metas, kind: 'vehicle', defaultName: name, models: finalModels, originalModels: [...declaredModels].sort(), skipped, removedTuning: cleaned.removed, audit, sourceHash, sourceBytes: stat.size, mergedSources };
 }

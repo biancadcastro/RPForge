@@ -1,4 +1,5 @@
 import { inflateRawSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 import { corruptError } from './user-error.js';
 
 // Desktop profile: limits of the local application.
@@ -89,7 +90,17 @@ export function* readRpf(buffer, prefix = '', state = { bytes: 0, entries: 0 }, 
     }
     if (!storedNestedArchive) state.bytes += data.length;
     if (state.bytes > limits.totalBytes) throw new Error('Limite total de extração excedido.');
-    if (nestedArchive) yield* readRpf(data, `${current}/`, state, depth + 1);
+    // An inner archive that is empty or has no RPF7 header (e.g. a zeroed language pack)
+    // carries nothing readable: skip it and report it instead of failing the whole package.
+    // Encrypted or structurally broken inner RPFs still fail below.
+    if (nestedArchive && (data.length < 16 || data.readUInt32LE(0) !== 0x52504637)) (state.ignoredArchives ??= []).push(current);
+    else if (nestedArchive) {
+      // A byte-identical copy of an inner archive already read adds nothing: skip and report it.
+      const digest = createHash('sha256').update(data).digest('hex');
+      state.innerArchives ??= new Map();
+      if (state.innerArchives.has(digest)) (state.duplicateArchives ??= []).push({ path: current, original: state.innerArchives.get(digest) });
+      else { state.innerArchives.set(digest, current); yield* readRpf(data, `${current}/`, state, depth + 1); }
+    }
     else yield { path: current, data };
   }
   yield* visit(0, prefix, 0);
