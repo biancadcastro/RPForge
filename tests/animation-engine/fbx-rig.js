@@ -112,7 +112,8 @@ export function fbxFromPoses(skel, bones, pose, rest, options = {}) {
       if (b.parent < 0 || options.translationCurves) curves.push({model: b.name, channel: 'T', axis: c, times, values: tracks[k].T[c]});
     }
   });
-  const pose4 = w => [w.m[0], w.m[3], w.m[6], 0, w.m[1], w.m[4], w.m[7], 0, w.m[2], w.m[5], w.m[8], 0, w.t[0], w.t[1], w.t[2], 1];
+  // Bind pose = true world matrix of the bone, which carries the armature's uniform scale (column-major 4x4).
+  const pose4 = w => [w.m[0], w.m[3], w.m[6], 0, w.m[1], w.m[4], w.m[7], 0, w.m[2], w.m[5], w.m[8], 0].map(v => v * armScale).concat([w.t[0], w.t[1], w.t[2], 1]);
   const timeMode = {24: 11, 25: 10, 30: 6, 60: 3}[fps];
   return buildFbx({
     version: options.version, ascii: options.ascii, compress: options.compress,
