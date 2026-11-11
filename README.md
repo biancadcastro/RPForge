@@ -40,15 +40,15 @@ antiga (`desktop/`) permanece apenas como alternativa legada. Veja
 
 ### Configure, revise e converta
 
-![Tela Configurar do RPForge com um exemplo fictício de veículo](docs/guia-usuario/assets/v1-configurar.png)
+![Tela Configurar do RPForge com um exemplo fictício de veículo](docs/guia-usuario/assets/v101-configurar.png)
 
 Os nomes ficam na mesma tela. Se a pasta de saída já existir, você escolhe como continuar.
 
 ### Gere YTYPs pelo botão direito
 
-![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/v1-ytyp.png)
+![Resultado de uma geração de YTYP feita com um modelo de exemplo](docs/guia-usuario/assets/v101-ytyp.png)
 
-As capturas são do manual 1.0.0 e usam exemplos fictícios. O [manual oficial no site](https://rpforge.dev/docs/) acompanha cada etapa; o [PDF do manual 1.0.0](docs/guia-usuario/Manual-RPForge-1.0.0.pdf) cobre conversão de RPFs, YTYP e conta. O [PDF histórico da 0.3.1](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) permanece como referência dessa edição.
+As capturas são do manual 1.0.1 e usam exemplos fictícios. O [manual oficial no site](https://rpforge.dev/docs/) acompanha cada etapa; o [PDF do manual 1.0.1](docs/guia-usuario/Manual-RPForge-1.0.1.pdf) cobre conversão de RPFs, YTYP, conta, planos Free e Pro e as ferramentas de roupas (OBJ, Neon e Separar pele). Os PDFs das edições [1.0.0](docs/guia-usuario/Manual-RPForge-1.0.0.pdf) e [0.3.1](docs/guia-usuario/Manual-RPForge-0.3.1.pdf) permanecem como referência histórica.
 
 ## 🧭 Comece por aqui
 

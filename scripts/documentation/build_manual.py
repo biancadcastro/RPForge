@@ -33,7 +33,7 @@ for key,font,size,color in [('body','Body',10.5,INK),('small','Body',8.2,MUTED),
 c=canvas.Canvas(str(OUT/PDFNAME),pagesize=A4,pageCompression=1)
 c.setTitle('RPForge | Guia oficial do usuário | '+VERSION)
 c.setAuthor('Bianca de Castro · RPForge')
-c.setSubject('Instalação, conversão de RPFs, spawns, YTYP e solução de problemas')
+c.setSubject('Instalação, conversão de RPFs, spawns, YTYP, planos Free e Pro, ferramentas de roupas e solução de problemas')
 PAGECOUNT=len(DATA['sections'])+2
 layouts=[]
 def para(text,x,y,width=WIDTH,key='body',color=None):
@@ -75,7 +75,7 @@ c.drawImage(img,(W-dw)/2,142,dw,dh,mask='auto')
 c.setFillColor(HexColor(ORANGE));c.rect(0,0,W,102,fill=1,stroke=0)
 c.setFillColor(HexColor(DARK));c.setFont('BodyBold',12);c.drawString(M,68,'RPFORGE '+VERSION)
 c.setFont('Body',9);c.drawString(M,48,DATA['edition']+' · '+DATA['date'])
-c.drawString(M,30,'Instalar · Converter · Gerar YTYP · Resolver avisos')
+c.drawString(M,30,'Instalar · Converter · Gerar YTYP · Roupas Pro · Resolver avisos')
 c.bookmarkPage('capa');c.addOutlineEntry('Guia do usuário','capa',level=0)
 c.showPage()
 
@@ -85,14 +85,16 @@ c.bookmarkPage('indice');c.addOutlineEntry('Índice','indice',level=0)
 c.setFont('Pixel',28);c.setFillColor(HexColor(INK));c.drawString(M,H-105,'Encontre seu próximo passo')
 y=para('Leia na ordem para começar ou vá direto ao assunto. Os títulos abaixo são clicáveis no PDF.',M,H-128)
 y-=22
+# Keep every chapter on the single contents page; tighten rows as the guide grows.
+row=min(28,(y-110)/len(DATA['sections']))
 for i,s in enumerate(DATA['sections']):
     num=i+3
-    c.setFillColor(HexColor('#E8E4DC' if i%2==0 else PAPER));c.roundRect(M,y-24,WIDTH,26,4,fill=1,stroke=0)
-    c.setFont('Body',10.3);c.setFillColor(HexColor(INK));c.drawString(M+12,y-16,s['label'])
-    c.setFont('BodyBold',10);c.setFillColor(HexColor('#B84715'));c.drawRightString(W-M-12,y-16,f'{num:02d}')
-    c.linkRect('',s['id'],(M,y-27,W-M,y+3),relative=0,thickness=0)
-    y-=28
-para('Sobre as imagens: telas do aplicativo com nomes e dados fictícios para demonstração. A imagem de YTYP mostra uma geração feita com um modelo de teste.',M,y-14,WIDTH,'small')
+    c.setFillColor(HexColor('#E8E4DC' if i%2==0 else PAPER));c.roundRect(M,y-row+4,WIDTH,row-2,4,fill=1,stroke=0)
+    c.setFont('Body',10.3);c.setFillColor(HexColor(INK));c.drawString(M+12,y-row+12,s['label'])
+    c.setFont('BodyBold',10);c.setFillColor(HexColor('#B84715'));c.drawRightString(W-M-12,y-row+12,f'{num:02d}')
+    c.linkRect('',s['id'],(M,y-row+1,W-M,y+3),relative=0,thickness=0)
+    y-=row
+para('Sobre as imagens: telas do aplicativo com nomes e dados fictícios para demonstração. As telas de RPF e YTYP mostram operações feitas com arquivos de teste; as de roupas mostram arquivos fictícios selecionados, antes do processamento.',M,y-14,WIDTH,'small')
 finish(2,'Índice',y-50)
 
 for index,s in enumerate(DATA['sections']):
@@ -151,6 +153,6 @@ for i,s in enumerate(DATA['sections']):
         body.append('<div class="block '+b.get('kind','')+'">'+''.join(p)+'</div>')
     parts.append(f'<section id="{s["id"]}" class="chapter" data-search><p class="eyebrow">{i+1:02d} / {esc(s["label"])}</p><h2>{esc(s["title"])}</h2><p class="lead">{esc(s["lead"])}</p>'+''.join(body)+'</section>')
 nav=''.join(f'<a href="#{s["id"]}"><span>{i+1:02d}</span>{esc(s["label"])}</a>' for i,s in enumerate(DATA['sections']))
-page=f'''<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Guia oficial do usuário RPForge: instalação, conversão de RPF, alteração de spawn e geração de YTYP."><title>{esc(DATA['title'])}</title><link rel="icon" href="assets/symbol.png"><link rel="stylesheet" href="estilo.css"></head><body><a class="skip" href="#conteudo">Ir para o conteúdo</a><aside class="sidebar"><a class="brand" href="#topo"><img src="assets/logo-dark.png" alt="RPForge"></a><p class="nav-title">GUIA DO USUÁRIO <span>v{VERSION}</span></p><label class="search-label" for="busca">Encontre um assunto</label><input id="busca" type="search" placeholder="Buscar no guia…" autocomplete="off"><nav aria-label="Capítulos do manual">{nav}</nav><a class="pdf-link" href="{PDFNAME}">↓ Baixar o manual em PDF</a><p class="edition">{esc(DATA['edition'])}<br>{esc(DATA['date'])}</p></aside><main id="conteudo"><header id="topo" class="hero"><div><p class="eyebrow">DOCUMENTAÇÃO OFICIAL / RPForge {VERSION}</p><h1>Seu pacote.<br>Seu próximo addon.</h1><p>{esc(DATA['intro'])}</p><div class="hero-actions"><a class="primary" href="#comece">Começar a usar →</a><a href="{PDFNAME}">Ler em PDF ↗</a></div></div><img class="hero-symbol" src="assets/symbol.png" alt=""></header><div class="reading-meta"><span>Manual para quem usa o app</span><span>Windows · GTA V Legacy · FiveM</span></div><p id="sem-resultados" role="status" hidden>Nenhum assunto encontrado. Tente “spawn”, “pasta” ou “YTYP”.</p>{''.join(parts)}<footer><img src="assets/logo-light.png" alt="RPForge"><p>Guia do usuário · versão {VERSION} · {esc(DATA['date'])}<br>Capturas com exemplos fictícios. Não afiliado à Rockstar Games ou à Cfx.re.</p><a href="#topo">Voltar ao início ↑</a></footer></main><dialog id="zoom" aria-label="Captura ampliada"><button class="close" aria-label="Fechar captura ampliada">Fechar ×</button><img alt=""><p></p></dialog><script src="interacao.js"></script></body></html>'''
+page=f'''<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Guia oficial do usuário RPForge: instalação, conversão de RPF, alteração de spawn, geração de YTYP, planos Free e Pro e ferramentas de roupas."><title>{esc(DATA['title'])}</title><link rel="icon" href="assets/symbol.png"><link rel="stylesheet" href="estilo.css"></head><body><a class="skip" href="#conteudo">Ir para o conteúdo</a><aside class="sidebar"><a class="brand" href="#topo"><img src="assets/logo-dark.png" alt="RPForge"></a><p class="nav-title">GUIA DO USUÁRIO <span>v{VERSION}</span></p><label class="search-label" for="busca">Encontre um assunto</label><input id="busca" type="search" placeholder="Buscar no guia…" autocomplete="off"><nav aria-label="Capítulos do manual">{nav}</nav><a class="pdf-link" href="{PDFNAME}">↓ Baixar o manual em PDF</a><p class="edition">{esc(DATA['edition'])}<br>{esc(DATA['date'])}</p></aside><main id="conteudo"><header id="topo" class="hero"><div><p class="eyebrow">DOCUMENTAÇÃO OFICIAL / RPForge {VERSION}</p><h1>Seu pacote.<br>Seu próximo addon.</h1><p>{esc(DATA['intro'])}</p><div class="hero-actions"><a class="primary" href="#comece">Começar a usar →</a><a href="{PDFNAME}">Ler em PDF ↗</a></div></div><img class="hero-symbol" src="assets/symbol.png" alt=""></header><div class="reading-meta"><span>Manual para quem usa o app</span><span>Windows · GTA V Legacy · FiveM · Free e Pro</span></div><p id="sem-resultados" role="status" hidden>Nenhum assunto encontrado. Tente “spawn”, “YTYP”, “Pro” ou “pele”.</p>{''.join(parts)}<footer><img src="assets/logo-light.png" alt="RPForge"><p>Guia do usuário · versão {VERSION} · {esc(DATA['date'])}<br>Capturas com exemplos fictícios. Não afiliado à Rockstar Games ou à Cfx.re.</p><a href="#topo">Voltar ao início ↑</a></footer></main><dialog id="zoom" aria-label="Captura ampliada"><button class="close" aria-label="Fechar captura ampliada">Fechar ×</button><img alt=""><p></p></dialog><script src="interacao.js"></script></body></html>'''
 (DOC/'index.html').write_text(page,encoding='utf8')
 print(json.dumps({'pdf':str(OUT/PDFNAME),'pages':PAGECOUNT,'html':str(DOC/'index.html'),'min_content_y':min(x['bottom'] for x in layouts)},ensure_ascii=False))

@@ -1,16 +1,24 @@
-RPForge - Guia do usuário 1.0.0
+RPForge - Guia do usuário 1.0.1
 
 Para consultar no navegador, abra index.html.
-Para ler, imprimir ou compartilhar o manual, abra Manual-RPForge-1.0.0.pdf.
-O Manual-RPForge-0.3.1.pdf permanece como referência histórica daquela edição.
+Para ler, imprimir ou compartilhar o manual, abra Manual-RPForge-1.0.1.pdf.
+Os arquivos Manual-RPForge-1.0.0.pdf e Manual-RPForge-0.3.1.pdf permanecem como
+referência histórica dessas edições.
 
 O guia funciona offline. Mantenha index.html, estilo.css, interacao.js e a pasta
-assets juntos. Não é necessário instalar programas, abrir um servidor ou criar conta.
+assets juntos. Não é necessário instalar programas, abrir um servidor ou criar conta
+para ler o guia.
 
-As capturas da edição 1.0.0 (arquivos v1-*.png) usam exemplos fictícios. O roteiro
-acompanha a instalação, conta e login, conversão de RPFs, nomes de veículos, pastas
-existentes, geração de YTYP e problemas comuns. As ferramentas Pro de roupas
-(Roupas para OBJ, Roupas para Neon e Separar pele) ainda não são cobertas por este guia.
+As capturas da edição 1.0.1 (arquivos v101-*.png) mostram a interface atual, com a
+barra lateral, e usam exemplos fictícios. O roteiro acompanha a instalação, os
+planos Free e Pro, conta e login, conversão de RPFs, nomes de veículos, pastas
+existentes, geração de YTYP, as ferramentas Pro de roupas (Roupas para OBJ, Roupas
+para Neon e Separar pele) e problemas comuns.
 
-Edição de 3 de novembro de 2026. O aplicativo atual é a versão 1.0.1, de testes,
-assinada com certificado local.
+Converter RPFs e Gerar YTYP são gratuitos e funcionam sem conta. As ferramentas de
+roupas exigem login e uma licença Pro ativa, liberada manualmente pela equipe do
+RPForge; não há compra dentro do aplicativo. O RPForge não se atualiza sozinho:
+para atualizar, baixe o instalador da nova versão no site oficial.
+
+Edição de 10 de novembro de 2026, para o RPForge 1.0.1, de testes, assinado com
+certificado local.

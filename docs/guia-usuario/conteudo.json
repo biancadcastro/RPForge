@@ -1,9 +1,9 @@
 {
   "title": "RPForge · Guia do usuário",
-  "version": "1.0.0",
-  "date": "3 de novembro de 2026",
+  "version": "1.0.1",
+  "date": "10 de novembro de 2026",
   "edition": "RPForge v1",
-  "intro": "Converta seus pacotes para o FiveM e gere YTYPs pelo botão direito do Windows. Este guia acompanha você da instalação ao primeiro resultado.",
+  "intro": "Converta seus pacotes para o FiveM, gere YTYPs e, no plano Pro, prepare suas roupas para texturização, Neon ou separação de pele. Este guia acompanha você da instalação ao primeiro resultado.",
   "sections": [
     {
       "id": "comece",
@@ -16,7 +16,7 @@
           "steps": [
             "Coloque o arquivo .rpf em uma pasta fácil de encontrar.",
             "Clique com o botão direito nessa pasta e escolha Converter com RPForge.",
-            "Na janela rápida, confira os nomes e os destinos; pelo app completo, use Ferramentas > Converter RPFs.",
+            "Na janela rápida, confira os nomes e os destinos; pelo app completo, escolha Converter RPFs na barra lateral.",
             "Use Revisar conversão quando estiver no app completo. Na revisão, confira o resumo e clique em Converter agora.",
             "Ao terminar, clique em Abrir resultado para encontrar o addon."
           ]
@@ -27,8 +27,8 @@
         },
         {
           "kind": "tip",
-          "heading": "Sem conta e sem terminal",
-          "body": "Para usar o aplicativo, você não precisa criar um login, instalar Node.js ou abrir comandos. O instalador inclui o necessário para o funcionamento do RPForge."
+          "heading": "Gratuito, sem conta e sem terminal",
+          "body": "Converter RPFs e Gerar YTYP são gratuitos e não pedem login. Você não precisa instalar Node.js nem abrir comandos: o instalador inclui o necessário. Somente as ferramentas de roupas exigem uma conta com o plano Pro."
         }
       ]
     },
@@ -73,63 +73,101 @@
       "id": "conhecer",
       "label": "Conhecer a janela",
       "title": "Tudo começa pela pasta",
-      "lead": "Use o menu Ferramentas para abrir Converter RPFs ou Gerar YTYP. A página Como usar fica disponível na navegação superior.",
+      "lead": "A barra lateral reúne Início, as ferramentas, Como usar e, no rodapé, a sua conta.",
       "blocks": [
         {
           "heading": "Como se orientar",
           "items": [
-            "Início: mostra as ferramentas disponíveis. Ferramentas permite buscar e alternar entre elas sem perder as escolhas de cada fluxo.",
+            "Início: mostra as ferramentas em dois grupos, Arquivos e recursos e Roupas e geometria. Cada uma indica Gratuito ou Requer Pro.",
+            "Ferramentas: a lista da barra lateral tem busca e permite alternar entre as ferramentas sem perder as escolhas de cada fluxo.",
             "Selecionar pasta: abre o seletor de pastas do Windows e inicia a análise ao confirmar.",
-            "Configurar: mostra os itens encontrados e os nomes que você pode editar.",
-            "Revisar: reúne o que será criado e os avisos para conferir.",
-            "Resultado: mostra o que deu certo, o que foi cancelado e eventuais falhas."
+            "Configurar, Revisar e Resultado: as etapas da conversão de RPF, da escolha dos nomes até o que foi criado.",
+            "Conta: o botão no rodapé da barra lateral mostra Entrar ou o seu nome quando a conta está conectada."
           ]
         }
       ],
-      "image": "v1-inicio.png",
-      "caption": "Tela inicial da interface atual, com dados fictícios de demonstração."
+      "image": "v101-inicio.png",
+      "caption": "Tela inicial da versão 1.0.1, com a barra lateral e o acesso de cada ferramenta. Perfil fictício de teste."
     },
     {
       "id": "acoes-rapidas",
       "label": "Ações rápidas",
       "title": "Direto pelo botão direito",
-      "lead": "As ações rápidas abrem uma janela compacta para a tarefa escolhida.",
-      "image": "v1-acao-rapida.png",
-      "caption": "Revisão compacta de um pacote de demonstração.",
+      "lead": "As ações rápidas abrem uma janela compacta para a tarefa escolhida no Explorador de Arquivos.",
+      "image": "v101-acao-rapida.png",
+      "caption": "Janela compacta de conversão com um pacote sintético. Aqui a pasta de saída já existia, e o app pede a configuração completa.",
       "blocks": [
         {
-          "heading": "Converter RPF",
-          "body": "Clique com o botão direito na pasta com os arquivos RPF e escolha Converter com RPForge. Confira a revisão e confirme a conversão."
+          "heading": "Converter RPF e Gerar YTYP",
+          "body": "Clique com o botão direito na pasta e escolha Converter com RPForge ou Gerar YTYP com RPForge. A conversão mostra uma revisão antes de gravar; o YTYP começa automaticamente. Essas ações são gratuitas e funcionam sem login."
         },
         {
-          "heading": "Gerar YTYP",
-          "body": "Em uma pasta com arquivos YDR, escolha Gerar YTYP com RPForge. A geração começa automaticamente e o resultado informa os arquivos criados."
+          "heading": "Roupas, com o plano Pro",
+          "body": "Em um arquivo .ydd, numa pasta ou no espaço vazio dentro dela aparecem Exportar para OBJ com RPForge, Converter roupa para Neon com RPForge e Separar pele com RPForge. Sem sessão conectada, a janela mostra primeiro o login e depois retoma a peça."
         },
         {
           "kind": "note",
-          "body": "As ações rápidas não carregam sua conta nem consultam versão. Elas mantêm a validação local dos arquivos e a proteção das saídas existentes."
+          "body": "Os itens de roupas só aparecem depois que o app confirma uma licença Pro válida neste computador. As ações rápidas não consultam versão nem atualizações."
+        }
+      ]
+    },
+    {
+      "id": "planos",
+      "label": "Planos Free e Pro",
+      "title": "O que é gratuito e o que é Pro",
+      "lead": "Converter RPFs e Gerar YTYP são gratuitos. As três ferramentas de roupas fazem parte do plano Pro.",
+      "image": "v101-planos.png",
+      "caption": "Conta conectada no plano Free, com dados fictícios. A tela informa o plano desta instalação.",
+      "blocks": [
+        {
+          "table": [
+            [
+              "Ferramenta",
+              "Acesso"
+            ],
+            [
+              "Converter RPFs",
+              "Gratuito. Funciona sem conta e sem conexão."
+            ],
+            [
+              "Gerar YTYP",
+              "Gratuito. Funciona sem conta e sem conexão."
+            ],
+            [
+              "Roupas para OBJ, Roupas para Neon e Separar pele",
+              "Pro. Exigem login e uma licença Pro ativa neste computador."
+            ]
+          ]
+        },
+        {
+          "heading": "Como o Pro é liberado",
+          "body": "O plano Pro é concedido manualmente pela equipe do RPForge à sua conta. Não há compra, pagamento ou ativação dentro do aplicativo. Depois da liberação, abra Conta e use Atualizar autorização."
+        },
+        {
+          "kind": "note",
+          "body": "Os itens de roupas no botão direito do Windows só aparecem com o Pro ativo. Os arquivos continuam sendo processados no seu computador."
         }
       ]
     },
     {
       "id": "conta",
       "label": "Conta e login",
-      "title": "Seu perfil, quando você quiser",
-      "lead": "A conta é opcional para as ferramentas atuais de conversão e geração de YTYP.",
-      "image": "v1-conta.png",
-      "caption": "Tela de entrada integrada ao app, sem credenciais reais.",
+      "title": "Sua conta, quando a ferramenta pede",
+      "lead": "A conta é opcional para converter RPFs e gerar YTYP. Para as ferramentas de roupas, ela é obrigatória e precisa ter o plano Pro.",
+      "image": "v101-conta.png",
+      "caption": "Tela de entrada integrada ao app, aberta pelo botão Entrar da barra lateral. Sem credenciais reais.",
       "blocks": [
         {
           "heading": "Entrar no aplicativo",
-          "body": "Use Entrar no cabeçalho. Você pode informar e-mail e senha ou escolher Discord, Google ou GitHub. Se sua conta usa segundo fator, confirme com o autenticador ou um código de recuperação."
+          "body": "Clique em Entrar, no rodapé da barra lateral. Informe e-mail e senha ou escolha Discord, Google ou GitHub. Se sua conta usa segundo fator, confirme com o autenticador ou um código de recuperação."
         },
         {
           "heading": "Entrar com um provedor",
-          "body": "O provedor abre no navegador padrão do Windows. Depois de entrar, confira a conta e o computador na página rpforge.dev/conectar-app/ e autorize a conexão. Volte ao aplicativo: o perfil aparece automaticamente."
+          "body": "O provedor abre no navegador padrão do Windows. Depois de entrar, confira a conta e o computador na página rpforge.dev/conectar-app/ e autorize. Volte ao app: seu nome aparece na barra lateral."
         },
         {
           "heading": "Computadores conectados",
-          "body": "A confirmação mostra os computadores autorizados. Se o limite estiver completo, você pode desconectar um deles antes de continuar. Não autorize pedidos que você não iniciou no app."
+          "body": "Cada conta usa até dois computadores. Em Conta, Gerenciar conta e computadores mostra as vagas e permite desconectar instalações antigas. Não autorize pedidos que você não iniciou no app."
         }
       ]
     },
@@ -145,15 +183,15 @@
         },
         {
           "heading": "Pelo aplicativo",
-          "body": "Abra o RPForge, entre em Ferramentas > Converter RPFs e use Selecionar pasta. Escolha a pasta que contém os arquivos .rpf. A análise começa ao confirmar a pasta."
+          "body": "Abra o RPForge, escolha Converter RPFs na barra lateral e use Selecionar pasta. Escolha a pasta que contém os arquivos .rpf. A análise começa ao confirmar a pasta."
         },
         {
           "kind": "tip",
           "body": "Não é preciso extrair o RPF antes. Pacotes RPF que estejam dentro de outro RPF são lidos pelo aplicativo."
         }
       ],
-      "image": "v1-configurar.png",
-      "caption": "Análise de um pacote sintético, com edição do spawn antes da revisão."
+      "image": "v101-configurar.png",
+      "caption": "Configurar com um pacote sintético: pasta de saída e nome no jogo podem ser editados antes da revisão."
     },
     {
       "id": "spawn",
@@ -179,7 +217,7 @@
           "body": "Em roupas, mapas e outros conteúdos, editar o nome muda a pasta do recurso. As coleções de roupas e os nomes internos desses arquivos são preservados."
         }
       ],
-      "image": "v1-configurar.png",
+      "image": "v101-configurar.png",
       "caption": "O nome escolhido é conferido antes da conversão."
     },
     {
@@ -195,15 +233,15 @@
               "O que acontece"
             ],
             [
-              "Cancelar",
+              "Cancelar este item",
               "Preserva a pasta existente e não converte esse RPF."
             ],
             [
-              "Usar outro nome",
-              "Permite criar a saída com outro nome. Confira a pasta escolhida na revisão."
+              "Alterar o nome da pasta",
+              "Edite Nome da pasta de saída e revise de novo para criar a saída em outra pasta."
             ],
             [
-              "Backup e substituir",
+              "Preservar backup e substituir",
               "Guarda a pasta antiga em um backup e cria uma nova saída no lugar."
             ]
           ]
@@ -234,8 +272,8 @@
           "body": "Clique em Voltar, faça a alteração e avance novamente. Os campos serão validados ao revisar. Quando estiver tudo certo, use Converter agora e aguarde o resultado."
         }
       ],
-      "image": "v1-revisao.png",
-      "caption": "Resumo real da conversão de um pacote de demonstração."
+      "image": "v101-revisao.png",
+      "caption": "Revisão de um pacote de demonstração antes de converter."
     },
     {
       "id": "resultado",
@@ -245,10 +283,10 @@
       "blocks": [
         {
           "heading": "Abrir resultado",
-          "body": "Use Abrir pasta no resultado para localizar o recurso criado. Quando houver vários RPFs, confira o resultado de cada saída."
+          "body": "Use Abrir resultado, ou Abrir esta pasta em cada item, para localizar o recurso criado. Quando houver vários RPFs, confira o resultado de cada saída."
         },
         {
-          "heading": "Nova conversão",
+          "heading": "Nova operação",
           "body": "Limpa o fluxo da janela e permite escolher outra pasta. Os addons que já foram criados permanecem no disco."
         },
         {
@@ -256,7 +294,7 @@
           "body": "O RPF original fica preservado ao lado da saída. O RPForge não coloca um relatório JSON dentro do addon."
         }
       ],
-      "image": "v1-resultado.png",
+      "image": "v101-resultado.png",
       "caption": "Resultado de uma conversão executada com um pacote sintético."
     },
     {
@@ -343,7 +381,7 @@
           "heading": "Pelo app ou pelo botão direito",
           "steps": [
             "Coloque os arquivos .ydr diretamente na pasta escolhida.",
-            "Pelo app, abra Ferramentas > Gerar YTYP, selecione a pasta e clique em Gerar YTYP.",
+            "Pelo app, escolha Gerar YTYP na barra lateral, selecione a pasta e clique em Gerar YTYP.",
             "Pelo botão direito, use Gerar YTYP com RPForge. A janela rápida inicia a geração automaticamente.",
             "Ao terminar, abra a pasta indicada no resultado."
           ]
@@ -353,8 +391,108 @@
           "body": "YTYPs existentes são preservados e a nova saída recebe um sufixo quando necessário. Um YTYP básico não recria salas, portais ou outros detalhes de um interior complexo."
         }
       ],
-      "image": "v1-ytyp.png",
+      "image": "v101-ytyp.png",
       "caption": "Resultado de uma geração executada com um modelo sintético."
+    },
+    {
+      "id": "roupas-obj",
+      "label": "Roupas para OBJ",
+      "title": "Leve a roupa para pintura",
+      "lead": "Ferramenta Pro. Exporta uma peça .ydd para OBJ e MTL, com UVs, normais e grupos de materiais, para texturizar em outro programa.",
+      "image": "v101-obj.png",
+      "caption": "Roupas para OBJ com arquivos fictícios selecionados, antes da exportação.",
+      "blocks": [
+        {
+          "heading": "Como exportar",
+          "steps": [
+            "Escolha Roupas para OBJ na barra lateral ou Exportar para OBJ com RPForge no botão direito de um .ydd.",
+            "Selecione o YDD, o YTD correspondente (opcional se a textura estiver no YDD), o nível de detalhe e a pasta de destino.",
+            "Clique em Exportar para OBJ. Ao terminar, confira a prévia 3D da malha entregue."
+          ]
+        },
+        {
+          "kind": "note",
+          "heading": "Limites",
+          "body": "Somente OBJ e MTL são salvos, sem sobrescrever arquivos. Texturas, rig, animações, shaders do GTA, normal e specular maps não são exportados. Aceita YDD e YTD de GTA V Legacy; peças sem textura difusa, UVs ou normais são recusadas. O OBJ serve para pintura, não para voltar ao jogo."
+        }
+      ]
+    },
+    {
+      "id": "roupas-neon",
+      "label": "Roupas para Neon",
+      "title": "Uma versão emissiva da roupa",
+      "lead": "Ferramenta Pro. Cria uma cópia da roupa com material emissivo, preservando malha, rig e texturas.",
+      "image": "v101-neon.png",
+      "caption": "Roupas para Neon com arquivos fictícios selecionados, antes da conversão.",
+      "blocks": [
+        {
+          "heading": "Como converter",
+          "steps": [
+            "Escolha Roupas para Neon na barra lateral ou Converter roupa para Neon com RPForge no botão direito.",
+            "Selecione a roupa isolada, o YTD correspondente e a pasta de destino.",
+            "Clique em Converter para Neon. O resultado mostra os nomes e o caminho dos novos arquivos."
+          ]
+        },
+        {
+          "kind": "note",
+          "heading": "Limites",
+          "body": "Os novos arquivos recebem um ID livre; o YTD é copiado sem alterar a imagem e os originais ficam intactos. Peças com pele são recusadas: use Separar pele antes. Aceita roupa freemode de GTA V Legacy com um drawable por YDD. A conferência do app é estrutural; veja a aparência no FiveM."
+        }
+      ]
+    },
+    {
+      "id": "separar-pele",
+      "label": "Separar pele",
+      "title": "Separe a roupa da pele",
+      "lead": "Ferramenta Pro. Analisa uma peça que mistura roupa e pele e, depois da sua revisão, gera os dois em arquivos separados.",
+      "image": "v101-pele.png",
+      "caption": "Separar pele com arquivos fictícios selecionados, antes da análise.",
+      "blocks": [
+        {
+          "heading": "Como começar",
+          "steps": [
+            "Escolha Separar pele na barra lateral ou Separar pele com RPForge no botão direito.",
+            "Selecione o YDD com roupa e pele, o YTD (opcional se estiver embutido) e a pasta de destino.",
+            "Clique em Analisar peça. A análise não grava nada e abre a revisão 3D."
+          ]
+        },
+        {
+          "kind": "note",
+          "body": "A separação não aplica Neon nem cria texturas brancas. Para uma roupa Neon com pele, separe primeiro e converta só a parte da roupa."
+        }
+      ]
+    },
+    {
+      "id": "pele-revisao",
+      "label": "Revisar a separação",
+      "title": "Confira cada face antes de separar",
+      "lead": "A análise sugere o que é pele e o que é roupa. A sugestão precisa ser conferida, principalmente em peças editadas.",
+      "blocks": [
+        {
+          "heading": "Cores da revisão",
+          "items": [
+            "Laranja: pele. Azul: roupa. Roxo: faces incertas, que precisam de uma decisão.",
+            "Todos os LODs disponíveis podem ser revisados. Trocar de LOD limpa a seleção atual."
+          ]
+        },
+        {
+          "heading": "Marcar faces",
+          "items": [
+            "Ferramentas: Face (V), Área (B) e Pincel (C). [ e ] ajustam o raio do pincel.",
+            "Shift adiciona à seleção e Alt remove. Somente faces visíveis pode ser desativado para atravessar a peça.",
+            "Use Marcar pele ou Marcar roupa. Ctrl+Z desfaz a atribuição; Restaurar sugestão volta ao início.",
+            "Câmera: botão do meio orbita, botão direito move e a roda aproxima. Wireframe mostra a malha."
+          ]
+        },
+        {
+          "heading": "Separar arquivos",
+          "body": "O botão fica bloqueado enquanto houver faces incertas, e o LOD alto precisa ter pele e roupa. A saída tem dois YDDs com IDs livres, cada um com sua cópia do YTD, nas subpastas Roupa e Pele do destino."
+        },
+        {
+          "kind": "tip",
+          "body": "O app confere os arquivos gerados, mas não certifica a classificação. Teste a aparência no FiveM antes de usar no servidor."
+        }
+      ]
     },
     {
       "id": "cuidados",
@@ -412,6 +550,14 @@
             [
               "Dependência externa",
               "Confira se o servidor tem o recurso ou arquivo mencionado."
+            ],
+            [
+              "Esta ferramenta é exclusiva do plano Pro",
+              "Entre com uma conta Pro ou use as ferramentas gratuitas. O Pro é liberado pela equipe do RPForge."
+            ],
+            [
+              "A licença deste computador não pôde ser validada",
+              "Abra Conta e use Atualizar autorização. Confira a conexão e a data e hora do Windows."
             ]
           ]
         },
@@ -429,7 +575,7 @@
       "blocks": [
         {
           "heading": "O menu do botão direito não apareceu",
-          "body": "Confira se você clicou em uma única pasta. Converter com RPForge aparece quando ela contém um .rpf; Gerar YTYP com RPForge aparece quando há um .ydr. A busca não percorre subpastas do Windows. Se necessário, procure a entrada clássica em Mostrar mais opções ou abra o app pelo menu Iniciar."
+          "body": "Confira se você clicou em uma única pasta. Converter com RPForge aparece quando ela contém um .rpf; Gerar YTYP com RPForge, quando há um .ydr. Os itens de roupas exigem Pro ativo. Se necessário, procure em Mostrar mais opções ou abra o app pelo menu Iniciar."
         },
         {
           "heading": "A pasta parece vazia no aplicativo",
@@ -458,9 +604,9 @@
         {
           "heading": "Atualizar",
           "steps": [
-            "Feche a janela do aplicativo e aguarde qualquer operação terminar.",
-            "Abra o instalador da nova versão e confira o nome e a origem do arquivo.",
-            "Mantenha seus RPFs, addons e backups nas suas pastas de trabalho.",
+            "O RPForge não se atualiza sozinho. Baixe o instalador da nova versão em rpforge.dev; em Como usar, o botão Instalação e atualização manual abre a página de instruções.",
+            "Feche o aplicativo e aguarde qualquer operação terminar.",
+            "Abra o instalador e confira o nome e a origem do arquivo.",
             "Depois de instalar, abra o app e teste um pacote conhecido."
           ]
         },
@@ -470,11 +616,11 @@
         },
         {
           "heading": "Versão e licença",
-          "body": "Este guia acompanha o RPForge v1.0.0, com licença proprietária. Os documentos de uso e os avisos de terceiros acompanham o instalador e a pasta legal da instalação. As versões antigas continuam sujeitas às licenças originais."
+          "body": "Este guia acompanha o RPForge 1.0.1, com licença proprietária. Os documentos de uso e os avisos de terceiros acompanham o instalador e a pasta legal da instalação."
         },
         {
           "kind": "note",
-          "body": "Esta edição não faz upload dos seus assets nem exige login para converter. Nada é publicado no seu servidor automaticamente."
+          "body": "O RPForge não faz upload dos seus assets e nada é publicado no seu servidor automaticamente. O login só é exigido pelas ferramentas Pro de roupas."
         }
       ]
     },
@@ -511,6 +657,10 @@
               "Arquivos de configuração do conteúdo."
             ],
             [
+              "YDD",
+              "Arquivo de modelo de roupas e peds."
+            ],
+            [
               "YDR",
               "Arquivo de modelo usado por objetos."
             ],
@@ -529,6 +679,18 @@
             [
               "Dependência",
               "Outro recurso ou arquivo necessário para o conteúdo funcionar."
+            ],
+            [
+              "LOD",
+              "Nível de detalhe do modelo: alto, médio, baixo ou muito baixo."
+            ],
+            [
+              "OBJ / MTL",
+              "Malha 3D e materiais em formatos abertos, para pintura."
+            ],
+            [
+              "Plano Pro",
+              "Acesso às ferramentas de roupas, liberado pela equipe do RPForge."
             ]
           ]
         },

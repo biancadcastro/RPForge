@@ -1,7 +1,7 @@
 # Contribuir com o RPForge
 
 Relatos de problemas, melhorias e correções são bem-vindos. Antes de começar,
-confira o [README](README.md), o [manual do usuário](docs/guia-usuario/Manual-RPForge-1.0.0.pdf)
+confira o [README](README.md), o [manual do usuário](docs/guia-usuario/Manual-RPForge-1.0.1.pdf)
 e as issues existentes.
 
 ## Relatar um problema
