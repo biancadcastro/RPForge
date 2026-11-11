@@ -29,7 +29,7 @@ export function auditAddon(files) {
     for (const entry of entries) {
       const name = normalized(child(entry, field));
       if (!name) { issue('error', 'EMPTY_IDENTIFIER', `data/${filename}`, `${label} sem ${field}.`); continue; }
-      if (result.has(name)) issue('error', 'DUPLICATE_IDENTIFIER', `data/${filename}`, `${label} duplicado: ${name}`);
+      if (result.has(name)) issue('error', 'DUPLICATE_IDENTIFIER', `data/${filename}`, `${filename} tem duas definições diferentes para ${name} (${label}). Mantenha só uma no RPF de origem e tente de novo.`);
       result.set(name, entry);
     }
     return result;

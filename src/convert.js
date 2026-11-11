@@ -1,7 +1,7 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { META, readMeta, mergeMetadata, serializeXml, records, child, normalized } from './metadata.js';
+import { META, readMeta, mergeMetadata, serializeXml, records, child, normalized, dropIdenticalRecords } from './metadata.js';
 import { auditAddon } from './audit.js';
 import { writePlan } from './output.js';
 import { readRpf, LIMITS, safeName } from './rpf.js';
@@ -16,6 +16,15 @@ const IGNORED = new Set(['dlctext.meta', 'shopdata.meta', 'shop_vehicle.meta']);
 
 export function resourceName(input) {
   return input.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'vehicle_addon';
+}
+
+/** One warning per original, listing its identical copies (language packs often repeat). */
+function duplicateWarnings(duplicates) {
+  const groups = new Map();
+  for (const item of duplicates) groups.set(item.original, [...(groups.get(item.original) ?? []), item.path]);
+  return [...groups].map(([original, copies]) => ({ severity: 'warning', code: 'DUPLICATE_INNER_ARCHIVE', file: original, message: copies.length === 1
+    ? `O pacote interno ${path.posix.basename(copies[0])} é uma cópia idêntica de ${path.posix.basename(original)} e foi lido uma vez só.`
+    : `${copies.length} pacotes internos (${copies.map(file => path.posix.basename(file)).join(', ')}) são cópias idênticas de ${path.posix.basename(original)} e foram lidos uma vez só.` }));
 }
 
 export async function prepareArchive(archive, options = {}) {
@@ -37,7 +46,7 @@ export async function prepareArchive(archive, options = {}) {
   const ignoredArchives = readState.ignoredArchives ?? [];
   const ignoredWarnings = [
     ...ignoredArchives.map(file => ({ severity: 'warning', code: 'IGNORED_INNER_ARCHIVE', file, message: `O pacote interno ${path.posix.basename(file)} está vazio ou ilegível e foi ignorado.` })),
-    ...(readState.duplicateArchives ?? []).map(item => ({ severity: 'warning', code: 'DUPLICATE_INNER_ARCHIVE', file: item.path, message: `O pacote interno ${item.path} é uma cópia idêntica de ${item.original} e foi lido uma vez só.` })),
+    ...duplicateWarnings(readState.duplicateArchives ?? []),
   ];
   // When nothing usable is found, say that an ignored inner package may have been the source.
   const ignoredNote = ignoredArchives.length ? ` ${ignoredArchives.length === 1 ? 'O pacote interno ' + path.posix.basename(ignoredArchives[0]) + ' estava vazio ou ilegível e foi ignorado' : 'Os pacotes internos ' + ignoredArchives.map(file => path.posix.basename(file)).join(', ') + ' estavam vazios ou ilegíveis e foram ignorados'}; se o conteúdo estava nele, o RPF de origem está danificado.` : '';
@@ -84,6 +93,13 @@ export async function prepareArchive(archive, options = {}) {
     } else if (!ADMIN.has(basename)) {
       skipped.push(entry.path);
     }
+  }
+  // Identical repeated records (same key, same content) are unambiguous: keep one and say so.
+  for (const meta of metas) {
+    const removed = dropIdenticalRecords(meta.doc, meta.basename);
+    if (!removed.length) continue;
+    files.set(meta.destination, { destination: meta.destination, data: serializeXml(meta.doc) });
+    xmlWarnings.push({ severity: 'warning', code: 'DUPLICATE_RECORD', file: meta.destination, message: `${meta.basename} repetia a mesma definição de ${[...new Set(removed)].join(', ')}; a cópia idêntica foi removida.` });
   }
   for (const item of records(metas.find(m => m.basename === 'vehicles.meta')?.doc, 'InitDatas')) {
     const model = normalized(child(item, 'modelName'));

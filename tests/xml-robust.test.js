@@ -99,3 +99,28 @@ test('a clean meta is published untouched and without warnings', async t => {
   assert.ok(!result.audit.issues.some(issue => issue.code === 'XML_REPAIRED'));
   assert.equal(await readFile(path.join(result.output, 'data/handling.meta'), 'utf8'), handling);
 });
+
+const variation = '<Item>\n      <modelName>Car</modelName>\n      <kits><Item>0_default_modkit</Item></kits>\n    </Item>';
+const variations = items => Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>\n<CVehicleModelInfoVariation>\n  <variationData>\n    ${items.join('\n    ')}\n  </variationData>\n</CVehicleModelInfoVariation>\n`);
+function withVariations(data) {
+  return makeRpf([
+    { name: 'car.yft', data: resource, resource: true },
+    { name: 'vehicles.meta', data: vehicles, compressed: true },
+    { name: 'handling.meta', data: Buffer.from(handling), compressed: true },
+    { name: 'carvariations.meta', data, compressed: true },
+  ]);
+}
+
+test('an identical repeated record is kept once with a warning', async t => {
+  const { result } = await convert(t, withVariations(variations([variation, variation])));
+  assert.equal(result.ok, true, result.error);
+  assert.ok(result.audit.issues.some(issue => issue.code === 'DUPLICATE_RECORD' && /carvariations\.meta repetia a mesma definição de Car; a cópia idêntica foi removida\./.test(issue.message)));
+  assert.equal((await readFile(path.join(result.output, 'data/carvariations.meta'), 'utf8')).match(/<modelName>/g).length, 1);
+});
+
+test('two different definitions for the same record are refused, never guessed', async t => {
+  const other = variation.replace('0_default_modkit', '1_other_modkit');
+  const { result } = await convert(t, withVariations(variations([variation, other])));
+  assert.equal(result.ok, false);
+  assert.match(result.error, /carvariations\.meta tem duas definições diferentes para car/);
+});

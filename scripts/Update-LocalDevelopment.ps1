@@ -41,7 +41,7 @@ catch {
     throw
 }
 # Dependencies are copied before their importers. No registry or native shell changes.
-foreach ($name in @('user-error.js', 'rsc7.js', 'publication.js', 'metadata.js', 'audit.js', 'output.js', 'spawns.js', 'prompts.js', 'rpf.js', 'tuning.js', 'content.js', 'ytyp.js', 'ytyp-template.json', 'clothing.js', 'clothing-neon.js', 'clothing-skin.js', 'convert.js', 'preview.js', 'bridge.js', 'cli.js')) {
+foreach ($name in @('user-error.js', 'xml-text.js', 'rsc7.js', 'publication.js', 'metadata.js', 'audit.js', 'output.js', 'spawns.js', 'prompts.js', 'rpf.js', 'tuning.js', 'content.js', 'ytyp.js', 'ytyp-template.json', 'clothing.js', 'clothing-neon.js', 'clothing-skin.js', 'convert.js', 'preview.js', 'bridge.js', 'cli.js')) {
     $source = Join-Path $root "src\$name"
     $target = Join-Path $installed "src\$name"
     if (Test-Path -LiteralPath $target) { Copy-Item -LiteralPath $target -Destination (Join-Path $backup $name) }

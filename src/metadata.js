@@ -70,3 +70,22 @@ export function mergeMetadata(target, incoming, basename) {
 export function records(doc, container) {
   return Array.from(doc?.getElementsByTagName(container) ?? []).flatMap(node => children(node).filter(n => n.tagName === 'Item'));
 }
+
+/** Byte-for-byte meaning duplicates (same key, same content) are dropped; differing ones are kept for the audit to refuse. */
+export const RECORD_LISTS = { 'vehicles.meta': ['InitDatas', 'modelName'], 'handling.meta': ['HandlingData', 'handlingName'], 'carvariations.meta': ['variationData', 'modelName'], 'carcols.meta': ['Kits', 'kitName'], 'vehiclelayouts.meta': ['VehicleLayouts', 'Name'] };
+export function dropIdenticalRecords(doc, basename) {
+  const [container, field] = RECORD_LISTS[basename] ?? [];
+  if (!container) return [];
+  const seen = new Map(), removed = [];
+  for (const item of records(doc, container)) {
+    const key = normalized(child(item, field));
+    if (!key) continue;
+    if (seen.has(key) && seen.get(key) === canonical(item)) {
+      const previous = item.previousSibling;
+      if (previous?.nodeType === 3 && !previous.nodeValue.trim()) previous.parentNode.removeChild(previous);
+      item.parentNode.removeChild(item);
+      removed.push(value(child(item, field)));
+    } else if (!seen.has(key)) seen.set(key, canonical(item));
+  }
+  return removed;
+}
