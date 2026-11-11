@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { DOMParser } from '@xmldom/xmldom';
+import { readXml } from './xml-text.js';
 import { outputName } from './output.js';
 import { buildYtyp, readDrawable } from './ytyp.js';
 
@@ -15,20 +15,18 @@ const METAS = {
 };
 const collectionName = name => /^mp_[mf]_freemode_01(?:_[a-z0-9_]+)?$/i.test(name);
 const componentName = name => /^(?:head|berd|hair|uppr|lowr|hand|feet|teef|accs|task|decl|jbib|p_head|p_eyes|p_ears|p_lwrist|p_rwrist)_/i.test(name);
+// Repairs are reported once per file (see xml-text.js) and published with the repaired text.
+let xmlIssues = null;
 function xml(data, label) {
-  const source = data.toString('utf8').replace(/^\uFEFF/, '');
-  if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error(`XML externo não suportado: ${label}`);
-  const errors = [];
-  let doc;
-  try { doc = new DOMParser({ onError: (level, message) => errors.push(message) }).parseFromString(source, 'application/xml'); }
-  catch { throw new Error(`XML inválido: ${label}`); }
-  if (errors.length || !doc?.documentElement) throw new Error(`XML inválido: ${label}`);
-  return doc;
+  const result = readXml(data, label);
+  if (xmlIssues) for (const message of result.notes) if (!xmlIssues.some(issue => issue.message === message)) xmlIssues.push({ severity: 'warning', code: 'XML_REPAIRED', file: label, message });
+  return Object.assign(result.doc, { repairedText: result.changed ? result.text : null });
 }
 
 /** No binary model edits, invented collection identifiers, or drawable renumbering. */
 export function prepareContent(entries, archive, options, sourceHash, sourceBytes) {
   const files = new Map(), registrations = [], skipped = [], types = new Set(), issues = [];
+  xmlIssues = issues;
   const ymts = new Set(entries.filter(e => /\.ymt$/i.test(e.path)).map(e => path.posix.basename(e.path, path.posix.extname(e.path)).toLowerCase()));
   const collections = new Set();
   const peds = new Set();
@@ -81,7 +79,7 @@ export function prepareContent(entries, archive, options, sourceHash, sourceByte
       else if (root === 'CWeaponInfoBlob') { type = 'WEAPONINFO_FILE_PATCH'; types.add('weapon'); }
       else if (METAS[lower] && root === METAS[lower][1]) type = METAS[lower][0];
       if (!type) throw new Error(`Meta requer suporte específico: ${entry.path} (${root}).`);
-      add('data/' + basename, entry.data); register(type, 'data/' + basename); continue;
+      add('data/' + basename, doc.repairedText ? Buffer.from(doc.repairedText) : entry.data); register(type, 'data/' + basename); continue;
     }
     if (ext === '.rel') {
       const type = lower.endsWith('.dat151.rel') ? 'AUDIO_GAMEDATA' : lower.endsWith('.dat54.rel') ? 'AUDIO_SOUNDDATA' : null;

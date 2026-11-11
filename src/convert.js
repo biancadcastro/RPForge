@@ -1,7 +1,7 @@
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { META, parseMeta, mergeMetadata, serializeXml, records, child, normalized } from './metadata.js';
+import { META, readMeta, mergeMetadata, serializeXml, records, child, normalized } from './metadata.js';
 import { auditAddon } from './audit.js';
 import { writePlan } from './output.js';
 import { readRpf, LIMITS, safeName } from './rpf.js';
@@ -28,6 +28,7 @@ export async function prepareArchive(archive, options = {}) {
   const models = new Set();
   const declaredModels = new Set();
   let mergedSources = 0;
+  const xmlWarnings = [];
   const source = await readFile(archive);
   const sourceHash = createHash('sha256').update(source).digest('hex');
   if (options.expectedSource && options.expectedSource !== sourceHash) throw new Error('O RPF mudou desde a prévia. Analise novamente antes de converter.');
@@ -67,7 +68,8 @@ export async function prepareArchive(archive, options = {}) {
       if (ext === '.yft' && !basename.endsWith('_hi.yft')) models.add(basename.slice(0, -4));
     } else if (META[basename]) {
       const [type] = META[basename];
-      const doc = parseMeta(entry.data, basename);
+      const meta = readMeta(entry.data, basename), doc = meta.doc;
+      for (const message of meta.notes) xmlWarnings.push({ severity: 'warning', code: 'XML_REPAIRED', file: entry.path, message });
       const destination = `data/${basename}`;
       const previous = metas.find(meta => meta.basename === basename);
       if (previous) {
@@ -75,7 +77,8 @@ export async function prepareArchive(archive, options = {}) {
         files.set(destination, { destination, data: serializeXml(previous.doc) });
         mergedSources++;
       } else {
-        add(destination, entry.data);
+        // The output gets the repaired text; the source RPF is never touched.
+        add(destination, meta.changed ? Buffer.from(meta.text) : entry.data);
         metas.push({ type, destination, basename, doc });
       }
     } else if (!ADMIN.has(basename)) {
@@ -106,8 +109,8 @@ export async function prepareArchive(archive, options = {}) {
   const manifest = ['-- Convertido com RPForge', "fx_version 'cerulean'", "game 'gta5'", '', 'files {', ...metas.map(m => `    '${m.destination}',`), '}', '', ...metas.map(m => `data_file '${m.type}' '${m.destination}'`), ''].join('\n');
   add('fxmanifest.lua', Buffer.from(manifest));
   const audit = auditAddon(files);
-  audit.issues.push(...ignoredWarnings);
-  audit.warnings += ignoredWarnings.length;
+  audit.issues.push(...ignoredWarnings, ...xmlWarnings);
+  audit.warnings += ignoredWarnings.length + xmlWarnings.length;
   options.onProgress?.({ phase: 'audit', current: 1, total: 1, label: path.basename(archive) });
   return { archive, files, metas, kind: 'vehicle', defaultName: name, models: finalModels, originalModels: [...declaredModels].sort(), skipped, removedTuning: cleaned.removed, audit, sourceHash, sourceBytes: stat.size, mergedSources };
 }

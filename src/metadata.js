@@ -1,4 +1,5 @@
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+import { XMLSerializer } from '@xmldom/xmldom';
+import { readXml } from './xml-text.js';
 
 export const META = {
   'handling.meta': ['HANDLING_FILE', 'CHandlingDataMgr'],
@@ -14,15 +15,12 @@ export const value = node => node?.textContent.trim() ?? '';
 export const normalized = node => value(node).toLowerCase();
 export const serializeXml = doc => Buffer.from(new XMLSerializer().serializeToString(doc));
 
+/** Parsed meta plus the text to publish and the warnings of any unambiguous repair (see xml-text.js). */
+export function readMeta(data, basename) {
+  return readXml(data, basename, { root: META[basename]?.[1] });
+}
 export function parseMeta(data, basename) {
-  const messages = [];
-  const source = data.toString('utf8').replace(/^\uFEFF/, '');
-  if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error(`Declaração XML externa não suportada: ${basename}`);
-  let doc;
-  try { doc = new DOMParser({ onError: (level, message) => messages.push(message) }).parseFromString(source, 'text/xml'); }
-  catch { throw new Error(`XML inválido: ${basename}`); }
-  if (messages.length || doc.documentElement?.tagName !== META[basename]?.[1]) throw new Error(`XML inválido ou raiz inesperada: ${basename}`);
-  return doc;
+  return readMeta(data, basename).doc;
 }
 
 function canonical(node) {
