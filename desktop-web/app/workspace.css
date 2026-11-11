@@ -37,7 +37,7 @@
 .desktop .clothing-config > .button { margin-bottom: 5px; }
 .desktop .clothing-file, .desktop .clothing-config select { background: var(--bg); border-color: var(--field-border); }
 .desktop .clothing-file:hover:not(:disabled) { background: var(--surface-raised); border-color: var(--control-border); }
-.desktop .profile-summary h2 { font: 700 26px/1.2 var(--font-display); }
+.desktop .profile-summary h2 { font: 700 26px/1.2 var(--font-body); }
 .desktop .account-panel > .button { margin-top: 12px; align-self: stretch; }
 .desktop .account-panel .account-footnote { color: var(--muted); }
 .desktop .clothing-delivery { border-top-color: var(--orange); }
@@ -70,12 +70,12 @@ body{
 }
 
 .desktop h1{
-  font: 700 24px/1.25 var(--font-display);
+  font: 700 24px/1.25 var(--font-body);
   letter-spacing: -.025em;
 }
 
 .desktop h2,.desktop h3{
-  font-family: var(--font-display);
+  font-family: var(--font-body);
 }
 
 .desktop:not(.quick){
@@ -128,7 +128,7 @@ body{
 .window-caption-divider{
   width: 1px;
   height: 13px;
-  background: #41414d;
+  background: var(--line-strong);
   margin: 0 3px;
 }
 
@@ -155,18 +155,18 @@ body{
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #b8b6c3;
+  color: var(--muted);
   -webkit-app-region: no-drag;
 }
 
 .window-controls button:hover:not(:disabled){
   background: var(--surface-hover);
-  color: #fff;
+  color: var(--text);
 }
 
 .window-controls button.window-close:hover:not(:disabled){
   background: #b83939;
-  color: #fff;
+  color: var(--text);
 }
 
 .window-controls button svg{
@@ -262,7 +262,7 @@ body{
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  color: #8f8e9e;
+  color: var(--field-border-hover);
 }
 
 .sidebar-link:hover:not(:disabled){
@@ -299,7 +299,7 @@ body{
   padding: 7px 9px;
   height: 36px;
   background: var(--bg);
-  border: 1px solid #34343e;
+  border: 1px solid var(--line);
   border-radius: 2px;
   color: var(--text);
   font: 13px var(--font-body);
@@ -348,7 +348,7 @@ body{
   width: 28px;
   height: 28px;
   min-width: 28px;
-  border-color: #51515e;
+  border-color: var(--line-strong);
   background: var(--surface-hover);
 }
 
@@ -367,7 +367,7 @@ body{
 }
 
 .home-tool-group h2{
-  font: 700 22px/1.2 var(--font-display);
+  font: 700 22px/1.2 var(--font-body);
   color: var(--text);
   margin: 0 0 16px;
 }
@@ -409,7 +409,7 @@ body{
   border: 1px solid var(--field-border);
   border-radius: 5px;
   color: var(--orange);
-  background: #27232a;
+  background: var(--surface-raised);
   flex-shrink: 0;
 }
 
@@ -431,14 +431,14 @@ body{
 
 .home-file-type{
   padding: 4px 7px;
-  border: 1px solid #3b3b48;
+  border: 1px solid var(--line);
   border-radius: 3px;
-  color: #a5a3b4;
+  color: var(--subtle);
   font: 12px var(--font-body);
 }
 
 .home-tool-row>svg{
-  color: #9795a7;
+  color: var(--subtle);
   width: 17px;
   flex-shrink: 0;
 }
@@ -516,7 +516,7 @@ body{
 }
 
 .desktop .clothing-config h2,.desktop .clothing-delivery h2{
-  font: 700 22px/1.2 var(--font-display);
+  font: 700 22px/1.2 var(--font-body);
   margin: 0 0 14px;
 }
 
@@ -569,7 +569,7 @@ body{
 }
 
 .desktop .empty-state h2{
-  font: 700 19px var(--font-display);
+  font: 700 19px var(--font-body);
   margin: 0;
 }
 
@@ -632,7 +632,7 @@ body{
 }
 
 .desktop .working-state h2{
-  font: 700 24px/1.2 var(--font-display);
+  font: 700 24px/1.2 var(--font-body);
 }
 
 .desktop .working-state p{
@@ -663,7 +663,7 @@ body{
 }
 
 .desktop .account-panel>h2{
-  font: 700 18px var(--font-display);
+  font: 700 18px var(--font-body);
   margin-bottom: 8px;
 }
 
@@ -696,7 +696,7 @@ body{
 }
 
 .desktop .help-grid h2{
-  font: 700 22px/1.2 var(--font-display);
+  font: 700 22px/1.2 var(--font-body);
 }
 
 .desktop .help-grid p,.desktop .help-note p{
@@ -776,9 +776,9 @@ body{
 .editor-lod select{
   min-width: 75px;
   padding: 5px 6px;
-  border: 1px solid #444450;
+  border: 1px solid var(--line-strong);
   border-radius: 3px;
-  background: #16161f;
+  background: var(--surface-sunken);
   color: var(--text);
   font: 12px var(--font-body);
 }
@@ -787,7 +787,7 @@ body{
   position: relative;
   overflow: hidden;
   touch-action: none;
-  background: #1d1d27;
+  background: var(--surface);
 }
 
 .skin-stage .clothing-caption{
@@ -805,19 +805,19 @@ body{
 }
 
 .skin-inspector h3{
-  font: 700 12px var(--font-display);
+  font: 700 12px var(--font-body);
   margin: 0 0 10px;
 }
 
 .skin-inspector h3 .selection-count{
   float: right;
-  color: #ffdf88;
+  color: var(--yellow);
   font-variant-numeric: tabular-nums;
 }
 
 .selection-operations{
   display: flex;
-  border: 1px solid #42424e;
+  border: 1px solid var(--line-strong);
   border-radius: 3px;
   margin: 0 0 13px;
   overflow: hidden;
@@ -827,10 +827,10 @@ body{
   flex: 1;
   min-width: 0;
   padding: 6px 3px;
-  background: #191921;
+  background: var(--surface-sunken);
   border: 0;
-  border-right: 1px solid #42424e;
-  color: #aaa7b8;
+  border-right: 1px solid var(--line-strong);
+  color: var(--muted);
   font: 11px var(--font-body);
 }
 
@@ -839,7 +839,7 @@ body{
 }
 
 .selection-operations button[aria-pressed=true]{
-  background: #3e3326;
+  background: var(--line);
   color: #ffdcaa;
 }
 
@@ -887,8 +887,8 @@ body{
   justify-content: center;
   gap: 6px;
   padding: 8px 5px;
-  border: 1px solid #454550;
-  background: #292934;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-hover);
   color: var(--text);
   border-radius: 3px;
   font: 12px var(--font-body);
@@ -899,7 +899,7 @@ body{
 }
 
 .selection-assign button:not(:disabled):hover{
-  background: #383844;
+  background: var(--line);
 }
 
 .selection-assign i{
@@ -972,7 +972,7 @@ body{
 }
 
 .mesh-selection-box{
-  border: 1px solid #ffdc8a;
+  border: 1px solid var(--yellow);
   background: #f6c96c20;
 }
 
@@ -986,7 +986,7 @@ body{
 }
 
 .skin-success-heading h2{
-  font: 700 21px var(--font-display);
+  font: 700 21px var(--font-body);
 }
 
 .skin-success-heading p{
@@ -1016,7 +1016,7 @@ body{
 }
 
 .skin-progress-dialog h2{
-  font: 700 20px var(--font-display);
+  font: 700 20px var(--font-body);
 }
 
 .skin-progress-dialog{
@@ -1035,7 +1035,7 @@ body{
 }
 
 .quick .skin-editor-footer{
-  background: #20202a;
+  background: var(--surface);
 }
 
 .quick .skin-config{
@@ -1233,7 +1233,7 @@ body{
 /* Shared geometry; compact viewport tools and approved pixel result controls keep their own sizes. */
 
 .desktop .account-panel>h2{
-  font-family: Pixelify,monospace;
+  font-family: var(--font-body);
   font-weight: 700;
   letter-spacing: 0;
 }
@@ -1403,7 +1403,7 @@ body{
 }
 
 .desktop .account-providers h3{
-  font: 400 13px/20px var(--font-display);
+  font: 400 13px/20px var(--font-body);
   color: var(--muted);
   margin: 0;
 }
@@ -1516,7 +1516,7 @@ body{
 
 /* Acesso por ferramenta: texto + borda, não só cor. A licença no shell continua sendo a autoridade. */
 .home-access{padding:3px 8px;border:1px solid currentColor;border-radius:999px;font:700 12px var(--font-body);white-space:nowrap}
-.home-access--free{color:#7fd49b}
+.home-access--free{color:var(--success)}
 .home-access--pro{color:var(--yellow)}
 .home-transition{max-width:1150px;margin-top:8px;padding:14px 16px;border:1px dashed var(--line);border-radius:var(--control-radius)}
 .home-transition h2{font:700 14px var(--font-body);margin:0 0 6px;color:var(--text)}

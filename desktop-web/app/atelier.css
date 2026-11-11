@@ -40,7 +40,7 @@
 
 .pixel-output-heading h2{
   overflow-wrap: anywhere;
-  font: 700 24px/1.25 var(--font-display);
+  font: 700 24px/1.25 var(--font-body);
 }
 
 .pixel-output-folder{
@@ -125,7 +125,7 @@
 }
 
 .pixel-output-heading h2{
-  font: 700 24px/1.25 var(--font-display);
+  font: 700 24px/1.25 var(--font-body);
   margin: 0;
 }
 
@@ -167,8 +167,8 @@
   width: 35px;
   height: 23px;
   flex-shrink: 0;
-  border: 1px solid #777180;
-  color: #c4becc;
+  border: 1px solid var(--field-border);
+  color: var(--muted-strong);
   font-size: 11px;
 }
 
@@ -294,7 +294,7 @@
 }
 
 .pixel-result-previews h2{
-  font: 700 26px/1.2 var(--font-display);
+  font: 700 26px/1.2 var(--font-body);
   margin: 0;
 }
 
@@ -309,7 +309,7 @@
 
 .pixel-result-previews figcaption{
   text-align: center;
-  color: #b5b1bf;
+  color: var(--muted);
   font-size: 14px;
   padding-top: 7px;
 }
@@ -319,7 +319,7 @@
   display: grid;
   place-items: center;
   min-height: 200px;
-  color: #aba8b8;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -354,7 +354,7 @@
   width: 21px;
   height: 21px;
   flex-shrink: 0;
-  color: #e9e4de;
+  color: var(--text);
 }
 
 .pixel-result-actions{
@@ -481,7 +481,7 @@
   min-height: 0;
   max-width: none;
   width: 100%;
-  color: #eeedf2;
+  color: var(--text);
   font-size: 14px;
 }
 
@@ -505,7 +505,7 @@
   align-items: center;
   gap: 12px;
   padding: 0 18px;
-  border-block: 1px solid #32333f;
+  border-block: 1px solid var(--line);
   background: var(--surface);
 }
 
@@ -513,16 +513,16 @@
   width: 17px;
   height: 17px;
   flex-shrink: 0;
-  color: #aeafbf;
+  color: var(--muted);
 }
 
 .atelier-context>span{
-  color: #c7c6d1;
+  color: var(--muted-strong);
   font-size: 13px;
 }
 
 .atelier-context h1{
-  font: 700 15px/1.4 var(--font-display);
+  font: 700 15px/1.4 var(--font-body);
   margin: 0;
   white-space: nowrap;
   letter-spacing: 0;
@@ -531,7 +531,7 @@
 .atelier-context-rule{
   width: 1px;
   height: 18px;
-  background: #474751;
+  background: var(--line-strong);
   margin: 0 4px;
   flex-shrink: 0;
 }
@@ -549,7 +549,7 @@
   gap: 9px;
   border: 0;
   background: transparent;
-  color: #eae9ee;
+  color: var(--text);
   font-size: 13px;
   min-height: 32px;
   padding: 4px 0 4px 12px;
@@ -563,7 +563,7 @@
 }
 
 .atelier-text-button:hover:not(:disabled){
-  color: #ffb06c;
+  color: var(--danger);
 }
 
 .atelier-body{
@@ -576,9 +576,9 @@
 }
 
 .atelier-panel{
-  border: 1px solid #383a47;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #21222b;
+  background: var(--surface-raised);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -602,7 +602,7 @@
   border: 0;
   border-left: 3px solid transparent;
   background: transparent;
-  color: #c2c1cf;
+  color: var(--muted-strong);
 }
 
 .atelier-rail button svg{
@@ -611,14 +611,14 @@
 }
 
 .atelier-rail button.current{
-  border-left-color: #ff8a32;
-  background: #39291e;
-  color: #ff963e;
+  border-left-color: var(--orange-hover);
+  background: var(--surface-hover);
+  color: var(--orange-hover);
 }
 
 .atelier-rail button:hover{
-  background: #2e2e39;
-  color: #fff;
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .atelier-rail .atelier-rail-help{
@@ -632,14 +632,14 @@
 }
 
 .atelier-source h2,.atelier-inspector h2{
-  font: 700 18px/1.3 var(--font-display);
+  font: 700 18px/1.3 var(--font-body);
   margin: 0 0 16px;
 }
 
 .atelier-source h2{
   padding-bottom: 12px;
-  border-bottom: 1px solid #393a46;
-  font-family: var(--font-display);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-body);
   font-weight: 700;
 }
 
@@ -657,9 +657,9 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #494b59;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #1b1d25;
+  background: var(--surface);
 }
 
 .atelier-asset-thumbnail img{
@@ -669,7 +669,7 @@
 }
 
 .atelier-asset-thumbnail>svg{
-  color: #8993a8;
+  color: var(--subtle);
   width: 30px;
   height: 30px;
 }
@@ -689,7 +689,7 @@
 
 .atelier-asset span{
   display: block;
-  color: #a7a8b6;
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
   margin-top: 7px;
@@ -700,7 +700,7 @@
 }
 
 .atelier-source h3{
-  font: 400 13px/1.4 var(--font-display);
+  font: 400 13px/1.4 var(--font-body);
   margin: 0 0 10px;
 }
 
@@ -723,7 +723,7 @@
   padding: 6px 4px;
   background: var(--surface-raised);
   border: 0;
-  border-right: 1px solid #444551;
+  border-right: 1px solid var(--line-strong);
   color: var(--text);
   font-size: 12px;
   white-space: nowrap;
@@ -797,7 +797,7 @@
 }
 
 .atelier-outliner .role-hidden{
-  color: #828391;
+  color: var(--field-border-hover);
   background: var(--surface);
 }
 
@@ -807,7 +807,7 @@
 
 .atelier-count-details summary,.atelier-review-options summary{
   font-size: 12px;
-  color: #b8bac8;
+  color: var(--muted);
   cursor: pointer;
   padding: 6px 0;
 }
@@ -820,16 +820,16 @@
 
 .atelier .skin-counts th,.atelier .skin-counts td{
   padding: 7px 3px;
-  border-color: #383a47;
+  border-color: var(--line);
   font-weight: 400;
 }
 
 .atelier .skin-counts thead{
-  color: #9498aa;
+  color: var(--subtle);
 }
 
 .atelier .skin-counts tbody tr[aria-current=true]{
-  background: #30323d;
+  background: var(--line);
 }
 
 .atelier-texture{
@@ -864,14 +864,14 @@
 }
 
 .atelier-review-options input{
-  accent-color: #ff913e;
+  accent-color: var(--orange-hover);
   margin: 3px 0 0;
 }
 
 .atelier-review-options button{
   background: none;
   color: #d3d4de;
-  border: 1px solid #494b5a;
+  border: 1px solid var(--line-strong);
   border-radius: 3px;
   font-size: 12px;
   padding: 7px;
@@ -929,14 +929,14 @@
 
 .atelier-toolbar .atelier-wire{
   border-color: var(--field-border);
-  background: #292b35;
+  background: var(--surface-hover);
 }
 
 .atelier-toolbar-rule{
   height: 23px;
   width: 1px;
   margin: 0 4px;
-  background: #4b4d59;
+  background: var(--line-strong);
   flex-shrink: 0;
 }
 
@@ -957,7 +957,7 @@
   width: 120px;
   min-width: 45px;
   height: 5px;
-  accent-color: #ff963d;
+  accent-color: var(--orange-hover);
   margin: 0;
 }
 
@@ -965,8 +965,8 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  background: #181b23;
-  border: 1px solid #474a58;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line-strong);
   border-radius: 4px;
   padding: 3px 6px;
 }
@@ -974,14 +974,14 @@
 .atelier-radius-field input{
   width: 43px;
   padding: 0;
-  color: #ececf3;
+  color: var(--text);
   background: none;
   border: 0;
   font-size: 12px;
 }
 
 .atelier-radius-field span{
-  color: #a4a8b9;
+  color: var(--muted);
   font-size: 11px;
 }
 
@@ -1004,9 +1004,9 @@
   appearance: none;
   width: 32px;
   height: 19px;
-  border: 1px solid #555968;
+  border: 1px solid var(--line-strong);
   border-radius: 11px;
-  background: #343847;
+  background: var(--line);
   margin: 0;
   position: relative;
   cursor: pointer;
@@ -1024,13 +1024,13 @@
 }
 
 .atelier-visible-switch input:checked{
-  background: #f0812d;
-  border-color: #ff9e51;
+  background: var(--orange);
+  border-color: var(--orange-hover);
 }
 
 .atelier-visible-switch input:checked:before{
   left: 15px;
-  background: #fff6eb;
+  background: var(--text);
 }
 
 .atelier .atelier-viewport{
@@ -1061,7 +1061,7 @@
   right: 10px;
   top: 10px;
   padding: 3px;
-  border: 1px solid #484c5a;
+  border: 1px solid var(--line-strong);
   border-radius: 5px;
   background: #282d39dd;
   z-index: 3;
@@ -1080,12 +1080,12 @@
 }
 
 .atelier-camera-controls button:hover{
-  background: #414957;
+  background: var(--line-strong);
 }
 
 .atelier-camera-controls button[aria-pressed=true]{
-  background: #3d4554;
-  color: #fff;
+  background: var(--line-strong);
+  color: var(--text);
 }
 
 .atelier-camera-controls button svg{
@@ -1119,11 +1119,11 @@
 }
 
 .atelier-view-cube button[data-axis=x]{
-  color: #f48f8e;
+  color: var(--danger);
 }
 
 .atelier-view-cube button[data-axis=y]{
-  color: #92d47b;
+  color: var(--success);
 }
 
 .atelier-view-cube button[data-axis=z]{
@@ -1135,7 +1135,7 @@
   left: 32px;
   top: 32px;
   border-radius: 50%;
-  background: #bdc9db;
+  background: var(--muted-strong);
   width: 6px;
   height: 6px;
 }
@@ -1146,7 +1146,7 @@
   bottom: 0;
   border: 0;
   background: transparent;
-  color: #a7b1c5;
+  color: var(--muted);
   font-size: 10px;
   padding: 4px 8px;
   pointer-events: auto;
@@ -1160,7 +1160,7 @@
   font-size: 12px;
   color: #ffbbae;
   padding: 10px;
-  background: #331e21;
+  background: var(--danger-bg);
 }
 
 .atelier-viewport-status{
@@ -1184,7 +1184,7 @@
   font-size: 10px;
   line-height: 1.4;
   color: var(--muted);
-  border-left: 1px solid #4b4e5c;
+  border-left: 1px solid var(--line-strong);
   padding-left: 14px;
 }
 
@@ -1204,12 +1204,12 @@
   font-size: 20px;
   letter-spacing: -.025em;
   margin-bottom: 17px;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 700;
 }
 
 .atelier-inspector h3{
-  font: 700 14px/1.4 var(--font-display);
+  font: 700 14px/1.4 var(--font-body);
   margin: 0 0 11px;
 }
 
@@ -1233,7 +1233,7 @@
   border: 0;
   background: none;
   padding: 0;
-  color: #b7bbc9;
+  color: var(--muted);
   text-decoration: underline;
   font-size: 11px;
 }
@@ -1261,7 +1261,7 @@
   background: var(--surface-raised);
   flex: 1;
   border: 0;
-  border-right: 1px solid #454958;
+  border-right: 1px solid var(--line-strong);
 }
 
 .atelier .selection-operations button:last-child{
@@ -1274,7 +1274,7 @@
 }
 
 .atelier .selection-operations button:hover:not(:disabled){
-  background: #424657;
+  background: var(--line-strong);
 }
 
 .atelier-assign>div{
@@ -1289,7 +1289,7 @@
   gap: 8px;
   flex: 1;
   min-height: 38px;
-  border: 1px solid #515564;
+  border: 1px solid var(--line-strong);
   border-radius: 5px;
   background: var(--surface-raised);
   color: var(--text);
@@ -1300,7 +1300,7 @@
 
 .atelier-assign button:hover:not(:disabled){
   background: var(--surface-hover);
-  border-color: #7b8195;
+  border-color: var(--field-border-hover);
 }
 
 .atelier i{
@@ -1340,7 +1340,7 @@
 }
 
 .atelier-lod-review button[aria-current=true]{
-  background: #323745;
+  background: var(--line);
 }
 
 .atelier-lod-review button>svg{
@@ -1367,11 +1367,11 @@
 }
 
 .lod-pending{
-  color: #f5c165;
+  color: var(--yellow);
 }
 
 .lod-complete{
-  color: #b3bfc4;
+  color: var(--muted);
 }
 
 .atelier-output-preview{
@@ -1390,7 +1390,7 @@
   min-width: 0;
   border: 1px solid var(--field-border);
   border-radius: 5px;
-  background: #1f222b;
+  background: var(--surface-raised);
   overflow: hidden;
 }
 
@@ -1414,7 +1414,7 @@
   display: grid;
   place-items: center;
   font-size: 11px;
-  color: #9da5b8;
+  color: var(--subtle);
 }
 
 .atelier-destination{
@@ -1456,12 +1456,12 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #c2c8d7;
+  color: var(--muted-strong);
   margin-top: 11px;
 }
 
 .atelier-destination p>span{
-  color: #8f98ac;
+  color: var(--subtle);
   margin-right: 6px;
 }
 
@@ -1509,7 +1509,7 @@
 .atelier .atelier-pending-note{
   font-size: 11px;
   line-height: 1.5;
-  color: #edc37e;
+  color: var(--yellow);
   margin: 0 0 9px;
 }
 
@@ -1519,8 +1519,8 @@
   right: 12px;
   bottom: 52px;
   padding: 16px;
-  background: #282e3c;
-  border: 1px solid #69738b;
+  background: var(--surface-hover);
+  border: 1px solid var(--field-border);
   border-radius: 6px;
   z-index: 5;
   box-shadow: 0 8px 35px #0007;
@@ -1530,7 +1530,7 @@
   float: right;
   border: 0;
   background: none;
-  color: #e4eaf9;
+  color: var(--text);
   font-size: 22px;
   padding: 0 2px;
 }
@@ -1542,7 +1542,7 @@
 .atelier-help p{
   font-size: 12px;
   line-height: 1.6;
-  color: #c3cbde;
+  color: var(--muted-strong);
   margin-top: 8px;
 }
 

@@ -1,31 +1,68 @@
-/* RPForge website palette and bundled font roles. Desktop density is intentional. */
+/* RPForge desktop tokens — one palette shared with the website (RPForge-Site/app/tokens.css).
+   Pixelify Sans only for large titles (>= 28px) and the logo; everything read, typed or
+   compared (file names, IDs, paths, buttons, small labels) uses Atkinson Hyperlegible. */
 :root {
   color-scheme: dark;
+  /* Surfaces */
   --bg: #121218;
   --surface: #1d1d27;
+  --surface-sunken: #18181f;
   --surface-raised: #25232d;
-  --surface-hover: #34303d;
+  --surface-hover: #2c2a36;
+  --viewport: var(--surface-sunken);
+  /* Lines: --line separates areas; --field-border bounds controls (>= 3:1 on --bg, WCAG 1.4.11) */
   --line: #343444;
-  --control-border: #8c8792;
-  --field-border: #42424f;
+  --line-strong: #4a4a5c;
+  --field-border: #6e6a78;
+  --field-border-hover: #8c8792;
+  --control-border: var(--field-border);
+  /* Text */
   --text: #f5f1e8;
-  --muted: #aaa9b7;
   --muted-strong: #c4becc;
+  --muted: #b4b3c0;
+  --subtle: #9b9aa8;
+  /* Brand */
   --orange: #ff7b25;
+  --orange-hover: #ff8d43;
+  --orange-border: #ff8c43;
   --yellow: #ffc857;
-  --primary: #e9843d;
-  --primary-hover: #f59852;
-  --primary-border: #ffd0a5;
+  --primary: var(--orange);
+  --primary-hover: var(--orange-hover);
+  --primary-border: var(--orange-border);
   --primary-ink: #20150d;
   --selection-bg: #ff7b251a;
   --selection-border: #a26841;
-  --danger: #f5b5a7;
-  --viewport: #18181f;
-  --font-body: Atkinson, Arial, sans-serif;
-  --font-display: Pixelify, monospace;
+  /* States: always paired with an icon and text, never color alone */
+  --success: #7fd49b;
+  --success-bg: #16281d;
+  --warning: #ffc857;
+  --warning-bg: #2c2414;
+  --danger: #ff9a8a;
+  --danger-bg: #2e1817;
+  --danger-border: #b4574a;
+  --info: #ff7b25;
+  --info-bg: #2a1d14;
+  /* Skin review roles (also patterned and labelled) */
+  --role-skin: #f2b48c;
+  --role-cloth: #8fb8ff;
+  --role-uncertain: #ffc857;
+  /* Type */
+  --font-body: Atkinson, 'Segoe UI', Arial, sans-serif;
+  --font-display: Pixelify, 'Segoe UI', monospace;
+  /* Controls */
   --control-height: 44px;
+  --control-height-dense: 36px;
   --control-gap: 8px;
   --control-radius: 3px;
+  --focus: var(--orange);
+  --focus-ring: 2px solid var(--focus);
+  --focus-offset: 3px;
+  --disabled-opacity: .45;
   --window-bar-height: 40px;
   --page-gap: 24px;
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-fast: 0ms; --motion-base: 0ms; }
 }

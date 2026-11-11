@@ -31,17 +31,18 @@ async function snap(id,title,group='Ferramentas',note='Dados de demonstração')
  const metrics=await page.evaluate(()=>{
   const visible=e=>!!e.getClientRects().length;
   const heading=Array.from(document.querySelectorAll('main h1')).find(visible);
-  const primary=Array.from(document.querySelectorAll('.button.primary,.pixel-result-button.primary')).find(e=>visible(e)&&!e.disabled);
+  const primary=Array.from(document.querySelectorAll('.button.primary')).find(e=>visible(e)&&!e.disabled);
   const main=Array.from(document.querySelectorAll('main')).find(visible);
-  return {headingFont:heading&&getComputedStyle(heading).fontFamily,bodyFont:getComputedStyle(document.body).fontFamily,
+  return {headingFont:heading&&getComputedStyle(heading).fontFamily,headingSize:heading&&parseFloat(getComputedStyle(heading).fontSize),smallDisplay:Array.from(document.querySelectorAll("body *")).filter(e=>visible(e)&&e.childElementCount===0&&e.textContent.trim()&&/Pixelify/.test(getComputedStyle(e).fontFamily)&&parseFloat(getComputedStyle(e).fontSize)<28).map(e=>e.textContent.trim().slice(0,30)),bodyFont:getComputedStyle(document.body).fontFamily,
    background:getComputedStyle(document.body).backgroundColor,primary:primary&&{font:getComputedStyle(primary).fontFamily,color:getComputedStyle(primary).color,background:getComputedStyle(primary).backgroundColor},
    fileFont:document.querySelector('.pixel-output li p')&&getComputedStyle(document.querySelector('.pixel-output li p')).fontFamily,
    overflow:main?main.scrollWidth>main.clientWidth+1:false,viewport:{width:innerWidth,height:innerHeight}};
  });
  assert.match(metrics.bodyFont,/Atkinson/,id+' body font');
- if(metrics.headingFont)assert.match(metrics.headingFont,/Pixelify/,id+' heading font');
+ if(metrics.headingFont&&metrics.headingSize>=28)assert.match(metrics.headingFont,/Pixelify/,id+' heading font');
+ assert.deepEqual(metrics.smallDisplay,[],id+' Pixelify only on large titles');
  if(metrics.fileFont)assert.match(metrics.fileFont,/Atkinson/,id+' file list font');
- if(metrics.primary){assert.match(metrics.primary.font,/Pixelify/,id+' control font');assert.equal(metrics.primary.color,'rgb(32, 21, 13)',id+' primary contrast');assert.equal(metrics.primary.background,'rgb(233, 132, 61)',id+' website primary color');}
+ if(metrics.primary){assert.match(metrics.primary.font,/Atkinson/,id+' control font');assert.doesNotMatch(metrics.primary.font,/Pixelify/,id+' controls never use the display font');assert.equal(metrics.primary.color,'rgb(32, 21, 13)',id+' primary contrast');assert.equal(metrics.primary.background,'rgb(255, 123, 37)',id+' website primary color');}
  assert.equal(metrics.overflow,false,id+' horizontal overflow');
  const accessibility=await page.evaluate(async()=>{
   const result=await globalThis.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}});
