@@ -5,10 +5,11 @@
  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+ xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
- IgnorableNamespaces="uap uap10 rescap desktop4 desktop5 com">
+ IgnorableNamespaces="uap uap10 rescap desktop4 desktop5 desktop6 com">
  <Identity Name="RedHorn.RPFForge" Publisher="__APPROVED_PUBLISHER_SUBJECT__" Version="0.0.0.0" ProcessorArchitecture="x64" />
- <Properties><DisplayName>RPForge</DisplayName><PublisherDisplayName>RedHorn</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo><uap10:AllowExternalContent>true</uap10:AllowExternalContent></Properties>
+ <Properties><DisplayName>RPForge</DisplayName><PublisherDisplayName>RedHorn</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo><uap10:AllowExternalContent>true</uap10:AllowExternalContent><desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization><desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization></Properties>
  <Resources><Resource Language="pt-br" /></Resources>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" /></Dependencies>
  <Capabilities><rescap:Capability Name="runFullTrust" /><rescap:Capability Name="unvirtualizedResources" /></Capabilities>
