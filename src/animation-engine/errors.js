@@ -21,6 +21,16 @@ export const ErrorCode = Object.freeze({
   SKELETON_INVALID: 'SKELETON_INVALID',         // reference skeleton malformed (duplicates, cycles, missing parent)
   SKELETON_MISMATCH: 'SKELETON_MISMATCH',       // animation references bones absent or ambiguous in the skeleton
   CANCELLED: 'CANCELLED',                       // caller signal aborted between stages
+  // FBX import (docs/animation-engine/FBX-AND-RETARGET.md)
+  FBX_INVALID: 'FBX_INVALID',                   // not an FBX file, or its node structure is corrupt/truncated
+  FBX_UNSUPPORTED_VERSION: 'FBX_UNSUPPORTED_VERSION', // FBX version outside 7.0-7.7 (e.g. FBX 6.x from 2010 and older)
+  FBX_UNSUPPORTED_FEATURE: 'FBX_UNSUPPORTED_FEATURE', // valid FBX content the converter refuses to guess (extra layers, mirrored scale...)
+  FBX_NO_SKELETON: 'FBX_NO_SKELETON',           // no bone/node hierarchy in the file
+  FBX_NO_ANIMATION: 'FBX_NO_ANIMATION',         // no take with rotation/translation curves on the hierarchy
+  FBX_TAKE_NOT_FOUND: 'FBX_TAKE_NOT_FOUND',     // requested take name/index does not exist
+  BONE_MAP_INVALID: 'BONE_MAP_INVALID',         // manual bone map names something that does not exist
+  BONE_MAP_INSUFFICIENT: 'BONE_MAP_INSUFFICIENT', // no FBX bone could be matched to the target skeleton
+  ANIMATION_TOO_LONG: 'ANIMATION_TOO_LONG',     // more frames than the proven single-block write profile holds
 });
 
 export class EngineError extends Error {
