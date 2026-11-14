@@ -1,0 +1,6 @@
+{
+  "name": "rpforge-texture-studio",
+  "private": true,
+  "type": "commonjs",
+  "description": "RPForge Texture Studio — Photoshop UXP panel and its own GTA V texture engine (CommonJS so the same files load in UXP and in Node tests)."
+}
