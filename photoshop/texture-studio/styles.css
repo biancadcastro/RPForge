@@ -1,0 +1,127 @@
+/* RPForge Texture Studio — RPForge identity (docs/IDENTIDADE.md, design/identidade/Final)
+   on top of the Photoshop host theme: compact, flat controls sized like Photoshop's own panels,
+   with RPForge orange only where it matters (main action, step numbers, active tools).
+   Buttons are divs (.btn): Photoshop draws real <button>s its own way and ignores this CSS.
+   Fonts are bundled (OFL, assets/fonts); nothing is loaded from the internet. */
+@font-face { font-family: "Pixelify"; src: url("assets/fonts/PixelifySans-Regular.ttf"); font-weight: 400; }
+@font-face { font-family: "Pixelify"; src: url("assets/fonts/PixelifySans-Bold.ttf"); font-weight: 700; }
+@font-face { font-family: "Atkinson"; src: url("assets/fonts/AtkinsonHyperlegible-Regular.ttf"); font-weight: 400; }
+@font-face { font-family: "Atkinson"; src: url("assets/fonts/AtkinsonHyperlegible-Bold.ttf"); font-weight: 700; }
+
+:root {
+  /* host theme (native feel) */
+  --bg: var(--uxp-host-background-color, #323232);
+  --text: var(--uxp-host-text-color, #e6e6e6);
+  --muted: var(--uxp-host-text-color-secondary, #a3a3a3);
+  --border: var(--uxp-host-border-color, rgba(255,255,255,0.12));
+  --control: rgba(255,255,255,0.07);
+  --control-hover: rgba(255,255,255,0.13);
+  --control-border: rgba(255,255,255,0.10);
+  --hover: rgba(255,255,255,0.06);
+  /* RPForge brand tokens */
+  --graphite: #14141b;
+  --orange: #ff7a32;
+  --primary: #e9843d;
+  --primary-hover: #f59852;
+  --primary-ink: #20150d;
+  --ok: #4ade80;
+  --error: #ff7676;
+  --font-display: "Pixelify", var(--uxp-host-font-family, "Adobe Clean"), "Segoe UI", sans-serif;
+  --font-body: var(--uxp-host-font-family, "Adobe Clean"), "Atkinson", "Segoe UI", sans-serif;
+}
+body { margin: 0; padding: 6px 10px 10px; color: var(--text); background: var(--bg); font-family: var(--font-body); font-size: var(--uxp-host-font-size, 12px); }
+.hidden { display: none; }
+b { font-weight: 700; }
+
+/* header */
+.top { display: flex; align-items: center; padding: 2px 0 8px; border-bottom: 1px solid var(--border); }
+.brand-icon { width: 20px; height: 20px; margin-right: 8px; flex-shrink: 0; }
+.title { font-family: var(--font-display); font-weight: 700; font-size: 13px; flex: 1; }
+.by { font-size: 10px; color: var(--muted); }
+
+/* steps */
+.step { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.step-head { display: flex; align-items: center; margin-bottom: 7px; }
+.num { width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 3px; background: var(--graphite); color: var(--orange); font-family: var(--font-display); font-size: 10px; font-weight: 700; margin-right: 7px; flex-shrink: 0; }
+h2 { font-family: var(--font-display); font-size: 12px; font-weight: 700; margin: 0; flex: 1; }
+.count { color: var(--muted); font-size: 11px; }
+.hint { color: var(--muted); margin: 0 0 8px 0; line-height: 1.45; }
+
+/* buttons (divs) — flat, 24px, like Photoshop's own panel buttons */
+.btn { display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 24px; padding: 0 10px;
+  border-radius: 4px; border: 1px solid var(--control-border); background: var(--control); color: var(--text);
+  font-size: 12px; white-space: nowrap; cursor: default; user-select: none; }
+.btn:hover { background: var(--control-hover); }
+.btn:active { background: rgba(255,255,255,0.18); }
+.btn.cta { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); font-weight: 700; height: 28px; }
+.btn.cta:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--muted); height: 20px; padding: 0 6px; }
+.btn.quiet:hover { color: var(--orange); background: var(--hover); }
+.btn.small { height: 22px; padding: 0 9px; font-size: 11px; }
+.btn.wide { width: 100%; }
+.btn.is-disabled { opacity: 0.38; pointer-events: none; }
+.row-buttons { display: flex; margin-top: 6px; }
+.row-buttons .btn { flex: 1; padding: 0 6px; }
+.row-buttons .btn + .btn { margin-left: 6px; }
+
+/* model */
+.file-row { display: flex; align-items: center; min-height: 22px; }
+.kind { color: var(--muted); width: 62px; flex-shrink: 0; }
+.file { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; margin-right: 4px; }
+#vehicleInfo { margin: 6px 0 0; }
+
+/* list */
+.search { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+.list { max-height: 300px; overflow-y: auto; }
+.group { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 8px 0 3px; }
+.item { display: flex; align-items: center; padding: 4px 4px 4px 6px; border-radius: 4px; border-left: 2px solid transparent; }
+.item:hover { background: var(--hover); border-left-color: var(--orange); }
+.item .info { flex: 1; overflow: hidden; margin-right: 6px; }
+.item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.item .meta { font-size: 10px; color: var(--muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item.livery .name::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 1px; background: var(--orange); margin-right: 6px; vertical-align: middle; }
+.empty { color: var(--muted); padding: 8px 2px; line-height: 1.4; }
+.check { display: flex; align-items: center; color: var(--muted); margin-top: 8px; }
+.check input { margin: 0 6px 0 0; }
+
+/* step 3 */
+.doc-info { margin: 0 0 6px 0; line-height: 1.5; word-break: break-word; }
+.wide-select { width: 100%; margin-bottom: 6px; }
+#saveBtn { margin-top: 2px; }
+
+/* options */
+.disclosure { justify-content: flex-start; border-color: transparent; background: transparent; color: var(--muted); padding: 0; margin-top: 6px; }
+.disclosure:hover { color: var(--orange); background: transparent; }
+.options { padding: 2px 0 8px; }
+.options label { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; color: var(--muted); }
+.options label.check { justify-content: flex-start; }
+.options select { width: 58%; }
+.opt-title { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin: 10px 0 2px; }
+
+/* feedback — right under the header */
+.progress { position: relative; height: 3px; background: var(--border); overflow: hidden; margin: 8px 0 16px; }
+.progress .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--orange); }
+.progress span { position: absolute; top: 5px; left: 0; font-size: 10px; color: var(--muted); }
+.message { padding: 6px 8px; border-radius: 4px; border-left: 3px solid var(--muted); background: var(--hover); word-break: break-word; line-height: 1.45; margin: 8px 0 0; }
+.message.error { border-left-color: var(--error); }
+.message.ok { border-left-color: var(--ok); }
+.foot { font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; }
+
+/* ---------- panels ---------- */
+.panel-root { box-sizing: border-box; }
+.unmounted { display: none; }
+
+/* ---------- 3D preview ---------- */
+.preview-root { display: flex; flex-direction: column; height: 100vh; min-height: 220px; margin: 0; padding: 0; }
+.pv-toolbar { display: flex; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.pv-toolbar .brand-icon { width: 18px; height: 18px; margin-right: 7px; }
+.pv-title { font-family: var(--font-display); font-weight: 700; font-size: 12px; flex: 1; min-width: 70px; }
+.tool { height: 22px; font-size: 11px; padding: 0 9px; margin: 2px 0 2px 4px; }
+.tool.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.pv-stage { position: relative; flex: 1; overflow: hidden; background: var(--graphite); cursor: grab; min-height: 160px; }
+.pv-image { position: absolute; left: 0; top: 0; user-select: none; }
+.pv-empty { position: absolute; left: 0; right: 0; top: 40%; text-align: center; color: var(--muted); line-height: 1.6; padding: 0 16px; }
+.pv-empty span { font-size: 10px; }
+.pv-foot { display: flex; align-items: center; padding: 4px 8px; border-top: 1px solid var(--border); }
+.pv-status { flex: 1; font-size: 10px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-live { margin: 0 0 0 8px; font-size: 11px; }
