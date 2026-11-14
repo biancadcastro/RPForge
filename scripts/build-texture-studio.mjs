@@ -106,7 +106,8 @@ function pluginFiles() {
     }
   };
   walk('');
-  return files;
+  // manifest.json first: some package validators read only the first entries of the .ccx.
+  return files.sort((a, b) => (b === 'manifest.json') - (a === 'manifest.json'));
 }
 
 function checkScripts(files) {
