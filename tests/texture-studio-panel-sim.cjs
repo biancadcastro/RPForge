@@ -176,7 +176,7 @@ function makeUxp(queue) {
     getFileForSaving: async () => { const next = queue.save.shift(); return next ? entry(next) : null; },
     createPersistentToken: async e => 'token:' + e.nativePath,
     getEntryForPersistentToken: async t => entry(t.slice(6)),
-    getEntryWithUrl: async u => { const p = decodeURI(u.replace(/^file:\/*/, '')); if (!fs.existsSync(p)) throw new Error('no entry ' + u); return fs.statSync(p).isDirectory() ? folder(p) : entry(p); },
+    getEntryWithUrl: async u => { const p = decodeURI(u.replace(/^file:\/*/, process.platform === 'win32' ? '' : '/')); if (!fs.existsSync(p)) throw new Error('no entry ' + u); return fs.statSync(p).isDirectory() ? folder(p) : entry(p); },
   };
   return { storage: { localFileSystem: lfs, formats: { binary: 'binary', utf8: 'utf8' } } };
 }
