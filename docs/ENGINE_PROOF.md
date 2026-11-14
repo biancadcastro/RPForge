@@ -38,3 +38,5 @@ com erro, sem tentativa de correção.
   [animation-engine/README.md](animation-engine/README.md).
 - `src/connector/transfer.js`: camada de transferência do futuro conector Windows,
   sem leitura de arquivos do GTA e sem codecs; testada em `tests/connector.test.js`.
+- `src/vehicle-engine`: leitura de YFT de veículo (fragType 162) e gravação no lugar, fase 0 do
+  Editor de veículos. Relatório em [VEHICLE_ENGINE_FASE0.md](VEHICLE_ENGINE_FASE0.md).
