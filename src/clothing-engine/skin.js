@@ -13,6 +13,7 @@ import {repackYdd} from './ydd-write.js';
 import {geometryArrays, vertexBytes} from './vertex.js';
 import {triangleFingerprint, isSkinShader} from './skin-reference.js';
 import {Extender} from '../vehicle-engine/yft-grow.js';
+import {textureDataSize} from '../vehicle-engine/yft-read.js';
 import {joaat} from '../animation-engine/hash.js';
 import {ErrorCode, EngineError, ensure} from '../animation-engine/errors.js';
 
@@ -210,8 +211,12 @@ function signature(read, drawable, roleOf) {
   return parts;
 }
 const rigOf = d => JSON.stringify(d.skeleton?.bones ?? null);
-const embeddedOf = (read, d) => JSON.stringify(d.shaderGroup.embeddedTextures.map(t => [t.name, t.width, t.height, t.formatCode, t.levels,
-  t.data ? Array.from((t.data.region === 'system' ? read.view.system : read.view.graphics).subarray(t.data.off, t.data.off + t.size)).reduce((a, b) => (a * 31 + b) | 0, 0) : 0]));
+// Embedded textures must keep their pixels: hash of the pixel data of every mip level.
+const embeddedOf = (read, d) => JSON.stringify(d.shaderGroup.embeddedTextures.map(t => {
+  const size = textureDataSize(t.formatCode, t.width, t.height, t.levels), src = t.data ? (t.data.region === 'system' ? read.view.system : read.view.graphics) : null;
+  let h = 0; if (src) { const px = src.subarray(t.data.off, t.data.off + size); ensure(px.length === size, ErrorCode.INCONSISTENT_REFERENCE, 'Embedded texture outside the resource'); for (const b of px) h = (h * 31 + b) | 0; }
+  return [t.name, t.width, t.height, t.formatCode, t.levels, size, h];
+}));
 
 /**
  * Write the two YDDs. names: {cloth, skin} internal drawable names. analysis must be splittable (canSplit).
