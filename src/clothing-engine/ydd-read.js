@@ -4,7 +4,6 @@
 // (vehicle-engine/yft-repack.js) can lay the file out again after edits.
 // Layouts were studied from CodeWalker sources/metadata (MIT); CodeWalker is used only as an
 // offline oracle in tests, never at runtime.
-import {decodeEnvelope} from '../animation-engine/envelope.js';
 import {ResourceView} from '../vehicle-engine/view.js';
 import {VERTEX_SEMANTICS, COMPONENT_SIZES, COMPONENT_NAMES} from '../vehicle-engine/names.js';
 import {readTextureDictionary} from '../vehicle-engine/yft-read.js';
@@ -210,11 +209,6 @@ function readDrawable(v, off, ctx) {
   return d;
 }
 
-/** Decode the RSC7 envelope of a YDD (Node). The browser decodes asynchronously and calls readYddResource. */
-export function decodeYdd(input, limits = CLOTHING_LIMITS) { return decodeEnvelope(input, YDD_RESOURCE_VERSION, limits); }
-export function decodeYtd(input, limits = CLOTHING_LIMITS) { return decodeEnvelope(input, YTD_RESOURCE_VERSION, limits); }
-
-export function readYdd(input, {limits} = {}) { return readYddResource(decodeYdd(input, limits)); }
 
 /** Read a decoded YDD resource. Returns {model: {drawables:[{hash, drawable}]}, view, resource}. Throws EngineError on anything inconsistent. */
 export function readYddResource(res) {
@@ -248,7 +242,6 @@ export function readYtdResource(res) {
   v.mark('system', 0, 0x40, 'TextureDictionary');
   return {textures: readTextureDictionary(v, 0), view: v};
 }
-export function readYtd(input, {limits} = {}) { return readYtdResource(decodeYtd(input, limits)); }
 
 /** Every geometry of one LOD, in file order, with its model index. */
 export function lodGeometries(drawable, lod) {
