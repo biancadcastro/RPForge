@@ -7,3 +7,4 @@ export {buildClothingObj, OBJ_LIMITS} from './obj.js';
 export {convertNeon, refuseSkin, NEON_SHADER, NEON_COLOUR} from './neon.js';
 export {analyseSkin, applyOverrides, splitSkin, summarize, previewOf, ROLE, SKIN_LIMITS} from './skin.js';
 export {referenceSet, genderOf, triangleFingerprint} from './skin-reference.js';
+export {contentSignature, rigOf, embeddedOf} from './content.js';

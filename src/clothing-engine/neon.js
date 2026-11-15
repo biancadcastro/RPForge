@@ -11,7 +11,7 @@ import {repackYdd} from './ydd-write.js';
 import {geometryArrays, componentReader, vertexBytes} from './vertex.js';
 import {triangleFingerprint, isSkinShader} from './skin-reference.js';
 import {Extender} from '../vehicle-engine/yft-grow.js';
-import {textureDataSize} from '../vehicle-engine/yft-read.js';
+import {rigOf, embeddedOf, contentSignature} from './content.js';
 import {COMPONENT_SIZES} from '../vehicle-engine/names.js';
 import {joaat} from '../animation-engine/hash.js';
 import {ErrorCode, EngineError, ensure} from '../animation-engine/errors.js';
@@ -96,13 +96,6 @@ function geometrySignature(read, drawable, keepBits) {
   }
   return parts;
 }
-const rigOf = d => JSON.stringify(d.skeleton?.bones ?? null);
-// Embedded textures must keep their pixels: hash of the pixel data of every mip level.
-const embeddedOf = (read, d) => JSON.stringify(d.shaderGroup.embeddedTextures.map(t => {
-  const size = textureDataSize(t.formatCode, t.width, t.height, t.levels), src = t.data ? (t.data.region === 'system' ? read.view.system : read.view.graphics) : null;
-  let h = 0; if (src) { const px = src.subarray(t.data.off, t.data.off + size); ensure(px.length === size, ErrorCode.INCONSISTENT_REFERENCE, 'Embedded texture outside the resource'); for (const b of px) h = (h * 31 + b) | 0; }
-  return [t.name, t.width, t.height, t.formatCode, t.levels, size, h];
-}));
 
 /**
  * Convert a read YDD (single drawable) to Neon. name: internal drawable name (e.g. "jbib_005_u").
@@ -184,7 +177,7 @@ export function convertNeon(read, {name, reference = null}) {
   ensure(origList.length === newList.length, ErrorCode.INCONSISTENT_REFERENCE, 'Geometria, UVs, pesos ou esqueleto mudaram. Saída rejeitada.');
   for (const {geometry} of newList) keepAfter.set(geometry.at, keepBits.get(origList[gi++].geometry.at));
   const after = geometrySignature(converted, c, keepAfter);
-  ensure(before.length === after.length && before.every((x, i) => x === after[i]) && rigOf(d) === rigOf(c), ErrorCode.INCONSISTENT_REFERENCE, 'Geometria, UVs, pesos ou esqueleto mudaram. Saída rejeitada.');
+  ensure(before.length === after.length && before.every((x, i) => x === after[i]) && rigOf(read, d) === rigOf(converted, c), ErrorCode.INCONSISTENT_REFERENCE, 'Geometria, UVs, pesos ou esqueleto mudaram. Saída rejeitada.');
   ensure(embeddedOf(read, d) === embeddedOf(converted, c), ErrorCode.INCONSISTENT_REFERENCE, 'Texturas embutidas mudaram. Saída rejeitada.');
   ensure(c.name === name && converted.model.drawables[0].hash === joaat(name.toLowerCase()) && c.shaderGroup.shaders.every(s => s.fileHash === NEON_SHADER.file),
     ErrorCode.INCONSISTENT_REFERENCE, 'Preset ou identificação Neon inválidos.');
@@ -193,6 +186,8 @@ export function convertNeon(read, {name, reference = null}) {
     for (let i = 0; i < g.vertexCount; i++) ensure(col(i).every((v, k) => v === NEON_COLOUR[k]), ErrorCode.INCONSISTENT_REFERENCE, 'Cor de vértice Neon não foi preservada.');
   }
   const regions = repackYdd(converted);
+  // The repacked layout must hold exactly the same content (only pointers move).
+  ensure(contentSignature(readYddResource({...converted.resource, ...regions})) === contentSignature(converted), ErrorCode.INCONSISTENT_REFERENCE, 'O arquivo regravado não confere com a conversão. Saída rejeitada.');
   const report = {geometryPreserved: true, rigPreserved: true, embeddedPreserved: true, shader: NEON_SHADER.label,
     lods: LODS.filter(l => c.lods[l]).map(l => ({lod: l, vertices: lodGeometries(c, l).reduce((s, x) => s + x.geometry.vertexCount, 0), triangles: lodGeometries(c, l).reduce((s, x) => s + x.geometry.triangles, 0)}))};
   return {read: converted, regions, report};

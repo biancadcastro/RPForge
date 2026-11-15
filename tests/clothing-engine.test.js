@@ -16,6 +16,7 @@ import {buildClothingObj} from '../src/clothing-engine/obj.js';
 import {convertNeon, NEON_COLOUR, NEON_SHADER} from '../src/clothing-engine/neon.js';
 import {analyseSkin, applyOverrides, splitSkin} from '../src/clothing-engine/skin.js';
 import {componentReader, geometryArrays} from '../src/clothing-engine/vertex.js';
+import {contentSignature} from '../src/clothing-engine/content.js';
 import {encodeYftResource} from '../src/vehicle-engine/resource.js';
 
 test('sha256 matches node:crypto', () => {
@@ -69,6 +70,7 @@ test('real garments: Neon keeps geometry and applies the preset', real, () => {
   const file = samples.neon[0], r = readYdd(readFileSync(file));
   const out = convertNeon(r, {name: 'jbib_009_u', reference: new Set(reference.female.concat(reference.male))});
   const c = readYdd(encode(out.regions)), d = c.model.drawables[0].drawable;
+  assert.equal(contentSignature(c), contentSignature(out.read), 'final bytes keep the converted content');
   assert.equal(d.name, 'jbib_009_u');
   assert.ok(d.shaderGroup.shaders.every(s => s.fileHash === NEON_SHADER.file));
   for (const l of LODS) for (const {geometry: g} of lodGeometries(d, l)) {
@@ -78,6 +80,7 @@ test('real garments: Neon keeps geometry and applies the preset', real, () => {
 });
 
 test('real garments: Separar pele partitions every face', real, () => {
+  let split = 0;
   for (const file of samples.skin) {
     const r = readYdd(readFileSync(file)), set = new Set(reference[/^mp_f_/i.test(file.split(/[\\/]/).pop()) ? 'female' : 'male']);
     const a = analyseSkin(r, set);
@@ -90,5 +93,8 @@ test('real garments: Separar pele partitions every face', real, () => {
     const faces = x => LODS.reduce((s, l) => s + lodGeometries(x.model.drawables[0].drawable, l).reduce((t, {geometry: g}) => t + g.triangles, 0), 0);
     const cloth = readYdd(encode(out.cloth.regions)), skin = readYdd(encode(out.skin.regions));
     assert.equal(faces(cloth) + faces(skin), faces(r), file);
+    assert.equal(contentSignature(cloth), contentSignature(out.cloth.read)); assert.equal(contentSignature(skin), contentSignature(out.skin.read));
+    split++;
   }
+  assert.ok(split > 0, 'at least one sample was split');
 });

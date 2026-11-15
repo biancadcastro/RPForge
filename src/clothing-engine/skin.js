@@ -13,7 +13,7 @@ import {repackYdd} from './ydd-write.js';
 import {geometryArrays, vertexBytes} from './vertex.js';
 import {triangleFingerprint, isSkinShader} from './skin-reference.js';
 import {Extender} from '../vehicle-engine/yft-grow.js';
-import {textureDataSize} from '../vehicle-engine/yft-read.js';
+import {rigOf, embeddedOf, contentSignature} from './content.js';
 import {joaat} from '../animation-engine/hash.js';
 import {ErrorCode, EngineError, ensure} from '../animation-engine/errors.js';
 
@@ -189,9 +189,9 @@ function buildRole(read, analysis, role, name) {
   const dv = ext.dv;
   for (let k = 0; k < 3; k++) { dv.setFloat32(d.at + 0x30 + k * 4, dlo[k], true); dv.setFloat32(d.at + 0x40 + k * 4, dhi[k], true); dv.setFloat32(d.at + 0x20 + k * 4, (dlo[k] + dhi[k]) / 2, true); }
   dv.setFloat32(d.at + 0x2C, Math.hypot(dhi[0] - dlo[0], dhi[1] - dlo[1], dhi[2] - dlo[2]) / 2, true);
-  const str = ext.alloc(name.length + 1);
+  const str = ext.alloc(name.length + 1); // may grow the buffer: take a fresh DataView after it
   for (let k = 0; k < name.length; k++) ext.bytes[str + k] = name.charCodeAt(k);
-  ext.ptr(d.at + 0xA8, str); dv.setUint32(read.model.hashesAt, joaat(name.toLowerCase()), true);
+  ext.ptr(d.at + 0xA8, str); ext.dv.setUint32(read.model.hashesAt, joaat(name.toLowerCase()), true);
   return readYddResource({...ext.finish(), graphics});
 }
 
@@ -210,13 +210,6 @@ function signature(read, drawable, roleOf) {
   }
   return parts;
 }
-const rigOf = d => JSON.stringify(d.skeleton?.bones ?? null);
-// Embedded textures must keep their pixels: hash of the pixel data of every mip level.
-const embeddedOf = (read, d) => JSON.stringify(d.shaderGroup.embeddedTextures.map(t => {
-  const size = textureDataSize(t.formatCode, t.width, t.height, t.levels), src = t.data ? (t.data.region === 'system' ? read.view.system : read.view.graphics) : null;
-  let h = 0; if (src) { const px = src.subarray(t.data.off, t.data.off + size); ensure(px.length === size, ErrorCode.INCONSISTENT_REFERENCE, 'Embedded texture outside the resource'); for (const b of px) h = (h * 31 + b) | 0; }
-  return [t.name, t.width, t.height, t.formatCode, t.levels, size, h];
-}));
 
 /**
  * Write the two YDDs. names: {cloth, skin} internal drawable names. analysis must be splittable (canSplit).
@@ -231,10 +224,12 @@ export function splitSkin(read, analysis, names) {
     const built = buildRole(read, analysis, role, names[role]), c = built.model.drawables[0].drawable;
     const expected = signature(read, d, (lod, gi) => { const r = analysis.lods[lod][gi].roles; return f => r[f] === ROLE[role]; });
     const actual = signature(built, c, () => null);
-    ensure(expected.length === actual.length && expected.every((x, i) => x === actual[i]) && rigOf(d) === rigOf(c), ErrorCode.INCONSISTENT_REFERENCE, 'Faces, atributos de vértice, materiais ou rig alterados. Saída rejeitada.');
+    ensure(expected.length === actual.length && expected.every((x, i) => x === actual[i]) && rigOf(read, d) === rigOf(built, c), ErrorCode.INCONSISTENT_REFERENCE, 'Faces, atributos de vértice, materiais ou rig alterados. Saída rejeitada.');
     ensure(embeddedOf(read, d) === embeddedOf(built, c), ErrorCode.INCONSISTENT_REFERENCE, 'Texturas embutidas alteradas. Saída rejeitada.');
     ensure(c.name === names[role] && built.model.drawables[0].hash === joaat(names[role].toLowerCase()), ErrorCode.INCONSISTENT_REFERENCE, 'Identificação do drawable inválida.');
-    out[role] = {read: built, regions: repackYdd(built)};
+    const regions = repackYdd(built);
+    ensure(contentSignature(readYddResource({...built.resource, ...regions})) === contentSignature(built), ErrorCode.INCONSISTENT_REFERENCE, 'O arquivo regravado não confere com a separação. Saída rejeitada.');
+    out[role] = {read: built, regions};
   }
   out.report = {lods: analysis.counts, partitionPreserved: true, attributesPreserved: true, rigPreserved: true, materialsPreserved: true, texturesPreserved: true};
   return out;

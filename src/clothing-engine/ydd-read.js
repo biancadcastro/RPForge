@@ -154,12 +154,16 @@ function readSkeleton(v, off) {
   const bonesAt = v.ptr(off + 0x20, count * SIZES.bone);
   v.mark('system', bonesAt, count * SIZES.bone, 'Bones');
   const bones = [];
+  // Byte ranges that define the rig without pointers (the full writer moves pointers): bone rotation,
+  // translation, scale, flags, index and tag, and the bind/transform matrices. Used by the output checks.
+  const rigRanges = [];
   for (let i = 0; i < count; i++) {
     const b = bonesAt + i * SIZES.bone;
     bones.push({index: v.i16(b + 0x42), name: v.stringAt(b + 0x38), tag: v.u16(b + 0x44), parent: v.i16(b + 0x32)});
+    rigRanges.push([b, 0x34], [b + 0x40, 0x10]);
   }
   for (const [field, kind] of [[0x28, 'BoneInverseBindMatrices'], [0x30, 'BoneTransforms']]) {
-    const at = v.ptr(off + field, count * SIZES.matrix); if (at !== null) v.mark('system', at, count * SIZES.matrix, kind);
+    const at = v.ptr(off + field, count * SIZES.matrix); if (at !== null) { v.mark('system', at, count * SIZES.matrix, kind); rigRanges.push([at, count * SIZES.matrix]); }
   }
   const parents = v.ptr(off + 0x38, count * 2); if (parents !== null) v.mark('system', parents, count * 2, 'BoneParentIndices');
   const children = v.ptr(off + 0x40, childCount * 2); if (children !== null) v.mark('system', children, childCount * 2, 'BoneChildIndices');
@@ -169,7 +173,7 @@ function readSkeleton(v, off) {
     const seen = new Set();
     for (let i = 0; i < tagCap; i++) for (let p = v.ptr(tags + i * 8, 16); p !== null && !seen.has(p); p = v.ptr(p + 8, 16)) { seen.add(p); v.mark('system', p, 16, 'BoneTag'); }
   }
-  return {at: off, count, bones};
+  return {at: off, count, bones, rigRanges};
 }
 
 function readDrawable(v, off, ctx) {
@@ -184,8 +188,9 @@ function readDrawable(v, off, ctx) {
   const joints = v.ptr(off + 0x90, SIZES.joints);
   if (joints !== null) {
     v.mark('system', joints, SIZES.joints, 'Joints');
+    d.jointRanges = [];
     for (const [field, countAt, size, kind] of [[0x10, 0x30, 0xC0, 'JointRotationLimits'], [0x18, 0x32, 0x40, 'JointTranslationLimits']]) {
-      const n = v.u16(joints + countAt), at = v.ptr(joints + field, Math.max(1, n * size)); if (at !== null && n) v.mark('system', at, n * size, kind);
+      const n = v.u16(joints + countAt), at = v.ptr(joints + field, Math.max(1, n * size)); if (at !== null && n) { v.mark('system', at, n * size, kind); d.jointRanges.push([at, n * size]); }
     }
   }
   const modelsBlock = v.ptr(off + 0xA0), blockSize = v.u16(off + 0x9A);
