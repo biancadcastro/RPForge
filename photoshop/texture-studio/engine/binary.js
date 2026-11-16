@@ -19,9 +19,9 @@ const SYSTEM_BASE = 0x50000000, GRAPHICS_BASE = 0x60000000;
 function pointerAt(b, o) {
   const lo = u32(b, o), hi = u32(b, o + 4);
   if (lo === 0 && hi === 0) return null;
-  ensure(hi === 0, 'Ponteiro de recurso inválido.');
+  ensure(hi === 0, 'Invalid resource pointer.');
   const region = lo >>> 28;
-  ensure(region === 5 || region === 6, 'Ponteiro de recurso inválido.');
+  ensure(region === 5 || region === 6, 'Invalid resource pointer.');
   return { region: region === 5 ? 'system' : 'graphics', offset: lo & 0x0fffffff };
 }
 function writePointer(b, o, region, offset) {
@@ -47,11 +47,11 @@ function cstring(b, o, max = 256) {
   let s = '';
   for (let i = 0; i < max; i++) {
     const c = b[o + i];
-    ensure(c !== undefined, 'Nome sem terminador.');
+    ensure(c !== undefined, 'Name without terminator.');
     if (c === 0) return s;
     s += String.fromCharCode(c);
   }
-  throw new EngineError('Nome longo demais no recurso.');
+  throw new EngineError('Name too long in the resource.');
 }
 
 // Gives the event loop a chance to breathe during long work (keeps Photoshop responsive).

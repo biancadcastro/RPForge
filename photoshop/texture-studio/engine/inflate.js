@@ -40,9 +40,9 @@ class BitReader {
   need(n) {
     while (this.bits < n) {
       if (this.pos >= this.input.length) {
-        if (this.bits === 0 && n > 0) throw new EngineError('Dados compactados terminaram antes do esperado.');
+        if (this.bits === 0 && n > 0) throw new EngineError('Compressed data ended early.');
         this.bits += 8; this.pos++; // zero padding; checked by caller via pos overflow
-        if (this.pos > this.input.length + 4) throw new EngineError('Dados compactados terminaram antes do esperado.');
+        if (this.pos > this.input.length + 4) throw new EngineError('Compressed data ended early.');
         continue;
       }
       this.bit |= this.input[this.pos++] << this.bits;
@@ -65,7 +65,7 @@ class BitReader {
       const len = t.slowLens[i];
       if ((this.bit & ((1 << len) - 1)) === t.slowCodes[i]) { this.bit >>>= len; this.bits -= len; return t.slowSyms[i]; }
     }
-    throw new EngineError('Código Huffman inválido.');
+    throw new EngineError('Invalid Huffman code.');
   }
   align() { const drop = this.bits & 7; this.bit >>>= drop; this.bits -= drop; }
 }
@@ -86,7 +86,7 @@ function inflateRaw(input, expectedSize) {
   let op = 0;
   const grow = n => {
     if (op + n <= out.length) return;
-    if (expectedSize) throw new EngineError('Dados descompactados maiores que o declarado.');
+    if (expectedSize) throw new EngineError('Decompressed data larger than declared.');
     let size = out.length * 2; while (size < op + n) size *= 2;
     const next = new Uint8Array(size); next.set(out.subarray(0, op)); out = next;
   };
@@ -99,11 +99,11 @@ function inflateRaw(input, expectedSize) {
       br.align();
       // Drop whole bytes still held in the bit buffer back to the stream position.
       const held = br.bits >>> 3; br.pos -= held; br.bit = 0; br.bits = 0;
-      if (br.pos + 4 > input.length) throw new EngineError('Bloco armazenado truncado.');
+      if (br.pos + 4 > input.length) throw new EngineError('Truncated stored block.');
       const len = input[br.pos] | (input[br.pos + 1] << 8), nlen = input[br.pos + 2] | (input[br.pos + 3] << 8);
-      if ((len ^ 0xffff) !== nlen) throw new EngineError('Bloco armazenado corrompido.');
+      if ((len ^ 0xffff) !== nlen) throw new EngineError('Corrupted stored block.');
       br.pos += 4;
-      if (br.pos + len > input.length) throw new EngineError('Bloco armazenado truncado.');
+      if (br.pos + len > input.length) throw new EngineError('Truncated stored block.');
       grow(len); out.set(input.subarray(br.pos, br.pos + len), op); op += len; br.pos += len;
       continue;
     }
@@ -120,34 +120,34 @@ function inflateRaw(input, expectedSize) {
         if (s < 16) lens[i++] = s;
         else {
           let rep, val = 0;
-          if (s === 16) { if (i === 0) throw new EngineError('Repetição sem código anterior.'); val = lens[i - 1]; rep = 3 + br.read(2); }
+          if (s === 16) { if (i === 0) throw new EngineError('Repeat without a previous code.'); val = lens[i - 1]; rep = 3 + br.read(2); }
           else if (s === 17) rep = 3 + br.read(3);
           else rep = 11 + br.read(7);
-          if (i + rep > hlit + hdist) throw new EngineError('Tabela Huffman inválida.');
+          if (i + rep > hlit + hdist) throw new EngineError('Invalid Huffman table.');
           lens.fill(val, i, i + rep); i += rep;
         }
       }
       lit = buildTable(lens.subarray(0, hlit), hlit);
       dist = buildTable(lens.subarray(hlit), hdist);
-    } else throw new EngineError('Tipo de bloco DEFLATE inválido.');
+    } else throw new EngineError('Invalid DEFLATE block type.');
     for (;;) {
       const s = br.symbol(lit);
       if (s < 256) { grow(1); out[op++] = s; continue; }
       if (s === 256) break;
       const li = s - 257;
-      if (li >= 29) throw new EngineError('Comprimento DEFLATE inválido.');
+      if (li >= 29) throw new EngineError('Invalid DEFLATE length.');
       const len = LEN_BASE[li] + br.read(LEN_EXTRA[li]);
       const ds = br.symbol(dist);
-      if (ds >= 30) throw new EngineError('Distância DEFLATE inválida.');
+      if (ds >= 30) throw new EngineError('Invalid DEFLATE distance.');
       const d = DIST_BASE[ds] + br.read(DIST_EXTRA[ds]);
-      if (d > op) throw new EngineError('Distância DEFLATE fora da janela.');
+      if (d > op) throw new EngineError('DEFLATE distance outside the window.');
       grow(len);
       let from = op - d;
       if (d >= len) { out.copyWithin(op, from, from + len); op += len; }
       else for (let k = 0; k < len; k++) out[op++] = out[from++];
     }
   } while (!final);
-  if (expectedSize && op !== expectedSize) throw new EngineError('Tamanho descompactado diferente do declarado.');
+  if (expectedSize && op !== expectedSize) throw new EngineError('Decompressed size differs from the declared one.');
   return expectedSize ? out : out.subarray(0, op);
 }
 

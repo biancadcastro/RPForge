@@ -87,8 +87,68 @@ test('YTD write/read keeps textures and replaceTexture swaps one', async () => {
   assert.equal(added.added, true); assert.equal(added.textures, 3);
 });
 
+test('i18n: every language has every key, with the same placeholders and tags', () => {
+  const dir = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), '..', 'photoshop', 'texture-studio');
+  const i18n = require(E + '../i18n.js');
+  const base = require(E + '../i18n/pt_BR.js'), keys = Object.keys(base);
+  // Keys used by the panel code and the HTML must all be in the tables.
+  const used = new Set();
+  for (const f of ['main.js', 'preview.js', 'boot.js']) {
+    const code = readFileSync(path.join(dir, f), 'utf8');
+    for (const m of code.matchAll(/\bt\(\s*'((?:\\'|[^'])*)'/g)) used.add(m[1].replace(/\\'/g, "'"));
+  }
+  const html = readFileSync(path.join(dir, 'index.html'), 'utf8');
+  for (const m of html.matchAll(/<([\w-]+)\b[^>]*\bclass="[^"]*\bt\b[^"]*"[^>]*>([\s\S]*?)<\/\1>/g)) used.add(m[2].replace(/<br\s*\/?>/gi, '<br>').replace(/\s+/g, ' ').trim());
+  for (const m of html.matchAll(/class="[^"]*\btt\b[^"]*"[^>]*title="([^"]*)"/g)) used.add(m[1]);
+  for (const k of used) assert.ok(k in base, `missing translation key: ${k}`);
+  const ph = s => (s.match(/\{\d+\}/g) || []).sort().join();
+  const tags = s => (s.match(/<\/?[a-z]+>/g) || []).join();
+  const codes = readdirSync(path.join(dir, 'i18n')).map(f => f.replace(/\.js$/, ''));
+  assert.deepEqual(codes.sort(), [...i18n.CODES].sort(), 'one file per supported language');
+  for (const code of codes) {
+    const tb = require(E + `../i18n/${code}.js`);
+    assert.deepEqual(Object.keys(tb).sort(), [...keys].sort(), `${code}: same keys as pt_BR`);
+    for (const k of keys) {
+      assert.ok(typeof tb[k] === 'string' && tb[k].trim(), `${code}: empty "${k}"`);
+      assert.equal(ph(tb[k]), ph(k), `${code}: placeholders of "${k}"`);
+      assert.equal(tags(tb[k]), tags(k), `${code}: tags of "${k}"`);
+    }
+  }
+  // Photoshop locales → tables; unknown ones fall back to English.
+  assert.equal(i18n.resolve('pt_BR'), 'pt_BR'); assert.equal(i18n.resolve('de_DE'), 'de'); assert.equal(i18n.resolve('zh_CN'), 'zh_CN');
+  assert.equal(i18n.resolve('zh_TW'), 'en'); assert.equal(i18n.resolve('nb_NO'), 'nb'); assert.equal(i18n.resolve('hu_HU'), 'en'); assert.equal(i18n.resolve('en_US'), 'en');
+  // Finished engine messages are matched by their pattern.
+  i18n.setLocale('pt_BR');
+  assert.equal(i18n.tr('Texture not found: abc_1'), 'Textura não encontrada: abc_1');
+  assert.equal(i18n.t('Saved to {0}.', 'x.ytd'), 'Salvo em x.ytd.');
+  i18n.setLocale('en_US');
+  assert.equal(i18n.tr('Texture not found: abc_1'), 'Texture not found: abc_1');
+  assert.ok(i18n.variants('UV guide').includes('Guia UV'), 'guides of any language are recognised');
+});
+
+test('panel in English (Photoshop in English): texts, layer names and messages', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'rpforge-panel-en-'));
+  try {
+    const file = path.join(dir, 'car.ytd');
+    writeFileSync(file, await syntheticYtd());
+    const p = loadPanel({ locale: 'en_US' });
+    p.queue.open.push(file);
+    await p.$('openVehicle').click(); await p.settle();
+    assert.match(p.$('message').textContent, /^Choose the texture/);
+    const row = p.$('list').children.find(r => r.className.includes('item') && r.textContent.includes('vehicle_sign_1'));
+    assert.equal(row.children[1].textContent, 'Open');
+    await row.children[1].click(); await p.settle();
+    const doc = p.photoshop.app.activeDocument;
+    assert.deepEqual(doc.layers.map(l => l.name), ['Paint', 'Original texture']);
+    await p.$('saveBtn').click(); await p.settle();
+    assert.match(p.$('message').textContent, /^Saved to car\.ytd/, p.$('message').textContent);
+    assert.equal(p.$('saveBtn').textContent, 'Save to YTD');
+    assert.ok(!/[ãçõáéíóú]/i.test(p.$('message').textContent + p.$('docInfo').innerHTML + p.$('vehicleInfo').textContent), 'no Portuguese left');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('engine refuses non-RSC7 and Enhanced files with clear messages', () => {
-  assert.throws(() => new VehicleSession({ ytd: new Uint8Array(64) }), /não é um recurso RSC7/);
+  assert.throws(() => new VehicleSession({ ytd: new Uint8Array(64) }), /not a GTA V RSC7 resource/);
   const fake = new Uint8Array(32); fake.set([0x52, 0x53, 0x43, 0x37, 5]);
   assert.throws(() => new VehicleSession({ ytd: fake }), /Enhanced/);
 });
@@ -101,7 +161,7 @@ test('panel: open YTD, open texture, paint, save with one backup', async () => {
     const p = loadPanel();
     p.queue.open.push(file);
     await p.$('openVehicle').click(); await p.settle();
-    assert.match(p.$('message').textContent, /Pronto/);
+    assert.match(p.$('message').textContent, /Escolha a textura/);
     // Without a model every texture of the YTD is listed.
     const row = p.$('list').children.find(r => r.className.includes('item') && r.textContent.includes('vehicle_sign_1'));
     assert.ok(row, 'texture row');
@@ -145,7 +205,7 @@ test('panel: a reopened PSD remembers its texture and reloads the files by itsel
     assert.match(again.$('ytdName').textContent, /car.ytd/, 'the .ytd was reloaded');
     assert.ok(!again.$('docCard').classList.contains('hidden'), 'the document is linked again');
     assert.match(again.$('docInfo').innerHTML, /vehicle_sign_1/);
-    assert.match(again.$('message').textContent, /reaberto/, again.$('message').textContent);
+    assert.match(again.$('message').textContent, /carregado de novo para/, again.$('message').textContent);
     // and it still saves to the same .ytd
     doc.layers[0].pixels = new Uint8Array(doc.width * doc.height * 4).fill(200);
     await again.$('saveBtn').click(); await again.settle();
@@ -214,7 +274,7 @@ test('OBJ reader flips V and groups by material; MTL finds the diffuse image', (
   const uv = obj.usage.get('pele').uses[0].uv;
   assert.deepEqual(Array.from(uv.subarray(0, 6)), [0, 1, 1, 1, 1, 0]); // v flipped
   assert.equal(readMtl('newmtl Pele\nmap_Kd -s 1 1 1 textures/pele diff.png\n').get('pele').diffuse, 'textures/pele diff.png');
-  assert.throws(() => readObj('v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n'), /não tem coordenadas de textura/);
+  assert.throws(() => readObj('v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n'), /no texture coordinates/);
 });
 
 test('panel: OBJ opens its PNG with guides and saves the image with a backup', async () => {
@@ -279,6 +339,23 @@ test('3D renderer draws a textured quad and picking returns its UV', () => {
   assert.ok(Math.abs(hit.uv0[0] - 0.5) < 0.02 && Math.abs(hit.uv0[1] - 0.5) < 0.02, `uv ${hit.uv0}`);
   const png = render.toPng(frame.rgba, 200, 150);
   assert.deepEqual(Array.from(png.subarray(0, 4)), [137, 80, 78, 71]);
+});
+
+test('3D renderer clamps bright paint under the highlight instead of wrapping (orange stayed orange)', () => {
+  const render = require(E + 'render.js');
+  const positions = new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0]);
+  const uv = new Float32Array([0, 1, 1, 1, 1, 0, 0, 0]);
+  const scene = new render.Scene([{ id: 'p', shader: 'vehicle_paint3', positions, normals: null, uv: [uv, uv], indices: new Uint16Array([0, 1, 2, 0, 2, 3]), diffuse: 'base', livery: 'sign' }], 'y');
+  const solid = (rgba) => { const t = new Uint8Array(4 * 4 * 4); for (let i = 0; i < 16; i++) t.set(rgba, i * 4); return { rgba: t, width: 4, height: 4 }; };
+  scene.setTexture('base', solid([168, 168, 172, 255]));
+  scene.setTexture('sign', solid([255, 100, 10, 255]));
+  // Seen from slightly below, the clear-coat highlight peaks on the quad (red would pass 255).
+  const frame = render.render(scene, { yaw: 0, pitch: -0.3, distance: 3, panX: 0, panY: 0 }, 200, 150, { smooth: false });
+  for (let p = 0; p < 200 * 150; p++) {
+    if (frame.meshId[p] !== 0) continue;
+    const o = p * 4;
+    assert.ok(frame.rgba[o] >= frame.rgba[o + 1], `pixel ${p}: red ${frame.rgba[o]} below green ${frame.rgba[o + 1]}`);
+  }
 });
 
 test('panel: 3D preview draws the model and marks the clicked point with guides', async () => {

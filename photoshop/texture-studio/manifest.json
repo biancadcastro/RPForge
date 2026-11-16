@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "dev.rpforge.texturestudio",
   "name": "RPForge Texture Studio",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "index.html",
   "host": {
     "app": "PS",
@@ -39,7 +39,7 @@
         {
           "width": 23,
           "height": 23,
-          "path": "icons/panel-dark.png",
+          "path": "icons/icon_D.png",
           "scale": [
             1,
             2
@@ -48,12 +48,15 @@
             "darkest",
             "dark",
             "medium"
+          ],
+          "species": [
+            "generic"
           ]
         },
         {
           "width": 23,
           "height": 23,
-          "path": "icons/panel-light.png",
+          "path": "icons/icon_N.png",
           "scale": [
             1,
             2
@@ -61,6 +64,9 @@
           "theme": [
             "lightest",
             "light"
+          ],
+          "species": [
+            "generic"
           ]
         }
       ]
@@ -69,8 +75,25 @@
       "type": "panel",
       "id": "texturestudio.preview",
       "label": {
-        "default": "Texture Studio — Prévia 3D",
-        "pt-BR": "Texture Studio — Prévia 3D"
+        "default": "3D Preview",
+        "pt-BR": "Prévia 3D",
+        "de-DE": "3D-Vorschau",
+        "fr-FR": "Aperçu 3D",
+        "es-ES": "Vista previa 3D",
+        "it-IT": "Anteprima 3D",
+        "ja-JP": "3D プレビュー",
+        "ko-KR": "3D 미리 보기",
+        "zh-CN": "3D 预览",
+        "ru-RU": "3D-просмотр",
+        "uk-UA": "3D-перегляд",
+        "pl-PL": "Podgląd 3D",
+        "cs-CZ": "Náhled 3D",
+        "tr-TR": "3B Önizleme",
+        "nl-NL": "3D-voorvertoning",
+        "sv-SE": "3D-förhandsvisning",
+        "da-DK": "3D-visning",
+        "fi-FI": "3D-esikatselu",
+        "nb-NO": "3D-forhåndsvisning"
       },
       "minimumSize": {
         "width": 240,
@@ -92,7 +115,7 @@
         {
           "width": 23,
           "height": 23,
-          "path": "icons/panel-dark.png",
+          "path": "icons/icon_D.png",
           "scale": [
             1,
             2
@@ -101,12 +124,15 @@
             "darkest",
             "dark",
             "medium"
+          ],
+          "species": [
+            "generic"
           ]
         },
         {
           "width": 23,
           "height": 23,
-          "path": "icons/panel-light.png",
+          "path": "icons/icon_N.png",
           "scale": [
             1,
             2
@@ -114,6 +140,9 @@
           "theme": [
             "lightest",
             "light"
+          ],
+          "species": [
+            "generic"
           ]
         }
       ]
@@ -121,9 +150,9 @@
   ],
   "icons": [
     {
-      "width": 48,
-      "height": 48,
-      "path": "icons/plugin.png",
+      "width": 24,
+      "height": 24,
+      "path": "icons/plugin-list.png",
       "scale": [
         1,
         2
@@ -137,6 +166,9 @@
     }
   ],
   "requiredPermissions": {
-    "localFileSystem": "fullAccess"
+    "localFileSystem": "fullAccess",
+    "ipc": {
+      "enablePluginCommunication": true
+    }
   }
 }

@@ -5,111 +5,110 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+<!-- Text in English; elements with class "t" (content) and "tt" (title) are translated by i18n.js. -->
 <!-- ============================== main panel ============================== -->
 <div id="panelMain" class="panel-root">
   <header class="top">
     <img class="brand-icon" src="assets/rpforge-icon.png" alt="RPForge" />
     <span class="title">Texture Studio</span>
-    <span class="by">por RPForge</span>
+    <span class="by t">by RPForge</span>
   </header>
   <div id="progress" class="progress hidden"><div id="progressBar" class="bar"></div><span id="progressText"></span></div>
   <p id="message" class="message hidden"></p>
 
   <!-- Step 1: model -->
   <section class="step" id="step1">
-    <div class="step-head"><span class="num">1</span><h2>Abrir o modelo</h2></div>
+    <div class="step-head"><span class="num">1</span><h2 class="t">Open the model</h2></div>
     <div id="vehicleEmpty">
-      <p class="hint">Veículos <b>.yft</b>, roupas <b>.ydd</b>, objetos <b>.ydr</b> ou qualquer modelo <b>.obj</b>. As texturas são encontradas sozinhas.</p>
-      <div role="button" tabindex="0" id="openVehicle" class="btn cta wide">Abrir modelo…</div>
+      <p class="hint t">Vehicles <b>.yft</b>, clothing <b>.ydd</b>, props <b>.ydr</b> or any <b>.obj</b> model.</p>
+      <div role="button" tabindex="0" id="openVehicle" class="btn cta wide t">Open model…</div>
     </div>
     <div id="vehicleLoaded" class="hidden">
-      <div class="file-row"><span id="modelKind" class="kind">Modelo</span><span id="yftName" class="file">—</span><div role="button" tabindex="0" id="pickYft" class="btn quiet">Trocar</div></div>
-      <div class="file-row"><span class="kind">Texturas</span><span id="ytdName" class="file">—</span><div role="button" tabindex="0" id="pickYtd" class="btn quiet">Trocar</div></div>
+      <div class="file-row"><span id="modelKind" class="kind">Model</span><span id="yftName" class="file"></span><div role="button" tabindex="0" id="pickYft" class="btn quiet t">Change</div></div>
+      <div class="file-row"><span class="kind t">Textures</span><span id="ytdName" class="file"></span><div role="button" tabindex="0" id="pickYtd" class="btn quiet t">Change</div></div>
       <p id="vehicleInfo" class="hint"></p>
       <div class="row-buttons">
-        <div role="button" tabindex="0" id="previewBtn" class="btn secondary">Ver em 3D</div>
-        <div role="button" tabindex="0" id="openAnother" class="btn secondary">Abrir outro…</div>
+        <div role="button" tabindex="0" id="previewBtn" class="btn secondary t">View in 3D</div>
+        <div role="button" tabindex="0" id="openAnother" class="btn secondary t">Open another…</div>
       </div>
     </div>
   </section>
 
   <!-- Step 2: texture -->
   <section class="step hidden" id="step2">
-    <div class="step-head"><span class="num">2</span><h2>Escolher a textura</h2><span id="count" class="count"></span></div>
-    <input id="filter" class="search" type="text" placeholder="Buscar…" />
+    <div class="step-head"><span class="num">2</span><h2 class="t">Choose the texture</h2><span id="count" class="count"></span></div>
+    <sp-textfield id="filter" class="search" type="search" placeholder="Search…"></sp-textfield>
     <div id="list" class="list"></div>
-    <label class="check"><input id="showAll" type="checkbox" /> Mostrar todas as texturas</label>
+    <sp-checkbox id="showAll" class="check t">Show all textures</sp-checkbox>
   </section>
 
   <!-- Step 3: save -->
   <section class="step hidden" id="docCard">
-    <div class="step-head"><span class="num">3</span><h2>Pintar e salvar</h2></div>
+    <div class="step-head"><span class="num">3</span><h2 class="t">Paint and save</h2></div>
     <p id="docInfo" class="doc-info"></p>
-    <p class="hint">Pinte na camada <b>Pintura</b>. Os guias de UV servem só de referência e não são salvos.</p>
-    <div role="button" tabindex="0" id="saveBtn" class="btn cta wide">Salvar no YTD</div>
+    <p class="hint t">Paint on the <b>Paint</b> layer. The UV guides are not saved.</p>
+    <div role="button" tabindex="0" id="saveBtn" class="btn cta wide">Save to YTD</div>
     <div class="row-buttons">
-      <div role="button" tabindex="0" id="guideBtn" class="btn secondary">Guia on/off</div>
-      <div role="button" tabindex="0" id="previewBtn2" class="btn secondary">Ver em 3D</div>
-      <div role="button" tabindex="0" id="saveCopyBtn" class="btn secondary" title="Salvar uma cópia em outro arquivo">Cópia…</div>
+      <div role="button" tabindex="0" id="guideBtn" class="btn secondary t">UV guide</div>
+      <div role="button" tabindex="0" id="previewBtn2" class="btn secondary t">View in 3D</div>
+      <div role="button" tabindex="0" id="saveCopyBtn" class="btn secondary t tt" title="Save a copy to another file">Copy…</div>
     </div>
   </section>
 
   <section class="step hidden" id="linkCard">
-    <div class="step-head"><span class="num">3</span><h2>Salvar este documento</h2></div>
-    <p class="hint">Este documento não foi aberto pelo painel. Escolha em qual textura ele deve ser salvo.</p>
+    <div class="step-head"><span class="num">3</span><h2 class="t">Save this document</h2></div>
+    <p class="hint t">This document was not opened by the panel. Choose which texture it should be saved to.</p>
     <select id="linkTarget" class="wide-select"></select>
-    <div role="button" tabindex="0" id="linkBtn" class="btn secondary wide">Usar esta textura</div>
+    <div role="button" tabindex="0" id="linkBtn" class="btn secondary wide t">Use this texture</div>
   </section>
 
   <!-- Options -->
-  <div role="button" tabindex="0" id="optionsToggle" class="btn disclosure">▸ Opções</div>
+  <div role="button" tabindex="0" id="optionsToggle" class="btn disclosure"><span id="optionsSign" class="num">+</span><span class="opt-label t">Options</span></div>
   <section id="options" class="options hidden">
-    <label>Tamanho ao abrir
+    <label><span class="t">Size when opening</span>
       <select id="workSize">
-        <option value="auto" selected>Automático</option>
+        <option class="t" value="auto" selected>Automatic</option>
         <option value="1024">1024 px</option>
         <option value="2048">2048 px</option>
         <option value="4096">4096 px</option>
-        <option value="original">Igual à textura</option>
+        <option class="t" value="original">Same as the texture</option>
       </select>
     </label>
-    <label>Formato ao salvar
+    <label><span class="t">Format when saving</span>
       <select id="format">
-        <option value="keep" selected>Igual ao original</option>
-        <option value="DXT5">DXT5 · com transparência</option>
-        <option value="DXT1">DXT1 · menor, sem transparência</option>
-        <option value="BC7">BC7 · melhor qualidade</option>
-        <option value="A8R8G8B8">Sem compressão</option>
+        <option class="t" value="keep" selected>Same as the original</option>
+        <option class="t" value="DXT5">DXT5 (with transparency)</option>
+        <option class="t" value="DXT1">DXT1 (smaller, no transparency)</option>
+        <option class="t" value="BC7">BC7 (best quality)</option>
+        <option class="t" value="A8R8G8B8">Uncompressed</option>
       </select>
     </label>
-    <p class="opt-title">Camadas extras ao abrir (como no Photoshop 2020)</p>
-    <label class="check"><input id="ovShaded" type="checkbox" checked /> Sombreado (o modelo iluminado na UV)</label>
-    <label class="check"><input id="ovNormal" type="checkbox" /> Mapa normal</label>
-    <label class="check"><input id="backup" type="checkbox" checked /> Guardar uma cópia do arquivo original</label>
+    <p class="opt-title t">Extra layers when opening</p>
+    <sp-checkbox id="ovShaded" class="check t" checked>Shaded model on the UV</sp-checkbox>
+    <sp-checkbox id="ovNormal" class="check t">Normal map</sp-checkbox>
+    <sp-checkbox id="backup" class="check t" checked>Keep a copy of the original file</sp-checkbox>
   </section>
 
-
-  <footer class="foot">Feito pelo RPForge · tudo é processado no seu computador</footer>
 </div>
 
 <!-- ============================== 3D preview panel ============================== -->
 <div id="panelPreview" class="panel-root preview-root unmounted">
   <div class="pv-toolbar">
     <img class="brand-icon" src="assets/rpforge-icon.png" alt="RPForge" />
-    <span id="pvTitle" class="pv-title">Prévia 3D</span>
-    <div role="button" tabindex="0" id="pvPick" class="btn tool" title="Clique no modelo para marcar o ponto na textura">Marcar ponto</div>
-    <div role="button" tabindex="0" id="pvFocus" class="btn tool" title="Destaca as peças da textura aberta">Destacar</div>
-    <div role="button" tabindex="0" id="pvAxis" class="btn tool" title="Troca o eixo vertical (para OBJ deitado)">Eixo</div>
-    <div role="button" tabindex="0" id="pvReset" class="btn tool" title="Volta à vista inicial">Centralizar</div>
-    <div role="button" tabindex="0" id="pvRefresh" class="btn tool" title="Recarrega o modelo e a textura">Atualizar</div>
+    <span id="pvTitle" class="pv-title t">3D Preview</span>
+    <div role="button" tabindex="0" id="pvPick" class="btn tool t tt" title="Click the model to mark the point on the texture">Mark point</div>
+    <div role="button" tabindex="0" id="pvFocus" class="btn tool t tt" title="Highlights the parts that use the open texture">Highlight</div>
+    <div role="button" tabindex="0" id="pvAxis" class="btn tool t tt" title="Swaps the vertical axis, for an OBJ lying down">Axis</div>
+    <div role="button" tabindex="0" id="pvReset" class="btn tool t tt" title="Back to the initial view">Center</div>
+    <div role="button" tabindex="0" id="pvRefresh" class="btn tool t tt" title="Reloads the model and the texture">Refresh</div>
   </div>
   <div id="pvStage" class="pv-stage">
     <img id="pvImage" class="pv-image hidden" alt="" />
-    <div id="pvEmpty" class="pv-empty">Abra um modelo no painel <b>Texture Studio</b> para vê-lo aqui.<br /><span>Dica: arraste esta aba para o outro monitor.</span></div>
+    <div id="pvEmpty" class="pv-empty t">Open a model in the <b>Texture Studio</b> panel.</div>
   </div>
   <div class="pv-foot">
-    <span id="pvStatus" class="pv-status">Arraste para girar · Shift + arraste move · roda aproxima · clique duplo centraliza</span>
-    <label class="check pv-live"><input id="pvLive" type="checkbox" checked /> Ao vivo</label>
+    <span id="pvStatus" class="pv-status">Drag to rotate. Shift + drag to pan. Scroll to zoom.</span>
+    <sp-checkbox id="pvLive" class="check t pv-live" checked>Live</sp-checkbox>
   </div>
 </div>
 
