@@ -87,7 +87,7 @@ function readEmbedded(sys, gfx, sg) {
       const format = bc.formatName(u32(sys, at + 0x58));
       const dp = pointerAt(sys, at + 0x70), region = dp.region === 'graphics' ? gfx : sys;
       const size = bc.dataSize(format, width, height, levels);
-      ensure(dp.offset + size <= region.length, 'Pixels fora do recurso.');
+      ensure(dp.offset + size <= region.length, 'Pixels outside the resource.');
       out.push({ name, width, height, format, levels, data: region.slice(dp.offset, dp.offset + size), location: { region: dp.region, offset: dp.offset, size } });
     } catch { /* unsupported embedded texture: listed as missing pixels */ }
   }
@@ -297,18 +297,18 @@ const LABEL = { yft: 'YFT', ydr: 'YDR', ydd: 'YDD' };
 // Returns { usage: Map(lowercase name -> {name, uses[]}), embedded: [], geometries, skipped, shaders, drawables }.
 function readModel(bytes, kind, decoded) {
   kind = String(kind || 'yft').toLowerCase();
-  ensure(KINDS[kind], `Tipo de modelo não suportado: ${kind}`);
+  ensure(KINDS[kind], `Unsupported model type: ${kind}`);
   const [legacy, enhanced] = KINDS[kind];
   const h = rsc7.header(bytes);
   if (h.version !== legacy) {
-    if (enhanced.includes(h.version)) throw new EngineError(`Este ${LABEL[kind]} é do GTA V Enhanced (gen9). Por enquanto só o Legacy é suportado.`, 'gen9');
-    throw new EngineError(`Versão de ${LABEL[kind]} não suportada (${h.version}).`, 'version');
+    if (enhanced.includes(h.version)) throw new EngineError(`This ${LABEL[kind]} is from GTA V Enhanced (gen9). For now only Legacy is supported.`, 'gen9');
+    throw new EngineError(`Unsupported ${LABEL[kind]} version (${h.version}).`, 'version');
   }
   const res = decoded || rsc7.decode(bytes), sys = res.system, gfx = res.graphics;
   let drawables;
-  if (kind === 'yft') { const p = pointerAt(sys, 0x30); ensure(p && p.region === 'system', 'YFT sem modelo principal.'); drawables = [p.offset]; }
+  if (kind === 'yft') { const p = pointerAt(sys, 0x30); ensure(p && p.region === 'system', 'YFT without a main model.'); drawables = [p.offset]; }
   else if (kind === 'ydr') drawables = [0];
-  else { drawables = list(sys, 0x30); ensure(drawables.length, 'YDD sem drawables.'); }
+  else { drawables = list(sys, 0x30); ensure(drawables.length, 'YDD without drawables.'); }
   const out = { usage: new Map(), meshes: [], childDrawables: new Set(), embedded: [], geometries: 0, skipped: 0, shaders: 0, drawables: drawables.length, up: 'z' };
   drawables.forEach((d, i) => {
     const shaders = readDrawable(sys, gfx, d, i, out);
@@ -324,9 +324,9 @@ async function replaceEmbedded(bytes, kind, name, rgba, width, height, onProgres
   const res = rsc7.decode(bytes);
   const model = readModel(bytes, kind, res);
   const copies = model.embedded.filter(t => t.name.toLowerCase() === String(name).toLowerCase());
-  ensure(copies.length, `Textura embutida não encontrada: ${name}`);
+  ensure(copies.length, `Embedded texture not found: ${name}`);
   const t = copies[0];
-  ensure(width === t.width && height === t.height, 'A textura embutida precisa manter o tamanho original.');
+  ensure(width === t.width && height === t.height, 'The embedded texture must keep its original size.');
   const parts = [];
   let cur = { rgba, w: width, h: height };
   for (let l = 0; l < t.levels; l++) {
@@ -337,11 +337,11 @@ async function replaceEmbedded(bytes, kind, name, rgba, width, height, onProgres
   }
   const data = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let o = 0; for (const p of parts) { data.set(p, o); o += p.length; }
-  ensure(data.length === t.location.size, 'Tamanho de pixels diferente do original.');
+  ensure(data.length === t.location.size, 'Pixel size differs from the original.');
   for (const c of copies) (c.location.region === 'graphics' ? res.graphics : res.system).set(data, c.location.offset);
   const out = rsc7.reencode(res);
   const check = readModel(out, kind).embedded.find(x => x.name.toLowerCase() === String(name).toLowerCase());
-  ensure(check && check.width === width && check.height === height, 'A verificação do arquivo gerado falhou.');
+  ensure(check && check.width === width && check.height === height, 'The check of the generated file failed.');
   return { bytes: out, format: t.format, levels: t.levels, copies: copies.length };
 }
 

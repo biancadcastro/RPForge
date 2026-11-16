@@ -293,7 +293,9 @@ function render(scene, cam, width, height, options = {}) {
           }
           zbuf[p] = z;
           if (glossy) { const gl = w0 * pa + w1 * pb + w2 * pc; r = r * light + gl; g = g * light + gl; bl = bl * light + gl; light = 1; }
-          rgba[o] = r * light; rgba[o + 1] = g * light; rgba[o + 2] = bl * light;
+          // Clamp: rgba is a plain Uint8Array, so values over 255 (bright paint + highlight) would wrap.
+          r *= light; g *= light; bl *= light;
+          rgba[o] = r > 255 ? 255 : r; rgba[o + 1] = g > 255 ? 255 : g; rgba[o + 2] = bl > 255 ? 255 : bl;
           meshId[p] = mi; triId[p] = t;
         }
       }

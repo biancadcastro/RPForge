@@ -22,16 +22,16 @@ function pageSizes(flags) {
 const regionSize = flags => pageSizes(flags).reduce((a, b) => a + b, 0);
 
 function header(bytes) {
-  ensure(bytes && bytes.length >= 16, 'Arquivo vazio ou truncado.');
+  ensure(bytes && bytes.length >= 16, 'Empty or truncated file.');
   const magic = u32(bytes, 0);
-  ensure(magic === MAGIC, 'Este arquivo não é um recurso RSC7 do GTA V.', 'not-rsc7');
+  ensure(magic === MAGIC, 'This file is not a GTA V RSC7 resource.', 'not-rsc7');
   return { version: u32(bytes, 4), systemFlags: u32(bytes, 8), graphicsFlags: u32(bytes, 12) };
 }
 
 function decode(bytes) {
   const h = header(bytes);
   const systemSize = regionSize(h.systemFlags), graphicsSize = regionSize(h.graphicsFlags);
-  ensure(systemSize > 0 && systemSize + graphicsSize <= MAX_REGION, 'Tamanho de recurso não suportado.');
+  ensure(systemSize > 0 && systemSize + graphicsSize <= MAX_REGION, 'Unsupported resource size.');
   const raw = inflateRaw(bytes.subarray(16), systemSize + graphicsSize);
   return {
     version: h.version, systemFlags: h.systemFlags, graphicsFlags: h.graphicsFlags, raw,
@@ -53,7 +53,7 @@ function packRegion(blocks) {
   let page = 0x2000;
   while (page < largest) page *= 2;
   for (;;) {
-    ensure(page <= (0x200 << 15) << PAGE_COUNT_FIELD, 'Recurso grande demais para o formato RSC7.');
+    ensure(page <= (0x200 << 15) << PAGE_COUNT_FIELD, 'Resource too large for the RSC7 format.');
     const free = []; // remaining cursor per page
     const place = b => {
       for (let p = 0; p < free.length; p++) {
@@ -79,7 +79,7 @@ class ResourceBuilder {
   constructor(version) { this.version = version; this.blocks = { system: [], graphics: [] }; }
   // Returns a handle whose .offset is set by layout(); fill() runs after layout.
   add(region, size, fill, align = 16) {
-    ensure(size > 0 && size <= MAX_REGION, 'Bloco de recurso inválido.');
+    ensure(size > 0 && size <= MAX_REGION, 'Invalid resource block.');
     const block = { region, size, align, fill, offset: null };
     this.blocks[region].push(block);
     return block;

@@ -57,11 +57,13 @@ function icons() {
   mkdirSync(dir, { recursive: true });
   const load = rel => { const f = path.join(brand, rel); if (!existsSync(f)) throw new Error(`identidade ausente: ${rel}`); return decodePng(new Uint8Array(readFileSync(f))); };
   const light = load('png/rpforge-simbolo-branco.png'), dark = load('png/rpforge-simbolo-preto.png'), app = load('icons/rpforge-escuro-1024.png');
+  // Adobe's naming: every scale in its own file (@1x and @2x). icon_D = dark UI themes (light
+  // symbol), icon_N = light UI themes (dark symbol); panel icons 23 px, plugin list icon 24 px.
   for (const scale of [1, 2]) {
-    const suffix = scale === 2 ? '@2x' : '', s = 23 * scale, p = 48 * scale;
-    writeFileSync(path.join(dir, `panel-dark${suffix}.png`), png(s, s, fit(light, s, scale)));
-    writeFileSync(path.join(dir, `panel-light${suffix}.png`), png(s, s, fit(dark, s, scale)));
-    writeFileSync(path.join(dir, `plugin${suffix}.png`), png(p, p, fit(app, p)));
+    const suffix = `@${scale}x`, s = 23 * scale, p = 24 * scale;
+    writeFileSync(path.join(dir, `icon_D${suffix}.png`), png(s, s, fit(light, s, scale)));
+    writeFileSync(path.join(dir, `icon_N${suffix}.png`), png(s, s, fit(dark, s, scale)));
+    writeFileSync(path.join(dir, `plugin-list${suffix}.png`), png(p, p, fit(app, p)));
   }
   const shipped = path.join(source, 'assets', 'rpforge-icon.png');
   if (!existsSync(shipped)) copyFileSync(path.join(brand, 'icons', 'rpforge-escuro-64.png'), shipped);
@@ -79,7 +81,7 @@ function validate() {
   if (manifest.host && manifest.host.app !== 'PS') fail('host.app precisa ser "PS"');
   const iconSets = [...(manifest.icons || []), ...manifest.entrypoints.flatMap(e => e.icons || [])];
   for (const icon of iconSets) for (const scale of icon.scale || [1]) {
-    const file = scale === 1 ? icon.path : icon.path.replace(/(\.\w+)$/, `@${scale}x$1`);
+    const file = icon.path.replace(/(\.\w+)$/, `@${scale}x$1`);
     const full = path.join(source, file);
     if (!existsSync(full)) fail(`ícone ausente: ${file}`);
     else {

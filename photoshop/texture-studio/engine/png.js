@@ -7,7 +7,7 @@ const { inflateRaw } = require('./inflate');
 function be32(b, o) { return ((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]) >>> 0; }
 
 function decodePng(bytes) {
-  ensure(bytes && bytes.length > 33 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71, 'Imagem PNG inválida.');
+  ensure(bytes && bytes.length > 33 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71, 'Invalid PNG image.');
   let o = 8, width = 0, height = 0, depth = 0, type = 0, interlace = 0, palette = null, trns = null;
   const idat = [];
   while (o + 8 <= bytes.length) {
@@ -19,10 +19,10 @@ function decodePng(bytes) {
     else if (name === 'IEND') break;
     o += 12 + len;
   }
-  ensure(width > 0 && height > 0 && width <= 16384 && height <= 16384, 'Dimensões de PNG não suportadas.');
-  ensure(depth === 8 || depth === 16 || (type === 3 && depth <= 8) || (type === 0 && depth < 8), 'Profundidade de cor de PNG não suportada.');
+  ensure(width > 0 && height > 0 && width <= 16384 && height <= 16384, 'Unsupported PNG dimensions.');
+  ensure(depth === 8 || depth === 16 || (type === 3 && depth <= 8) || (type === 0 && depth < 8), 'Unsupported PNG bit depth.');
   const channels = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[type];
-  ensure(channels, 'Tipo de PNG não suportado.');
+  ensure(channels, 'Unsupported PNG type.');
   const total = idat.reduce((n, c) => n + c.length, 0), z = new Uint8Array(total);
   let p = 0; for (const c of idat) { z.set(c, p); p += c.length; }
   const raw = inflateRaw(z.subarray(2)); // skip zlib header

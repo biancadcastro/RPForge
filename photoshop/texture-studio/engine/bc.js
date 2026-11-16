@@ -22,7 +22,7 @@ const FORMATS = {
 const BY_CODE = new Map(Object.entries(FORMATS).map(([k, v]) => [v.code, k]));
 function formatName(code) {
   const name = BY_CODE.get(code);
-  if (!name) throw new EngineError(`Formato de textura não suportado (0x${code.toString(16)}).`, 'format');
+  if (!name) throw new EngineError(`Unsupported texture format (0x${code.toString(16)}).`, 'format');
   return name;
 }
 const isBlock = f => !!FORMATS[f].block;
@@ -416,7 +416,7 @@ function encodeBc7Mode6(blk, out, o) {
 // Encodes one mip level from RGBA8. Calls onBlockRow(by, bh) so callers can report progress.
 function encode(format, rgba, w, h) {
   const f = FORMATS[format];
-  if (!f) throw new EngineError(`Formato de saída não suportado: ${format}`);
+  if (!f) throw new EngineError(`Unsupported output format: ${format}`);
   if (!f.block) {
     const out = new Uint8Array(w * h * f.bpp);
     for (let i = 0, n = w * h; i < n; i++) {

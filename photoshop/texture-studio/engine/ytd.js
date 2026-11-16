@@ -14,21 +14,21 @@ const bc = require('./bc');
 const VERSION = 13, ROOT_SIZE = 0x40, TEXTURE_SIZE = 0x90;
 
 function readTexture(sys, gfx, at) {
-  ensure(at + TEXTURE_SIZE <= sys.length, 'Textura fora do recurso.');
+  ensure(at + TEXTURE_SIZE <= sys.length, 'Texture outside the resource.');
   const namePtr = pointerAt(sys, at + 0x28);
-  ensure(namePtr && namePtr.region === 'system', 'Textura sem nome.');
+  ensure(namePtr && namePtr.region === 'system', 'Texture without a name.');
   const name = cstring(sys, namePtr.offset);
   const width = u16(sys, at + 0x50), height = u16(sys, at + 0x52), depth = u16(sys, at + 0x54);
   const code = u32(sys, at + 0x58), levels = sys[at + 0x5d];
-  ensure(width > 0 && height > 0 && width <= 16384 && height <= 16384, `Dimensões inválidas em ${name}.`);
-  ensure(depth === 1, `Textura volumétrica não suportada (${name}).`);
-  ensure(levels >= 1 && levels <= 16, `Mipmaps inválidos em ${name}.`);
+  ensure(width > 0 && height > 0 && width <= 16384 && height <= 16384, `Invalid dimensions in ${name}.`);
+  ensure(depth === 1, `Volume texture not supported (${name}).`);
+  ensure(levels >= 1 && levels <= 16, `Invalid mipmaps in ${name}.`);
   const format = bc.formatName(code);
   const size = bc.dataSize(format, width, height, levels);
   const dataPtr = pointerAt(sys, at + 0x70);
-  ensure(dataPtr, `Textura sem pixels (${name}).`);
+  ensure(dataPtr, `Texture without pixels (${name}).`);
   const region = dataPtr.region === 'graphics' ? gfx : sys;
-  ensure(dataPtr.offset + size <= region.length, `Pixels fora do recurso (${name}).`);
+  ensure(dataPtr.offset + size <= region.length, `Pixels outside the resource (${name}).`);
   return {
     name, width, height, format, levels,
     struct: sys.slice(at, at + TEXTURE_SIZE),
@@ -40,20 +40,20 @@ function readTexture(sys, gfx, at) {
 function readYtd(bytes) {
   const h = rsc7.header(bytes);
   if (h.version !== VERSION) {
-    if (h.version === 5) throw new EngineError('Este YTD é do GTA V Enhanced (gen9). Por enquanto só o Legacy é suportado.', 'gen9');
-    throw new EngineError(`Versão de YTD não suportada (${h.version}).`, 'version');
+    if (h.version === 5) throw new EngineError('This YTD is from GTA V Enhanced (gen9). For now only Legacy is supported.', 'gen9');
+    throw new EngineError(`Unsupported YTD version (${h.version}).`, 'version');
   }
   const res = rsc7.decode(bytes), sys = res.system, gfx = res.graphics;
   const list = pointerAt(sys, 0x30), count = u16(sys, 0x38);
-  ensure(count <= 4096, 'Dicionário com texturas demais.');
+  ensure(count <= 4096, 'Dictionary with too many textures.');
   const textures = [];
   for (let i = 0; i < count; i++) {
     const p = pointerAt(sys, list.offset + i * 8);
-    ensure(p && p.region === 'system', 'Ponteiro de textura inválido.');
+    ensure(p && p.region === 'system', 'Invalid texture pointer.');
     textures.push(readTexture(sys, gfx, p.offset));
   }
   const seen = new Set();
-  for (const t of textures) { const k = joaat(t.name); ensure(!seen.has(k), `Nome de textura duplicado: ${t.name}`); seen.add(k); }
+  for (const t of textures) { const k = joaat(t.name); ensure(!seen.has(k), `Duplicate texture name: ${t.name}`); seen.add(k); }
   return { root: sys.slice(0, ROOT_SIZE), textures };
 }
 
@@ -65,11 +65,11 @@ function listYtd(bytes) {
 function writeYtd(dict, options = {}) {
   const textures = dict.textures.slice().map(t => ({ ...t, hash: joaat(t.name) }));
   textures.sort((a, b) => a.hash - b.hash);
-  for (let i = 1; i < textures.length; i++) ensure(textures[i].hash !== textures[i - 1].hash, `Nome de textura duplicado: ${textures[i].name}`);
-  ensure(textures.length > 0 && textures.length <= 4096, 'Dicionário vazio ou grande demais.');
+  for (let i = 1; i < textures.length; i++) ensure(textures[i].hash !== textures[i - 1].hash, `Duplicate texture name: ${textures[i].name}`);
+  ensure(textures.length > 0 && textures.length <= 4096, 'Empty or too large dictionary.');
   for (const t of textures) {
-    ensure(/^[\x20-\x7e]{1,255}$/.test(t.name), `Nome de textura inválido: ${t.name}`);
-    ensure(t.data.length === bc.dataSize(t.format, t.width, t.height, t.levels), `Tamanho de pixels incorreto em ${t.name}.`);
+    ensure(/^[\x20-\x7e]{1,255}$/.test(t.name), `Invalid texture name: ${t.name}`);
+    ensure(t.data.length === bc.dataSize(t.format, t.width, t.height, t.levels), `Wrong pixel size in ${t.name}.`);
   }
   // Pages-info block holds 8 bytes per page; size it from the previous attempt until stable.
   let pages = 16;
@@ -104,13 +104,13 @@ function writeYtd(dict, options = {}) {
     if (b.systemPages + b.graphicsPages <= pages) return out;
     pages = b.systemPages + b.graphicsPages;
   }
-  throw new EngineError('Não foi possível organizar as páginas do YTD.');
+  throw new EngineError('Could not lay out the YTD pages.');
 }
 
 // Builds a full-chain texture (GTA mip convention) from RGBA8 pixels.
 async function buildTexture(base, rgba, width, height, format, onProgress) {
-  ensure(width % 4 === 0 && height % 4 === 0, 'Largura e altura precisam ser múltiplas de 4.');
-  ensure(width <= 16384 && height <= 16384, 'Textura grande demais (máximo 16384).');
+  ensure(width % 4 === 0 && height % 4 === 0, 'Width and height must be multiples of 4.');
+  ensure(width <= 16384 && height <= 16384, 'Texture too large (maximum 16384).');
   const levels = bc.gtaLevels(width, height);
   const parts = [];
   let cur = { rgba, w: width, h: height };

@@ -7,9 +7,12 @@ const { app, core, action, imaging, constants } = require('photoshop');
 const uxp = require('uxp');
 const fs = uxp.storage.localFileSystem;
 const formats = uxp.storage.formats;
+const { t, tr, translateDom, variants, numberLocale } = require('./i18n.js');
+translateDom(document);
+try { const f = document.getElementById('filter'); if (f) { if (f.setAttribute) f.setAttribute('placeholder', t('Search…')); else f.placeholder = t('Search…'); } } catch {}
 let engine;
 try { engine = require('./engine/index.js'); }
-catch (e) { if (window.rpforgeReport) window.rpforgeReport('motor não carregou: ' + (e && e.message)); throw e; }
+catch (e) { if (window.rpforgeReport) window.rpforgeReport(t('engine failed to load: {0}', e && e.message)); throw e; }
 
 // Two panels share this page: the main panel and the 3D preview (which can float on another monitor).
 (function mountPanels() {
@@ -23,7 +26,8 @@ catch (e) { if (window.rpforgeReport) window.rpforgeReport('motor não carregou:
   };
   try {
     const { entrypoints } = uxp;
-    if (entrypoints && entrypoints.setup) entrypoints.setup({ panels: {
+    // The plugin's own ID at run time (the Marketplace build has another one), for showPanel().
+    if (entrypoints && entrypoints.setup) entrypoints.setup({ plugin: { create() { window.rpforgePluginId = this && this.id; } }, panels: {
       'texturestudio.panel': { create: attach('panelMain'), show: attach('panelMain') },
       'texturestudio.preview': { create: attach('panelPreview'), show: attach('panelPreview', () => preview && preview.shown()), hide: () => { (window.rpforgeVisible = window.rpforgeVisible || {}).panelPreview = false; } },
     } });
@@ -31,7 +35,11 @@ catch (e) { if (window.rpforgeReport) window.rpforgeReport('motor não carregou:
 })();
 
 const PROFILE = 'sRGB IEC61966-2.1';
-const GUIDE_PREFIX = 'Guia UV';
+// UV guide layers: "<UV guide> <channel or overlay> (<not saved>)" in the panel language. Guides
+// named in any language (and the "Guia UV" of 1.x) are recognised.
+const GUIDE_PREFIXES = [...new Set(['Guia UV', ...variants('UV guide')])].sort((a, b) => b.length - a.length);
+const guideName = label => `${t('UV guide')} ${label} (${t('not saved')})`;
+const guideRest = name => { const p = GUIDE_PREFIXES.find(x => name.startsWith(x + ' ')); return p ? name.slice(p.length + 1) : null; };
 const LINKS_KEY = 'rpforge.links.v2';
 const PREFS_KEY = 'rpforge.prefs.v1';
 const GTA_MODELS = ['yft', 'ydr', 'ydd'];
@@ -59,7 +67,7 @@ const state = { model: null, kind: null, dicts: [], images: new Map(), session: 
 const show = (el, on) => el.classList.toggle('hidden', !on);
 function message(text, kind = '') {
   const el = $('message');
-  el.textContent = text || '';
+  el.textContent = tr(text) || '';
   el.className = 'message' + (kind ? ' ' + kind : '');
   show(el, !!text);
 }
@@ -67,13 +75,14 @@ function progress(value, text) {
   show($('progress'), value !== null);
   if (value === null) return;
   $('progressBar').style.width = `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
-  $('progressText').textContent = text || '';
+  $('progressText').textContent = tr(text) || '';
 }
 const baseName = p => (p || '').split(/[\\/]/).pop();
 const stem = name => name.replace(/\.[^.]+$/, '');
 const ext = name => (/\.([^.]+)$/.exec(name) || [, ''])[1].toLowerCase();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+// one/many are keys like '{0} part' / '{0} parts'.
+const plural = (n, one, many) => t(n === 1 ? one : many, n.toLocaleString(numberLocale()));
 
 async function run(label, fn) {
   if (state.busy) return;
@@ -85,8 +94,8 @@ async function run(label, fn) {
 }
 function friendly(e) {
   const text = (e && e.message) || String(e);
-  if (/permission|denied|not allowed/i.test(text)) return 'O Photoshop não permitiu acessar o arquivo. Escolha o arquivo de novo pelo botão do painel.';
-  return text;
+  if (/permission|denied|not allowed/i.test(text)) return t('Photoshop did not allow access to the file. Choose the file again with the panel button.');
+  return tr(text);
 }
 
 function loadPrefs() { try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; } }
@@ -177,7 +186,7 @@ async function writeDocLink(docId, link) {
     xmp = /<\/rdf:RDF>/.test(xmp) ? xmp.replace(/<\/rdf:RDF>/, block + '</rdf:RDF>')
       : `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">${block}</rdf:RDF></x:xmpmeta>`;
     await action.batchPlay([{ _obj: 'set', _target: [{ _ref: 'property', _property: 'XMPMetadataAsUTF8' }, { _ref: 'document', _id: docId }], to: { _obj: 'document', XMPMetadataAsUTF8: xmp } }], {});
-  }, { commandName: 'Lembrar modelo (RPForge)' });
+  }, { commandName: t('Remember model (RPForge)') });
 }
 
 // Saved documents are also remembered by file path (backup for when metadata is unavailable).
@@ -208,7 +217,7 @@ async function restoreFromDocument(doc) {
     const model = src.model ? await entryFrom(src.model.path, src.model.token) : null;
     if (src.model && !model) {
       refreshDocument();
-      message(`Este documento pinta ${link.texture} de ${src.model.name}, mas o modelo não está mais em ${src.model.path}. Abra-o pelo painel para continuar.`, 'error');
+      message(t('This document paints {0} of {1}, but the model is no longer at {2}. Open it from the panel to continue.', link.texture, src.model.name, src.model.path), 'error');
       return;
     }
     const dicts = [];
@@ -220,7 +229,7 @@ async function restoreFromDocument(doc) {
   refreshDocument();
   if (preview) { preview.sessionChanged(); preview.linkChanged(); }
   const what = src && src.model ? src.model.name : link.file || link.texture;
-  message(`Documento de ${link.texture} reaberto: ${what} foi carregado de novo. É só continuar pintando e salvar.`, 'ok');
+  message(t('{1} was loaded again for {0}.', link.texture, what), 'ok');
 }
 
 // ---------------------------------------------------------------- opening a model
@@ -267,14 +276,14 @@ async function pickTextures() {
 async function loadModel(discover) {
   renderFiles();
   if (!state.model && !state.dicts.length) return;
-  await run('Lendo o modelo', async () => {
-    progress(0.1, 'Lendo arquivos');
+  await run(t('Reading the model'), async () => {
+    progress(0.1, t('Reading files'));
     if (state.kind === 'obj') return loadObj();
     const modelBytes = state.model ? await readBytes(state.model) : null;
     const model = modelBytes ? { kind: state.kind, bytes: modelBytes } : null;
     state.parsed = null;
     if (discover && state.model) state.dicts = await discoverDictionaries(model);
-    progress(0.5, 'Lendo texturas');
+    progress(0.5, t('Reading textures'));
     const dictionaries = [];
     for (const d of state.dicts) dictionaries.push({ name: d.name, bytes: await readBytes(d) });
     await sleep(0);
@@ -311,7 +320,7 @@ async function loadObj() {
   for (const n of mtlNames.length ? mtlNames : [`${stem(state.model.name)}.mtl`]) {
     const e = findIn(siblings, [n]); if (e) mtl.push(await readText(e));
   }
-  progress(0.5, 'Lendo UVs');
+  progress(0.5, t('Reading UVs'));
   await sleep(0);
   state.session = new engine.ModelSession({ model: { kind: 'obj', text, mtl } });
   for (const t of state.session.textures()) {
@@ -332,30 +341,30 @@ function afterLoad() {
   const own = list.filter(t => ['ytd', 'embedded', 'image'].includes(t.origin)).length;
   const info = [];
   const m = state.session.model;
-  if (m) info.push(state.kind === 'obj' ? plural(m.triangles, 'triângulo', 'triângulos') : plural(m.geometries, 'peça', 'peças'));
-  info.push(plural(own, 'textura', 'texturas'));
-  if (liveries) info.push(plural(liveries, 'livery', 'liveries'));
+  if (m) info.push(state.kind === 'obj' ? plural(m.triangles, '{0} triangle', '{0} triangles') : plural(m.geometries, '{0} part', '{0} parts'));
+  info.push(plural(own, '{0} texture', '{0} textures'));
+  if (liveries) info.push(plural(liveries, '{0} livery', '{0} liveries'));
   let note = '';
-  if (state.kind !== 'obj' && !state.dicts.length) note = state.session.model ? ' Abra também o .ytd para poder salvar.' : '';
-  $('vehicleInfo').textContent = info.join(' · ') + '.' + note;
+  if (state.kind !== 'obj' && !state.dicts.length) note = state.session.model ? ' ' + t('Also open the .ytd to be able to save.') : '';
+  $('vehicleInfo').textContent = info.join(', ') + '.' + note;
   renderFiles();
   show($('step2'), true);
   renderList();
-  message(liveries ? 'Pronto. A livery está no topo da lista.' : 'Pronto. Escolha a textura que quer pintar.', 'ok');
+  message(liveries ? t('The livery is at the top of the list.') : t('Choose the texture you want to paint.'), 'ok');
   if (preview) preview.sessionChanged();
 }
 
-const KIND_LABEL = { yft: 'Veículo', ydr: 'Objeto', ydd: 'Roupa / peça', obj: 'Modelo OBJ', ytd: 'Modelo' };
+const KIND_LABEL = { yft: 'Vehicle', ydr: 'Prop', ydd: 'Clothing', obj: 'OBJ model', ytd: 'Model' };
 function renderFiles() {
   const loaded = !!(state.model || state.dicts.length);
   show($('vehicleEmpty'), !loaded);
   show($('vehicleLoaded'), loaded);
-  $('modelKind').textContent = KIND_LABEL[state.kind] || 'Modelo';
-  $('yftName').textContent = state.model ? state.model.name : 'não aberto';
+  $('modelKind').textContent = t(KIND_LABEL[state.kind] || 'Model');
+  $('yftName').textContent = state.model ? state.model.name : t('not open');
   $('yftName').title = state.model ? state.model.nativePath || '' : '';
   let textures;
-  if (state.kind === 'obj') textures = state.images.size ? [...state.images.values()].map(e => e.name).join(', ') : 'nenhuma imagem encontrada';
-  else textures = state.dicts.length ? state.dicts.map(d => d.name).join(', ') : 'nenhum .ytd encontrado';
+  if (state.kind === 'obj') textures = state.images.size ? [...state.images.values()].map(e => e.name).join(', ') : t('no image found');
+  else textures = state.dicts.length ? state.dicts.map(d => d.name).join(', ') : t('no .ytd found');
   $('ytdName').textContent = textures;
   $('ytdName').title = textures;
 }
@@ -365,18 +374,18 @@ function originOf(t) {
   if (state.kind === 'obj') return state.images.has(t.name.toLowerCase()) ? 'image' : 'new-image';
   return t.origin;
 }
-function describe(t) {
+function describe(tex) {
   const parts = [];
-  if (t.livery) parts.push('Livery');
-  const origin = originOf(t);
-  if (origin === 'embedded') parts.push('dentro do modelo');
-  else if (origin === 'missing') parts.push('ainda não existe no YTD');
-  else if (origin === 'game') parts.push('do jogo (não fica neste arquivo)');
-  else if (origin === 'image') parts.push(state.images.get(t.name.toLowerCase()).name);
-  else if (origin === 'new-image') parts.push('sem imagem: começa em branco');
-  if (t.width) parts.push(`${t.width}×${t.height}`);
-  if (t.uvs.length && state.kind !== 'obj') parts.push(plural(t.uvs[0].geometries, 'peça', 'peças'));
-  return parts.join(' · ');
+  if (tex.livery) parts.push(t('Livery'));
+  const origin = originOf(tex);
+  if (origin === 'embedded') parts.push(t('inside the model'));
+  else if (origin === 'missing') parts.push(t('not in the YTD yet'));
+  else if (origin === 'game') parts.push(t('from the game, not in this file'));
+  else if (origin === 'image') parts.push(state.images.get(tex.name.toLowerCase()).name);
+  else if (origin === 'new-image') parts.push(t('no image, starts blank'));
+  if (tex.width) parts.push(`${tex.width}×${tex.height}`);
+  if (tex.uvs.length && state.kind !== 'obj') parts.push(plural(tex.uvs[0].geometries, '{0} part', '{0} parts'));
+  return parts.join(', ');
 }
 
 function renderList() {
@@ -391,11 +400,11 @@ function renderList() {
   $('count').textContent = String(items.length);
   const list = $('list');
   list.innerHTML = '';
-  const groups = [['Liveries', items.filter(t => t.livery)], [state.kind === 'obj' ? 'Materiais' : 'Texturas do modelo', items.filter(t => !t.livery && t.origin !== 'game')], ['Do jogo', items.filter(t => !t.livery && t.origin === 'game')]];
+  const groups = [[t('Liveries'), items.filter(x => x.livery)], [state.kind === 'obj' ? t('Materials') : t('Model textures'), items.filter(x => !x.livery && x.origin !== 'game')], [t('From the game'), items.filter(x => !x.livery && x.origin === 'game')]];
   if (!items.length) {
     const empty = document.createElement('div');
     empty.className = 'empty';
-    empty.textContent = q ? 'Nenhuma textura com esse nome.' : 'Nenhuma textura para mostrar. Marque "Mostrar todas as texturas".';
+    empty.textContent = q ? t('No texture with that name.') : t('No textures to show. Check "{0}".', t('Show all textures'));
     list.appendChild(empty);
   }
   for (const [title, group] of groups) {
@@ -405,17 +414,17 @@ function renderList() {
     list.appendChild(head);
     // Paintable textures first, read-only ones (inside the model) after.
     group.sort((a, b) => (a.origin === 'embedded') - (b.origin === 'embedded') || (b.livery - a.livery));
-    for (const t of group) {
+    for (const tex of group) {
       const row = document.createElement('div');
-      row.className = 'item' + (t.livery ? ' livery' : '');
+      row.className = 'item' + (tex.livery ? ' livery' : '');
       const info = document.createElement('div'); info.className = 'info';
-      const name = document.createElement('div'); name.className = 'name'; name.textContent = t.name;
-      const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = describe(t);
+      const name = document.createElement('div'); name.className = 'name'; name.textContent = tex.name;
+      const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = describe(tex);
       info.appendChild(name); info.appendChild(meta);
       const open = asButton(document.createElement('div'));
-      open.className = 'btn small'; open.textContent = 'Abrir';
-      open.disabled = t.origin === 'game';
-      open.addEventListener('click', () => openTexture(t.name));
+      open.className = 'btn small'; open.textContent = t('Open');
+      open.disabled = tex.origin === 'game';
+      open.addEventListener('click', () => openTexture(tex.name));
       row.appendChild(info); row.appendChild(open);
       list.appendChild(row);
     }
@@ -441,7 +450,7 @@ async function putLayerPixels(doc, layer, rgba, width, height) {
   try { await imaging.putPixels({ documentID: doc.id, layerID: layer.id, imageData, replace: true, targetBounds: { left: 0, top: 0 } }); }
   finally { try { imageData.dispose(); } catch {} }
 }
-const isGuide = layer => typeof layer.name === 'string' && layer.name.startsWith(GUIDE_PREFIX);
+const isGuide = layer => typeof layer.name === 'string' && guideRest(layer.name) !== null;
 
 async function newDocument(name, width, height) {
   return app.documents.add({
@@ -451,34 +460,34 @@ async function newDocument(name, width, height) {
   });
 }
 
-// Adds the "Pintura" layer and the UV guides on top of whatever the document holds.
-async function addWorkLayers(doc, t, width, height, guides) {
-  const paint = await doc.createPixelLayer({ name: 'Pintura' });
+// Adds the "Paint" layer and the UV guides on top of whatever the document holds.
+async function addWorkLayers(doc, tex, width, height, guides) {
+  const paint = await doc.createPixelLayer({ name: t('Paint') });
   // Optional overlays like Photoshop 2020's 3D "Create UV Overlays" (hidden; turn on in Layers).
-  const channel = t.recommendedChannel === null ? 0 : t.recommendedChannel;
-  for (const [id, kind, label] of [['ovShaded', 'shaded', 'sombreado'], ['ovNormal', 'normal', 'mapa normal']]) {
-    if (!$(id).checked || !state.session || !state.session.model || !t.uvs.length) continue;
+  const channel = tex.recommendedChannel === null ? 0 : tex.recommendedChannel;
+  for (const [id, kind, label] of [['ovShaded', 'shaded', t('shaded')], ['ovNormal', 'normal', t('normal map')]]) {
+    if (!$(id).checked || !state.session || !state.session.model || !tex.uvs.length) continue;
     try {
-      const o = state.session.overlay(t.name, channel, kind, width, height);
-      const layer = await doc.createPixelLayer({ name: `${GUIDE_PREFIX} ${label} (não é salvo)` });
+      const o = state.session.overlay(tex.name, channel, kind, width, height);
+      const layer = await doc.createPixelLayer({ name: guideName(label) });
       await putLayerPixels(doc, layer, o.rgba, width, height);
       layer.visible = false;
       try { layer.allLocked = true; } catch {}
     } catch (e) { console.warn('overlay', e); }
   }
   for (const g of guides) {
-    const layer = await doc.createPixelLayer({ name: `${GUIDE_PREFIX} ${g.channel} (não é salvo)`, opacity: 90 });
+    const layer = await doc.createPixelLayer({ name: guideName(g.channel), opacity: 90 });
     await putLayerPixels(doc, layer, g.rgba, width, height);
-    layer.visible = g.channel === t.recommendedChannel;
+    layer.visible = g.channel === tex.recommendedChannel;
     try { layer.allLocked = true; } catch {}
   }
   try { paint.selected = true; } catch {}
 }
 
-async function drawGuides(name, t, width, height) {
+async function drawGuides(name, tex, width, height) {
   const guides = [];
-  for (const u of t.uvs) {
-    progress(0.2 + 0.2 * guides.length, `Desenhando guia UV${u.channel}`);
+  for (const u of tex.uvs) {
+    progress(0.2 + 0.2 * guides.length, t('Drawing the UV{0} guide', u.channel));
     await sleep(0);
     guides.push({ channel: u.channel, ...state.session.guide(name, u.channel, width, height) });
   }
@@ -486,86 +495,86 @@ async function drawGuides(name, t, width, height) {
 }
 
 async function openTexture(name) {
-  const t = state.session.textures().find(x => x.name === name);
-  if (state.kind === 'obj') return openImageTexture(t);
-  await run(`Abrindo ${name}`, async () => {
+  const tex = state.session.textures().find(x => x.name === name);
+  if (state.kind === 'obj') return openImageTexture(tex);
+  await run(t('Opening {0}', name), async () => {
     const { width, height } = canvasSize(name);
-    progress(0.1, 'Lendo pixels');
+    progress(0.1, t('Reading pixels'));
     await sleep(0);
     const px = state.session.pixels(name);
     const base = px ? engine.resize(px.rgba, px.width, px.height, width, height) : null;
-    const guides = await drawGuides(name, t, width, height);
+    const guides = await drawGuides(name, tex, width, height);
     let docId = null;
     await core.executeAsModal(async () => {
-      progress(0.6, 'Criando documento');
+      progress(0.6, t('Creating the document'));
       const doc = await newDocument(`${name} (RPForge)`, width, height);
       const original = doc.layers[0];
-      original.name = 'Textura original';
+      original.name = t('Original texture');
       if (base) await putLayerPixels(doc, original, base, width, height);
-      progress(0.75, 'Criando camadas');
-      await addWorkLayers(doc, t, width, height, guides);
+      progress(0.75, t('Creating layers'));
+      await addWorkLayers(doc, tex, width, height, guides);
       docId = doc.id;
-    }, { commandName: 'Abrir textura (RPForge)' });
+    }, { commandName: t('Open texture (RPForge)') });
     // Save target: the .ytd the texture came from, or the first one for new textures.
-    if (t.origin === 'embedded' && state.model) {
+    if (tex.origin === 'embedded' && state.model) {
       await setLink(docId, {
         kind: 'model', modelKind: state.kind, texture: name, path: state.model.nativePath, token: await tokenFor(state.model), file: state.model.name,
-        editable: true, origin: 'embedded', guideChannel: t.recommendedChannel, size: `${t.width}×${t.height}`,
+        editable: true, origin: 'embedded', guideChannel: tex.recommendedChannel, size: `${tex.width}×${tex.height}`,
       });
-      finishOpen(t, width, height, guides, !base);
+      finishOpen(tex, width, height, guides, !base);
       if (preview) preview.linkChanged();
       return;
     }
-    const target = state.dicts.find(d => d.name === t.source) || state.dicts[0] || null;
+    const target = state.dicts.find(d => d.name === tex.source) || state.dicts[0] || null;
     await setLink(docId, {
       kind: 'ytd', texture: name, path: target ? target.nativePath : null, token: await tokenFor(target), file: target ? target.name : null,
-      editable: t.editable && !!target, origin: t.origin, guideChannel: t.recommendedChannel,
+      editable: tex.editable && !!target, origin: tex.origin, guideChannel: tex.recommendedChannel,
     });
-    finishOpen(t, width, height, guides, !base);
+    finishOpen(tex, width, height, guides, !base);
     if (preview) preview.linkChanged();
   });
 }
 
-async function openImageTexture(t) {
-  const image = state.images.get(t.name.toLowerCase()) || null;
-  await run(`Abrindo ${t.name}`, async () => {
+async function openImageTexture(tex) {
+  const image = state.images.get(tex.name.toLowerCase()) || null;
+  await run(t('Opening {0}', tex.name), async () => {
     let docId = null, width = 0, height = 0, guides = [];
     if (image && /\.(png|jpe?g)$/i.test(image.name)) {
       await core.executeAsModal(async () => {
-        progress(0.2, 'Abrindo a imagem');
+        progress(0.2, t('Opening the image'));
         const doc = await app.open(image);
         width = Math.round(Number(doc.width)); height = Math.round(Number(doc.height));
-        try { doc.layers[doc.layers.length - 1].name = 'Textura original'; } catch {}
-        guides = await drawGuides(t.name, t, width, height);
-        progress(0.75, 'Criando camadas');
-        await addWorkLayers(doc, t, width, height, guides);
+        try { doc.layers[doc.layers.length - 1].name = t('Original texture'); } catch {}
+        guides = await drawGuides(tex.name, tex, width, height);
+        progress(0.75, t('Creating layers'));
+        await addWorkLayers(doc, tex, width, height, guides);
         docId = doc.id;
-      }, { commandName: 'Abrir textura (RPForge)' });
+      }, { commandName: t('Open texture (RPForge)') });
     } else {
-      ({ width, height } = canvasSize(t.name));
-      guides = await drawGuides(t.name, t, width, height);
+      ({ width, height } = canvasSize(tex.name));
+      guides = await drawGuides(tex.name, tex, width, height);
       await core.executeAsModal(async () => {
-        const doc = await newDocument(`${t.name} (RPForge)`, width, height);
-        doc.layers[0].name = 'Fundo';
-        await addWorkLayers(doc, t, width, height, guides);
+        const doc = await newDocument(`${tex.name} (RPForge)`, width, height);
+        doc.layers[0].name = t('Background');
+        await addWorkLayers(doc, tex, width, height, guides);
         docId = doc.id;
-      }, { commandName: 'Abrir textura (RPForge)' });
+      }, { commandName: t('Open texture (RPForge)') });
     }
     await setLink(docId, {
-      kind: 'image', texture: t.name, path: image ? image.nativePath : null, token: await tokenFor(image), file: image ? image.name : null,
+      kind: 'image', texture: tex.name, path: image ? image.nativePath : null, token: await tokenFor(image), file: image ? image.name : null,
       folder: state.model ? state.model.nativePath : null, editable: true, origin: image ? 'image' : 'new-image', guideChannel: 0,
     });
-    finishOpen(t, width, height, guides, !image);
+    finishOpen(tex, width, height, guides, !image);
     if (preview) preview.linkChanged();
   });
 }
 
-function finishOpen(t, width, height, guides, empty) {
+function finishOpen(tex, width, height, guides, empty) {
   const skipped = guides.reduce((n, g) => n + g.skipped, 0);
-  const notes = [`${t.name} aberta em ${width}×${height}.`];
-  if (t.livery) notes.push('O guia já está no layout da livery.');
-  if (skipped) notes.push(`${skipped} triângulos de material repetido ficaram fora do guia.`);
-  if (empty) notes.push('Não havia imagem para esta textura, então o documento começa em branco.');
+  const notes = [t('{0} opened at {1}×{2}.', tex.name, width, height)];
+  if (tex.livery) notes.push(t('The guide already follows the livery layout.'));
+  if (skipped) notes.push(t('{0} triangles of a repeated material were left out of the guide.', skipped));
+  if (empty) notes.push(t('This texture had no image. The document starts blank.'));
   message(notes.join(' '), 'ok');
 }
 
@@ -613,15 +622,15 @@ async function readComposite(doc) {
 
 async function backupOnce(entry, bytes) {
   if (!$('backup').checked || state.backedUp.has(entry.nativePath)) return null;
-  progress(0.9, 'Guardando cópia do original');
+  progress(0.9, t('Keeping a copy of the original'));
   let name = `${stem(entry.name)}.backup-${timestamp()}.${ext(entry.name)}`;
   try {
     const folder = await parentFolder(entry);
-    if (!folder) throw new Error('pasta indisponível');
+    if (!folder) throw new Error('folder unavailable');
     await writeBytes(await folder.createFile(name, { overwrite: false }), bytes);
   } catch {
     const backup = await fs.getFileForSaving(name, { types: [ext(entry.name)] });
-    if (!backup) throw new Error('Salvamento cancelado: a cópia do original não foi criada.');
+    if (!backup) throw new Error(t('Save cancelled: the copy of the original was not created.'));
     await writeBytes(backup, bytes); name = backup.name;
   }
   state.backedUp.add(entry.nativePath);
@@ -633,14 +642,14 @@ async function saveDocument(asCopy) {
   if (!doc || !link) return;
   if (link.kind === 'image') return saveImage(doc, link, asCopy);
   if (link.kind === 'model') return saveEmbedded(doc, link, asCopy);
-  await run('Salvando no YTD', async () => {
-    if (!link.editable) throw new Error(link.origin === 'embedded' ? 'Esta textura fica dentro do modelo. Por enquanto só texturas de um .ytd podem ser salvas.' : 'Abra o .ytd do modelo para poder salvar.');
+  await run(t('Saving to the YTD'), async () => {
+    if (!link.editable) throw new Error(link.origin === 'embedded' ? t('This texture is inside the model. Only textures in a .ytd can be saved here.') : t('Open the model\'s .ytd to be able to save.'));
     const entry = await entryFrom(link.path, link.token) || state.dicts.find(d => d.nativePath === link.path);
-    if (!entry) throw new Error('Não encontrei o .ytd deste documento. Abra o modelo de novo no painel.');
-    progress(0.05, 'Lendo o YTD');
+    if (!entry) throw new Error(t('Could not find the .ytd of this document. Open the model again in the panel.'));
+    progress(0.05, t('Reading the YTD'));
     const original = await readBytes(entry);
     let pixels;
-    await core.executeAsModal(async () => { pixels = await readComposite(doc); }, { commandName: 'Ler pixels (RPForge)' });
+    await core.executeAsModal(async () => { pixels = await readComposite(doc); }, { commandName: t('Read pixels (RPForge)') });
     let { rgba, width, height } = pixels;
     if (width % 4 || height % 4) {
       const nw = Math.max(4, Math.round(width / 4) * 4), nh = Math.max(4, Math.round(height / 4) * 4);
@@ -656,44 +665,44 @@ async function saveDocument(asCopy) {
       target = await fs.getFileForSaving(`${stem(entry.name)}.ytd`, { types: ['ytd'] });
       if (!target) return;
     } else backupName = await backupOnce(entry, original);
-    progress(0.95, 'Gravando');
+    progress(0.95, t('Writing'));
     await writeBytes(target, result.bytes);
     if (!asCopy) await refreshSession();
-    const notes = [`Salvo em ${target.name}: ${link.texture} ${width}×${height}, ${engine.FORMATS[result.format].label}.`];
-    if (result.added) notes.push('A textura foi adicionada ao arquivo.');
-    if (format === 'DXT1' && result.format !== 'DXT1') notes.push('Havia transparência parcial, então foi usado DXT5.');
-    if (backupName) notes.push(`Cópia do original: ${backupName}.`);
+    const notes = [t('Saved to {0}: {1} {2}×{3}, {4}.', target.name, link.texture, width, height, engine.FORMATS[result.format].label)];
+    if (result.added) notes.push(t('The texture was added to the file.'));
+    if (format === 'DXT1' && result.format !== 'DXT1') notes.push(t('There was partial transparency, so DXT5 was used.'));
+    if (backupName) notes.push(t('Copy of the original: {0}.', backupName));
     message(notes.join(' '), 'ok');
   });
 }
 
 // Texture inside the model file (.ydd/.ydr/.yft): written in place, same size and format.
 async function saveEmbedded(doc, link, asCopy) {
-  await run('Salvando no modelo', async () => {
+  await run(t('Saving to the model'), async () => {
     const entry = await entryFrom(link.path, link.token) || (state.model && state.model.nativePath === link.path ? state.model : null);
-    if (!entry) throw new Error('Não encontrei o arquivo do modelo. Abra-o de novo no painel.');
-    progress(0.05, 'Lendo o modelo');
+    if (!entry) throw new Error(t('Could not find the model file. Open it again in the panel.'));
+    progress(0.05, t('Reading the model'));
     const original = await readBytes(entry);
     let pixels;
-    await core.executeAsModal(async () => { pixels = await readComposite(doc); }, { commandName: 'Ler pixels (RPForge)' });
+    await core.executeAsModal(async () => { pixels = await readComposite(doc); }, { commandName: t('Read pixels (RPForge)') });
     const result = await engine.replaceEmbeddedTexture(original, link.modelKind, link.texture, pixels.rgba, pixels.width, pixels.height, { onProgress: (v, text) => progress(v * 0.85, text) });
     let target = entry, backupName = null;
     if (asCopy) {
       target = await fs.getFileForSaving(entry.name, { types: [ext(entry.name)] });
       if (!target) return;
     } else backupName = await backupOnce(entry, original);
-    progress(0.95, 'Gravando');
+    progress(0.95, t('Writing'));
     await writeBytes(target, result.bytes);
     if (!asCopy) await refreshSession();
-    const notes = [`Salvo em ${target.name}: ${link.texture} ${result.width}×${result.height}, ${engine.FORMATS[result.format].label}.`];
-    if (result.resized) notes.push('Texturas dentro do modelo mantêm o tamanho original, então a imagem foi ajustada.');
-    if (backupName) notes.push(`Cópia do original: ${backupName}.`);
+    const notes = [t('Saved to {0}: {1} {2}×{3}, {4}.', target.name, link.texture, result.width, result.height, engine.FORMATS[result.format].label)];
+    if (result.resized) notes.push(t('Textures inside the model keep their original size, so the image was resized.'));
+    if (backupName) notes.push(t('Copy of the original: {0}.', backupName));
     message(notes.join(' '), 'ok');
   });
 }
 
 async function saveImage(doc, link, asCopy) {
-  await run('Salvando a imagem', async () => {
+  await run(t('Saving the image'), async () => {
     let target = asCopy ? null : await entryFrom(link.path, link.token);
     if (target && !/\.(png|jpe?g)$/i.test(target.name)) target = null;
     if (!target) {
@@ -702,18 +711,18 @@ async function saveImage(doc, link, asCopy) {
     }
     let backupName = null;
     if (!asCopy && link.path && target.nativePath === link.path) backupName = await backupOnce(target, await readBytes(target));
-    progress(0.6, 'Gravando');
+    progress(0.6, t('Writing'));
     await core.executeAsModal(async () => {
-      const copy = await doc.duplicate(`${link.texture} (salvar)`);
+      const copy = await doc.duplicate(t('{0} (save)', link.texture));
       try {
         for (const layer of Array.from(copy.layers)) if (isGuide(layer)) { try { layer.allLocked = false; } catch {} await layer.delete(); }
         await copy.flatten();
         if (/\.jpe?g$/i.test(target.name)) await copy.saveAs.jpg(target, { quality: 12 }, true);
         else await copy.saveAs.png(target, { compression: 6 }, true);
       } finally { await copy.closeWithoutSaving(); app.activeDocument = doc; }
-    }, { commandName: 'Salvar textura (RPForge)' });
+    }, { commandName: t('Save texture (RPForge)') });
     if (!link.path) await setLink(doc.id, { ...link, path: target.nativePath, token: await tokenFor(target), file: target.name, origin: 'image' });
-    message(`Salvo em ${target.name}.` + (backupName ? ` Cópia do original: ${backupName}.` : ''), 'ok');
+    message(t('Saved to {0}.', target.name) + (backupName ? ' ' + t('Copy of the original: {0}.', backupName) : ''), 'ok');
   });
 }
 
@@ -734,9 +743,9 @@ async function toggleGuide() {
   const doc = app.activeDocument;
   if (!doc) return;
   const guides = Array.from(doc.layers).filter(isGuide);
-  if (!guides.length) return message('Este documento não tem guia de UV.', 'error');
+  if (!guides.length) return message(t('This document has no UV guide.'), 'error');
   const link = linkOf(doc);
-  const preferred = guides.find(g => link && g.name.startsWith(`${GUIDE_PREFIX} ${link.guideChannel} `)) || guides[0];
+  const preferred = guides.find(g => link && (guideRest(g.name) || '').startsWith(`${link.guideChannel} `)) || guides[0];
   await core.executeAsModal(async () => {
     const anyVisible = guides.some(g => g.visible);
     for (const g of guides) {
@@ -745,7 +754,7 @@ async function toggleGuide() {
       g.visible = !anyVisible && g === preferred;
       if (locked) g.allLocked = true;
     }
-  }, { commandName: 'Guia de UV (RPForge)' });
+  }, { commandName: t('UV guide (RPForge)') });
 }
 
 // ---------------------------------------------------------------- step 3 card
@@ -758,12 +767,12 @@ function refreshDocument() {
   show($('docCard'), !!link);
   show($('linkCard'), !!doc && !link && !!state.session && (state.dicts.length > 0 || state.kind === 'obj'));
   if (!link) return;
-  const where = link.file || (link.kind === 'image' ? 'uma imagem nova (você escolhe onde)' : '—');
-  const parts = [`Salva <b>${escapeHtml(link.texture)}</b> em <b>${escapeHtml(where)}</b>`];
-  if (!link.editable) parts.push('Abra o .ytd do modelo para poder salvar.');
-  if (link.kind === 'model') parts.push(`Fica dentro do modelo: salva no mesmo tamanho (${escapeHtml(link.size || '')}) e formato.`);
+  const where = link.file || (link.kind === 'image' ? t('a new image') : t('not open'));
+  const parts = [t('Saves <b>{0}</b> to <b>{1}</b>', escapeHtml(link.texture), escapeHtml(where))];
+  if (!link.editable) parts.push(escapeHtml(t('Open the model\'s .ytd to be able to save.')));
+  if (link.kind === 'model') parts.push(escapeHtml(t('Saved inside the model, at the same size ({0}) and format.', link.size || '')));
   $('docInfo').innerHTML = parts.join('<br/>');
-  $('saveBtn').textContent = link.kind === 'image' ? 'Salvar imagem' : link.kind === 'model' ? 'Salvar no modelo' : 'Salvar no YTD';
+  $('saveBtn').textContent = link.kind === 'image' ? t('Save image') : link.kind === 'model' ? t('Save to model') : t('Save to YTD');
   $('saveBtn').disabled = !link.editable || state.busy;
   $('saveCopyBtn').disabled = !link.editable || state.busy;
 }
@@ -782,16 +791,16 @@ function renderLinkTargets() {
 async function linkActive() {
   const doc = app.activeDocument, name = $('linkTarget').value;
   if (!doc || !name || !state.session) return;
-  const t = state.session.textures().find(x => x.name === name);
+  const tex = state.session.textures().find(x => x.name === name);
   if (state.kind === 'obj') {
     const image = state.images.get(name.toLowerCase()) || null;
     await setLink(doc.id, { kind: 'image', texture: name, path: image ? image.nativePath : null, token: await tokenFor(image), file: image ? image.name : null, editable: true, origin: 'image', guideChannel: 0 });
   } else {
-    const target = state.dicts.find(d => d.name === t.source) || state.dicts[0];
-    await setLink(doc.id, { kind: 'ytd', texture: name, path: target.nativePath, token: await tokenFor(target), file: target.name, editable: true, origin: t.origin, guideChannel: t.recommendedChannel });
+    const target = state.dicts.find(d => d.name === tex.source) || state.dicts[0];
+    await setLink(doc.id, { kind: 'ytd', texture: name, path: target.nativePath, token: await tokenFor(target), file: target.name, editable: true, origin: tex.origin, guideChannel: tex.recommendedChannel });
   }
   refreshDocument();
-  message(`Documento ligado a ${name}. Agora é só salvar.`, 'ok');
+  message(t('Document linked to {0}.', name), 'ok');
 }
 
 // ---------------------------------------------------------------- 3D preview
@@ -817,7 +826,7 @@ async function readDocumentTexture(maxSize) {
   const read = async opts => {
     const get = () => imaging.getPixels({ documentID: doc.id, componentSize: 8, applyAlpha: false, colorSpace: 'RGB', colorProfile: PROFILE, targetSize: { width: tw, height: th }, ...opts });
     try { return await get(); }
-    catch { let r; await core.executeAsModal(async () => { r = await get(); }, { commandName: 'Prévia 3D (RPForge)' }); return r; }
+    catch { let r; await core.executeAsModal(async () => { r = await get(); }, { commandName: t('3D preview (RPForge)') }); return r; }
   };
   const blit = async (res, opacity) => {
     const img = res.imageData;
@@ -851,7 +860,7 @@ async function readDocumentTexture(maxSize) {
     await core.executeAsModal(async ctx => {
       const host = ctx && ctx.hostControl;
       if (!host || typeof host.suspendHistory !== 'function') return;
-      const suspension = await host.suspendHistory({ documentID: doc.id, name: 'Prévia 3D (RPForge)' });
+      const suspension = await host.suspendHistory({ documentID: doc.id, name: t('3D preview (RPForge)') });
       try {
         for (const g of guides) g.visible = false;
         composite = await imaging.getPixels({ documentID: doc.id, componentSize: 8, applyAlpha: false, colorSpace: 'RGB', colorProfile: PROFILE, targetSize: { width: tw, height: th } });
@@ -859,7 +868,7 @@ async function readDocumentTexture(maxSize) {
         for (const g of guides) { try { g.visible = true; } catch {} }
         await host.resumeHistory(suspension, false);
       }
-    }, { commandName: 'Prévia 3D (RPForge)' });
+    }, { commandName: t('3D preview (RPForge)') });
   } catch { composite = null; }
   if (composite) await blit(composite, 1);
   else for (const layer of paintLayers(doc.layers)) { // fallback: plain pixel layers only
@@ -871,21 +880,21 @@ async function readDocumentTexture(maxSize) {
 let markedGuides = [];
 async function markOnTexture(u, v) {
   const doc = activeDocument();
-  if (!doc) throw new Error('nenhum documento aberto');
+  if (!doc) throw new Error(t('no document open'));
   const x = Math.round(u * Number(doc.width)), y = Math.round(v * Number(doc.height));
   await core.executeAsModal(async () => {
     for (const g of markedGuides) { try { await g.delete(); } catch {} }
     markedGuides = [];
     const V = enumValue('Direction', 'VERTICAL', 'vertical'), Hz = enumValue('Direction', 'HORIZONTAL', 'horizontal');
     markedGuides.push(await doc.guides.add(V, x), await doc.guides.add(Hz, y));
-  }, { commandName: 'Marcar ponto (RPForge)' });
+  }, { commandName: t('Mark point (RPForge)') });
   return `x ${x}, y ${y} px`;
 }
 
 let preview = null;
 try {
   preview = require('./preview.js').createPreview({
-    $, imaging,
+    $, imaging, t, tr, numberLocale,
     getSession: () => state.session,
     getActiveLink: () => linkOf(activeDocument()),
     historyKey: () => { const d = activeDocument(); if (!d) return null; const h = d.activeHistoryState; return `${d.id}:${h && h.id !== undefined ? h.id : (d.historyStates ? d.historyStates.length : Date.now())}`; },
@@ -893,14 +902,18 @@ try {
     // Photoshop tells the panel when the preview is shown or hidden; closed preview = no work.
     isVisible: () => { const v = typeof window !== 'undefined' ? window.rpforgeVisible : null; return !v || v.panelPreview === true; },
   });
-} catch (e) { console.warn('preview', e); if (window.rpforgeReport) window.rpforgeReport('prévia 3D não carregou: ' + e.message); }
+} catch (e) { console.warn('preview', e); if (window.rpforgeReport) window.rpforgeReport(t('3D preview failed to load: {0}', e.message)); }
 
 async function showPreviewPanel() {
   try {
-    const plugin = uxp.pluginManager && Array.from(uxp.pluginManager.plugins).find(p => p.id === 'dev.rpforge.texturestudio');
+    // Needs requiredPermissions.ipc.enablePluginCommunication in the manifest. The Marketplace build
+    // has the ID Adobe's portal generated, so the ID comes from the running plugin.
+    const plugins = uxp.pluginManager ? Array.from(uxp.pluginManager.plugins) : [];
+    const own = window.rpforgePluginId || (uxp.entrypoints && uxp.entrypoints._pluginInfo && uxp.entrypoints._pluginInfo.id);
+    const plugin = plugins.find(p => p.id === own) || plugins.find(p => p.id === 'dev.rpforge.texturestudio' || p.name === 'RPForge Texture Studio');
     if (plugin && plugin.showPanel) { await plugin.showPanel('texturestudio.preview'); if (preview) preview.redraw(); return; }
-  } catch {}
-  message('Abra pelo menu Plugins › RPForge Texture Studio › Prévia 3D. Depois arraste a aba para o outro monitor.', 'ok');
+  } catch (e) { console.warn('showPanel', e); }
+  message(t('Open it from Plugins › RPForge Texture Studio › 3D Preview.'), 'ok');
 }
 
 // ---------------------------------------------------------------- wiring
@@ -918,7 +931,7 @@ $('previewBtn').addEventListener('click', safe(showPreviewPanel));
 $('previewBtn2').addEventListener('click', safe(showPreviewPanel));
 for (const id of ['ovShaded', 'ovNormal']) $(id).addEventListener('change', () => savePrefs({ [id]: $(id).checked }));
 $('linkBtn').addEventListener('click', safe(linkActive));
-$('optionsToggle').addEventListener('click', () => { const open = $('options').classList.contains('hidden'); show($('options'), open); $('optionsToggle').textContent = (open ? '▾' : '▸') + ' Opções'; });
+$('optionsToggle').addEventListener('click', () => { const open = $('options').classList.contains('hidden'); show($('options'), open); $('optionsSign').textContent = open ? '−' : '+'; $('optionsToggle').classList.toggle('open', open); });
 $('workSize').addEventListener('change', () => savePrefs({ workSize: $('workSize').value }));
 $('backup').addEventListener('change', () => savePrefs({ backup: $('backup').checked }));
 

@@ -2,6 +2,7 @@
 // Renders the open model with RPForge's own software renderer and keeps the texture being
 // painted in sync with the Photoshop document.
 const { render } = require('./engine/index.js');
+const { t, tr, numberLocale } = require('./i18n.js');
 
 const DEFAULT_CAMERA = { yaw: 3.79, pitch: 0.22, distance: 2.55, panX: 0, panY: 0 };
 const MAX_PIXELS = 1280 * 900;   // still frames
@@ -15,7 +16,8 @@ function createPreview(deps) {
   const view = { scene: null, sessionRef: null, cam: { ...DEFAULT_CAMERA }, frame: null, pending: null, busy: false, mode: 'full', picking: false, highlight: false, lastHistory: null, liveName: null };
 
   const say = text => { status.textContent = text; };
-  const defaultHint = 'Arraste para girar · Shift + arraste move · roda aproxima · clique duplo centraliza';
+  const defaultHint = t('Drag to rotate. Shift + drag to pan. Scroll to zoom.');
+  say(defaultHint);
 
   // ---------------- scene ----------------
   function ensureScene() {
@@ -23,14 +25,14 @@ function createPreview(deps) {
     if (session !== view.sessionRef) {
       view.sessionRef = session; view.scene = null; view.liveName = null; view.lastHistory = null;
       if (session && session.hasModel) {
-        try { view.scene = session.scene(); } catch (e) { say('Não foi possível montar o 3D: ' + e.message); }
+        try { view.scene = session.scene(); } catch (e) { say(t('Could not build the 3D view: {0}', tr(e.message))); }
         view.cam = { ...DEFAULT_CAMERA };
       }
     }
     const has = !!(view.scene && view.scene.meshes.length);
     empty.classList.toggle('hidden', has);
     img.classList.toggle('hidden', !has);
-    $('pvTitle').textContent = has && session.model ? 'Prévia 3D' : 'Prévia 3D';
+    $('pvTitle').textContent = t('3D Preview');
     return has;
   }
 
@@ -70,8 +72,8 @@ function createPreview(deps) {
       if (mode === 'full' && frame.time * 4 < 100) view.fineTimer = setTimeout(() => schedule('fine'), 400);
       img.src = await toImageUrl(shown.rgba, shown.w, shown.h);
       img.style.width = cssW + 'px'; img.style.height = cssH + 'px';
-      if (!view.picking && status.dataset.sticky !== '1') say(`${defaultHint} · ${view.scene.triangles.toLocaleString('pt-BR')} triângulos · ${frame.time} ms`);
-    } catch (e) { say('Erro na prévia: ' + e.message); }
+      if (!view.picking && status.dataset.sticky !== '1') say(defaultHint);
+    } catch (e) { say(t('Preview error: {0}', tr(e.message))); }
     finally { view.busy = false; }
   }
 
@@ -114,7 +116,7 @@ function createPreview(deps) {
       view.scene.setTexture(link.texture, tex);
       view.lastHistory = history; view.liveName = link.texture;
       schedule('full');
-    } catch (e) { say('Não foi possível ler o documento: ' + e.message); }
+    } catch (e) { say(t('Could not read the document: {0}', tr(e.message))); }
   }
 
   // ---------------- interaction ----------------
@@ -165,21 +167,21 @@ function createPreview(deps) {
   async function pickAt(p) {
     if (!view.frame) return;
     const hit = render.pick(view.scene, view.frame, p.x * view.frame.scaleX, p.y * view.frame.scaleY);
-    if (!hit) { say('Nada nesse ponto. Clique em cima do modelo.'); return; }
+    if (!hit) { say(t('Nothing there. Click on the model.')); return; }
     const link = deps.getActiveLink();
     const uses = name => link && name && name.toLowerCase() === link.texture.toLowerCase();
     let uv = null;
     if (uses(hit.livery) && hit.uv1) uv = hit.uv1; else if (uses(hit.diffuse) && hit.uv0) uv = hit.uv0;
     if (!uv) {
       const other = hit.diffuse || hit.livery;
-      say(other ? `Essa parte usa a textura “${other}”. Abra-a no painel Texture Studio para marcar o ponto.` : 'Essa parte não usa a textura aberta.');
+      say(other ? t('That part uses the texture “{0}”. Open it in the Texture Studio panel to mark the point.', other) : t('That part does not use the open texture.'));
       return;
     }
     const u = uv[0] - Math.floor(uv[0]), v = uv[1] - Math.floor(uv[1]);
     try {
       const where = await deps.markOnTexture(u, v);
-      say(`Ponto marcado na textura: ${where}. As guias do Photoshop mostram o lugar.`);
-    } catch (e) { say(`Ponto na textura: ${(u * 100).toFixed(1)}% × ${(v * 100).toFixed(1)}% (${e.message})`); }
+      say(t('Point marked on the texture at {0}.', where));
+    } catch (e) { say(t('Point on the texture: {0}% × {1}% ({2})', (u * 100).toFixed(1), (v * 100).toFixed(1), tr(e.message))); }
   }
 
   // ---------------- toolbar ----------------
@@ -192,7 +194,7 @@ function createPreview(deps) {
   $('pvPick').addEventListener('click', () => {
     view.picking = !view.picking;
     $('pvPick').classList.toggle('on', view.picking);
-    say(view.picking ? 'Clique em um ponto do modelo para marcar o lugar na textura.' : defaultHint);
+    say(view.picking ? t('Click a point on the model to mark the spot on the texture.') : defaultHint);
   });
   $('pvFocus').addEventListener('click', () => { view.highlight = !view.highlight; $('pvFocus').classList.toggle('on', view.highlight); schedule('full'); });
 

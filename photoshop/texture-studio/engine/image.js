@@ -35,7 +35,7 @@ function idct(block, out) {
 }
 
 function decodeJpeg(bytes) {
-  ensure(bytes[0] === 0xff && bytes[1] === 0xd8, 'Imagem JPEG inválida.');
+  ensure(bytes[0] === 0xff && bytes[1] === 0xd8, 'Invalid JPEG image.');
   const qt = [], dcT = [], acT = [];
   let frame = null, restart = 0, pos = 2, adobe = null;
   const u16be = o => (bytes[o] << 8) | bytes[o + 1];
@@ -57,11 +57,11 @@ function decodeJpeg(bytes) {
       for (let i = 0; i < bytes[seg + 5]; i++) { const o = seg + 6 + i * 3; comps.push({ id: bytes[o], h: bytes[o + 1] >> 4, v: bytes[o + 1] & 15, tq: bytes[o + 2] }); }
       frame = { height: u16be(seg + 1), width: u16be(seg + 3), comps };
     } else if (marker === 0xc2 || marker === 0xc3 || (marker >= 0xc5 && marker <= 0xcf && marker !== 0xc8 && marker !== 0xcc)) {
-      throw new EngineError('JPEG progressivo ou sem perdas ainda não é suportado na prévia. Salve como JPEG padrão ou PNG.', 'jpeg');
+      throw new EngineError('Progressive or lossless JPEG is not supported in the preview yet. Save as a baseline JPEG or PNG.', 'jpeg');
     } else if (marker === 0xdd) restart = u16be(seg);
     else if (marker === 0xee && String.fromCharCode(...bytes.subarray(seg, seg + 5)) === 'Adobe') adobe = bytes[seg + 11];
     else if (marker === 0xda) {
-      ensure(frame, 'JPEG sem cabeçalho de quadro.');
+      ensure(frame, 'JPEG without a frame header.');
       const n = bytes[seg], scomps = [];
       for (let i = 0; i < n; i++) { const c = frame.comps.find(x => x.id === bytes[seg + 1 + i * 2]); c.dc = dcT[bytes[seg + 2 + i * 2] >> 4]; c.ac = acT[bytes[seg + 2 + i * 2] & 15]; scomps.push(c); }
       pos = decodeScan(bytes, end, frame, scomps, qt, restart);
@@ -69,7 +69,7 @@ function decodeJpeg(bytes) {
     }
     pos = end;
   }
-  ensure(frame && frame.comps[0].pixels, 'JPEG sem dados de imagem.');
+  ensure(frame && frame.comps[0].pixels, 'JPEG without image data.');
   return toRgba(frame, adobe);
 }
 
@@ -153,11 +153,11 @@ function toRgba(frame, adobe) {
 
 // ---------------- TGA ----------------
 function decodeTga(bytes) {
-  ensure(bytes.length > 18, 'Imagem TGA inválida.');
+  ensure(bytes.length > 18, 'Invalid TGA image.');
   const idLen = bytes[0], cmapType = bytes[1], type = bytes[2];
   const w = bytes[12] | (bytes[13] << 8), h = bytes[14] | (bytes[15] << 8), bpp = bytes[16], desc = bytes[17];
-  ensure(cmapType === 0 && [2, 3, 10, 11].includes(type) && w && h, 'Tipo de TGA não suportado (use 24/32 bits ou tons de cinza).');
-  const ch = bpp >> 3; ensure([1, 3, 4].includes(ch), 'Profundidade de TGA não suportada.');
+  ensure(cmapType === 0 && [2, 3, 10, 11].includes(type) && w && h, 'Unsupported TGA type (use 24/32-bit or grayscale).');
+  const ch = bpp >> 3; ensure([1, 3, 4].includes(ch), 'Unsupported TGA bit depth.');
   let p = 18 + idLen;
   const px = new Uint8Array(w * h * ch);
   if (type === 2 || type === 3) px.set(bytes.subarray(p, p + px.length));
@@ -180,7 +180,7 @@ function decodeImage(bytes, extension = '') {
   if (bytes[0] === 0x89 && bytes[1] === 0x50) return decodePng(bytes);
   if (bytes[0] === 0xff && bytes[1] === 0xd8) return decodeJpeg(bytes);
   if (/tga$/i.test(extension)) return decodeTga(bytes);
-  throw new EngineError('Formato de imagem não suportado (use PNG, JPG ou TGA).', 'image');
+  throw new EngineError('Unsupported image format (use PNG, JPG or TGA).', 'image');
 }
 
 module.exports = { decodeImage, decodeJpeg, decodeTga };

@@ -31,7 +31,7 @@ class El {
 }
 function buildDom(html) {
   const byId = new Map(), every = [], body = new El('body');
-  const re = /<(input|select|button|div|span|p|section|footer|header|label|b|h2|option|img)\b([^>]*)>/g;
+  const re = /<(sp-checkbox|sp-textfield|input|select|button|div|span|p|section|footer|header|label|b|h2|option|img)\b([^>]*)>/g;
   let m; const selects = [];
   while ((m = re.exec(html))) {
     const attrs = {}; m[2].replace(/([\w-]+)(?:="([^"]*)")?/g, (_, k, v) => { attrs[k] = v === undefined ? '' : v; });
@@ -44,6 +44,7 @@ function buildDom(html) {
   return {
     body, getElementById: id => byId.get(id) || null, createElement: tag => new El(tag),
     querySelectorAll: sel => (sel.startsWith('.') ? every.filter(e => e.classList.contains(sel.slice(1))) : []),
+    all: every,
   };
 }
 
@@ -178,10 +179,12 @@ function makeUxp(queue) {
     getEntryForPersistentToken: async t => entry(t.slice(6)),
     getEntryWithUrl: async u => { const p = decodeURI(u.replace(/^file:\/*/, process.platform === 'win32' ? '' : '/')); if (!fs.existsSync(p)) throw new Error('no entry ' + u); return fs.statSync(p).isDirectory() ? folder(p) : entry(p); },
   };
-  return { storage: { localFileSystem: lfs, formats: { binary: 'binary', utf8: 'utf8' } } };
+  return { storage: { localFileSystem: lfs, formats: { binary: 'binary', utf8: 'utf8' } }, host: { uiLocale: 'pt_BR' } };
 }
 
-function loadPanel() {
+// locale: Photoshop UI language the panel sees (default pt_BR, as the existing assertions expect).
+function loadPanel({ locale = 'pt_BR' } = {}) {
+  require(path.join(PANEL, 'i18n.js')).setLocale(locale);
   const html = fs.readFileSync(path.join(PANEL, 'index.html'), 'utf8');
   const document = buildDom(html), log = [], queue = { open: [], save: [] };
   const photoshop = makePhotoshop(log), uxp = makeUxp(queue);

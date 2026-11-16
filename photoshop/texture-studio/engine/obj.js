@@ -8,7 +8,7 @@ const MAX_TRIANGLES = 4000000;
 
 // Returns { usage, meshes, materials, mtllibs, triangles, missingUv, up }.
 function readObj(text) {
-  ensure(typeof text === 'string' && text.length, 'Arquivo OBJ vazio.');
+  ensure(typeof text === 'string' && text.length, 'Empty OBJ file.');
   const vt = [0, 0], vp = [0, 0, 0], vn = [0, 0, 0]; // 1-based
   const groups = new Map(); // material -> { uv: [], pos: [], nrm: [] } per corner
   const mtllibs = [];
@@ -39,12 +39,12 @@ function readObj(text) {
           g.pos.push(vp[pi * 3], vp[pi * 3 + 1], vp[pi * 3 + 2]);
           if (ni === null) { g.hasN = false; g.nrm.push(0, 0, 0); } else g.nrm.push(vn[ni * 3], vn[ni * 3 + 1], vn[ni * 3 + 2]);
         }
-        if (++tris > MAX_TRIANGLES) throw new EngineError('Modelo OBJ grande demais (mais de 4 milhões de triângulos).');
+        if (++tris > MAX_TRIANGLES) throw new EngineError('OBJ model too large (more than 4 million triangles).');
       }
     } else if (line.startsWith('usemtl')) current = line.slice(6).trim() || 'default';
     else if (line.startsWith('mtllib')) { const f = line.slice(6).trim(); if (f) mtllibs.push(f); }
   }
-  ensure(tris > 0, missingUv ? 'O OBJ não tem coordenadas de textura (UV). Faça o UV no seu programa 3D antes.' : 'O OBJ não tem faces.');
+  ensure(tris > 0, missingUv ? 'The OBJ has no texture coordinates (UV). Unwrap it in your 3D software first.' : 'The OBJ has no faces.');
   const usage = new Map(), meshes = [];
   for (const [name, g] of groups) {
     if (!g.uv.length) continue;

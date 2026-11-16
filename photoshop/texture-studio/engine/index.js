@@ -37,7 +37,7 @@ class ModelSession {
   // dictionaries: [{ name, bytes }] (.ytd files); the first one is the default target for new textures.
   // parsed: the result of an earlier parse of the same model (skips reading it twice).
   constructor({ model = null, dictionaries = [], parsed = null } = {}) {
-    ensure(model || dictionaries.length, 'Abra um modelo ou um YTD.');
+    ensure(model || dictionaries.length, 'Open a model or a YTD.');
     this.kind = model ? model.kind : 'ytd';
     this.dicts = dictionaries.map(d => ({ name: d.name, dict: ytdCodec.readYtd(d.bytes) }));
     this.dict = this.dicts.length ? this.dicts[0].dict : null; // compatibility
@@ -91,7 +91,7 @@ class ModelSession {
 
   entry(name) {
     const e = this.entries.get(String(name).toLowerCase());
-    ensure(e, `Textura não encontrada: ${name}`);
+    ensure(e, `Texture not found: ${name}`);
     return e;
   }
 
@@ -141,14 +141,14 @@ class ModelSession {
   overlay(name, channel, kind, width, height) {
     const ids = new Set(this.entry(name).uses.filter(u => u.channel === channel).map(u => u.geometry));
     const meshes = (this.model && this.model.meshes || []).filter(m => ids.has(m.id) && m.uv[channel]);
-    ensure(meshes.length, 'Não há geometria para esta textura.');
+    ensure(meshes.length, 'There is no geometry for this texture.');
     return drawOverlay(meshes, channel, kind, width, height, this.model.up || 'z');
   }
 
   guide(name, channel, width, height) {
     const uses = this.entry(name).uses.filter(u => u.channel === channel);
-    ensure(uses.length, 'Esta textura não tem UV nesse canal.');
-    ensure(width <= MAX_GUIDE && height <= MAX_GUIDE, 'Guia grande demais.');
+    ensure(uses.length, 'This texture has no UV in that channel.');
+    ensure(width <= MAX_GUIDE && height <= MAX_GUIDE, 'Guide too large.');
     return drawGuide(uses, width, height);
   }
 }
@@ -183,27 +183,27 @@ const OUTPUT_FORMATS = ['DXT1', 'DXT5', 'BC7', 'A8R8G8B8'];
 async function replaceTexture(ytdBytes, name, rgba, width, height, options = {}) {
   const progress = options.onProgress || (() => {});
   const dict = ytdCodec.readYtd(ytdBytes);
-  ensure(rgba && rgba.length === width * height * 4, 'Imagem inválida.');
+  ensure(rgba && rgba.length === width * height * 4, 'Invalid image.');
   const index = dict.textures.findIndex(t => t.name.toLowerCase() === String(name).toLowerCase());
   const base = index >= 0 ? dict.textures[index] : dict.textures[0];
-  ensure(base, 'O YTD não tem nenhuma textura para servir de modelo.');
+  ensure(base, 'The YTD has no texture to use as a template.');
   let format = options.format && options.format !== 'keep' ? options.format : (index >= 0 ? base.format : 'DXT5');
-  ensure(bc.FORMATS[format], `Formato desconhecido: ${format}`);
+  ensure(bc.FORMATS[format], `Unknown format: ${format}`);
   if (format === 'DXT1' && hasTranslucency(rgba)) format = 'DXT5'; // DXT1 keeps only on/off alpha
-  progress(0.02, 'Comprimindo');
+  progress(0.02, 'Compressing');
   await tick();
   const texture = await ytdCodec.buildTexture({ name: index >= 0 ? base.name : name, struct: base.struct.slice() }, rgba, width, height, format,
-    async f => { progress(0.05 + f * 0.75, 'Comprimindo'); await tick(); });
+    async f => { progress(0.05 + f * 0.75, 'Compressing'); await tick(); });
   if (index >= 0) dict.textures[index] = texture; else dict.textures.push(texture);
-  progress(0.85, 'Montando o YTD');
+  progress(0.85, 'Building the YTD');
   await tick();
   const out = ytdCodec.writeYtd(dict);
-  progress(0.95, 'Conferindo');
+  progress(0.95, 'Checking');
   await tick();
   const check = ytdCodec.readYtd(out);
   const written = check.textures.find(t => t.name.toLowerCase() === texture.name.toLowerCase());
-  ensure(written && written.width === width && written.height === height && check.textures.length === dict.textures.length, 'A verificação do YTD gerado falhou.');
-  progress(1, 'Pronto');
+  ensure(written && written.width === width && written.height === height && check.textures.length === dict.textures.length, 'The check of the generated YTD failed.');
+  progress(1, 'Done');
   return { bytes: out, format, levels: texture.levels, added: index < 0, textures: check.textures.length };
 }
 
@@ -215,9 +215,9 @@ function hasTranslucency(rgba) {
 // Saves pixels into a texture embedded in a GTA model (.yft/.ydr/.ydd), resized to its original size.
 async function replaceEmbeddedTexture(modelBytes, kind, name, rgba, width, height, options = {}) {
   const probe = yftCodec.readModel(modelBytes, kind).embedded.find(t => t.name.toLowerCase() === String(name).toLowerCase());
-  ensure(probe, `Textura embutida não encontrada: ${name}`);
+  ensure(probe, `Embedded texture not found: ${name}`);
   const px = width === probe.width && height === probe.height ? rgba : resize(rgba, width, height, probe.width, probe.height);
-  const result = await yftCodec.replaceEmbedded(modelBytes, kind, name, px, probe.width, probe.height, f => (options.onProgress || (() => {}))(0.1 + f * 0.8, 'Comprimindo'));
+  const result = await yftCodec.replaceEmbedded(modelBytes, kind, name, px, probe.width, probe.height, f => (options.onProgress || (() => {}))(0.1 + f * 0.8, 'Compressing'));
   return { ...result, width: probe.width, height: probe.height, resized: width !== probe.width || height !== probe.height };
 }
 
