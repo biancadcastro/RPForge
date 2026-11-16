@@ -1,11 +1,17 @@
 # Preparacao para SignPath Foundation
 
-Decisao da mantenedora: seguir pela SignPath para o projeto de codigo aberto.
-Estado: codigo e documentacao sincronizados no repositorio privado; sem candidatura enviada e sem garantia de aprovacao.
+Decisao da mantenedora: seguir pela SignPath para o projeto.
+Estado: candidatura enviada em 1 de novembro de 2026; avaliacao pendente, sem garantia de aprovacao
+(ver [Code signing policy](CODE_SIGNING_POLICY.md)). `signpath/project.json` permanece com
+`enabled: false`; os binarios e o MSIX locais usam certificado de teste.
+
+Atencao: a partir da 0.3.2 o codigo proprio passou a licenca proprietaria (`LICENSE`,
+`UNLICENSED` no `package.json`). A SignPath Foundation atende projetos de codigo aberto;
+revisar a elegibilidade com a SignPath antes de prosseguir.
 
 ## Ja disponivel
 
-- Codigo proprio sob GPLv3 (GPL-3.0-only) e repositorio Git com historico.
+- Repositorio Git com historico. O codigo proprio usava GPL-3.0-only ate a 0.3.1; desde a 0.3.2 e proprietario.
 - Documentacao do produto, testes do conversor e testes da janela.
 - Rascunho de [Code signing policy](CODE_SIGNING_POLICY.md) e descricao de [privacidade](PRIVACY.md).
 - [Compilacao verificavel preparada](SIGNPATH_BUILD.md), com toolchains fixadas por versao e SHA-256.
@@ -26,6 +32,7 @@ Estado: codigo e documentacao sincronizados no repositorio privado; sem candidat
 - Quando a mantenedora autorizar: tornar o codigo publico e disponibilizar uma versao
   inicial documentada. A avaliacao inclui a origem e a reputacao verificavel do projeto.
 - Revisar os requisitos vigentes e enviar a candidatura somente com autorizacao explicita.
+  (Concluido: candidatura enviada em 1 de novembro de 2026.)
 
 ## Depois da aprovacao
 

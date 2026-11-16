@@ -77,6 +77,7 @@ test('peds, weapons and audio receive their own metadata registrations', async t
 
 test('custom props without archetypes receive a binary YTYP registered in their resource', async t => {
   const header = Buffer.alloc(16); header.write('RSC7'); header.writeUInt32LE(165, 4);
+  header.writeUInt32LE(0xa8000000, 8); header.writeUInt32LE(0x50000000, 12); // one 512-byte system page, as real headers declare
   const raw = Buffer.alloc(512); raw.writeFloatLE(2, 44);
   for (const at of [48, 52, 56]) raw.writeFloatLE(-1, at);
   for (const at of [64, 68, 72]) raw.writeFloatLE(1, at);

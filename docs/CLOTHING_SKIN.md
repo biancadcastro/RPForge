@@ -1,6 +1,6 @@
 # Separar pele
 
-Ferramenta independente de Neon, disponível no app e no menu de contexto de arquivos YDD, pastas e fundo da pasta. Não usa Blender.
+Ferramenta independente de Neon, disponível no app e no menu de contexto de arquivos YDD, pastas e fundo da pasta. Não usa Blender. É uma ferramenta Pro: exige login e licença assinada com a capacidade `clothing.skin`.
 
 A análise sugere pele e tecido a partir de materiais e referências geométricas. A revisão 3D mostra todos os LODs disponíveis; laranja indica pele, azul roupa e roxo faces incertas. A sugestão precisa ser conferida. Geometria modificada pode exigir marcação manual. Clique para marcar faces; regiões incertas conectadas podem ser marcadas juntas. Há desfazer e restauração da sugestão.
 

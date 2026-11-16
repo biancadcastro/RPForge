@@ -2,7 +2,9 @@
 
 Disponível no app e no botão direito do YDD, sobre a pasta ou no fundo da pasta.
 As ações do Explorer usam `--neon` e `--neon-folder` e abrem uma janela compacta.
-Não consultam conta ou versão e não executam Blender.
+Não consultam versão e não executam Blender. A ferramenta é Pro: exige login e
+licença assinada com a capacidade `clothing.neon`; sem sessão, a janela compacta
+mostra o login integrado antes de retomar a peça.
 
 ## Uso e saída
 
@@ -51,7 +53,8 @@ médio e baixo também foram preservados. O teste verifica hashes dos originais,
 cópia exata do YTD, IDs distintos em conversões repetidas e cancelamento sem sobras.
 
 `desktop-web/scripts/check-neon.mjs` valida as duas peças reais pela janela
-compacta, ausência de confirmação de pele, conta não consultada e encerramento do worker.
+compacta, ausência de confirmação de pele e encerramento do worker, com acesso Pro
+simulado (`scripts/lib/test-pro-access.mjs`), sem API real.
 Os dados reais são copiados para diretórios temporários antes de chegar ao app
 ou ao motor. Os scripts aceitam saídas somente sob `output/` ou em diretório
 temporário e recusam redirecionamentos. O modo de teste do Electron recusa peças

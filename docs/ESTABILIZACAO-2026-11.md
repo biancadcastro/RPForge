@@ -2,7 +2,7 @@
 
 A interface canônica do desktop é `desktop-web` (Electron/Next). A implementação C# existente permanece para compatibilidade de infraestrutura e não deve receber uma segunda jornada de conta. Não remover infraestrutura legada sem verificar as referências do instalador e do Explorer.
 
-`globals.css` define base e tokens; `workspace.css` define o shell e controles comuns; `atelier.css` define a composição do editor e resultados; `alignment.css` contém ajustes de alinhamento. Novas telas devem reutilizar `OperationProgress`, `OperationResult` e os controles existentes. Não criar uma nova camada global para corrigir uma tela. A consolidação completa do CSS legado deve ser incremental, com capturas e testes de cada fluxo.
+`globals.css` define base e tokens; `workspace.css` define o shell e controles comuns; `atelier.css` define a composição do editor e resultados; os antigos ajustes de `alignment.css` foram incorporados a `workspace.css`. Novas telas devem reutilizar `OperationProgress`, `OperationResult` e os controles existentes. Não criar uma nova camada global para corrigir uma tela. A consolidação completa do CSS legado deve ser incremental, com capturas e testes de cada fluxo.
 
 ## Ordem de uma futura publicação
 

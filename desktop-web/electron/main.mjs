@@ -80,6 +80,8 @@ function desktopAccount() {
   return nativeAccount;
 }
 async function accountProfile(force = false) {
+  // A forced read always renews against the API; quick actions and tools must never ask for one.
+  if (force) profileRequests++;
   if (testMode) return typeof globalThis.__forgeTestProfile==='function'?globalThis.__forgeTestProfile():process.env.RPF_TEST_SIGNED_OUT==='1'?publicProfile(nativeAccount?.record?.profile):{ displayName: "Pessoa de teste", avatarUrl: null };
   const connected = await desktopAccount().profile();
   return connected;

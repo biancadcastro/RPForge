@@ -1,5 +1,9 @@
 # Desenvolvimento e validação da interface
 
+> Este documento descreve a interface WinForms legada. A interface atual em
+> Electron + Next.js e os comandos de desenvolvimento estão em
+> [DESKTOP_ARCHITECTURE.md](DESKTOP_ARCHITECTURE.md).
+
 ## Estrutura
 
 | Arquivo | Responsabilidade |
@@ -18,8 +22,8 @@ A aplicação mantém Windows Forms/.NET Framework e o contrato JSON do bridge N
 
 ```powershell
 npm test
-npm run desktop:build
-npm run desktop:test
+npm run desktop:legacy:build
+npm run desktop:legacy:test
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Test-DesktopVisual.ps1
 ```
 

@@ -1,7 +1,8 @@
 # Roupas para OBJ — primeira implementação
 
-Ferramenta de desenvolvimento, ainda fora do instalador público v1.0.0.
-Processamento local, sem Blender e sem envio de modelos ou texturas à API.
+Ferramenta Pro, incluída no instalador atual (1.0.1; motor em `engines\clothing`).
+Exige login e licença assinada com a capacidade `clothing.obj`. O processamento é
+local, sem Blender e sem envio de modelos ou texturas à API.
 
 ## Fluxo
 
@@ -23,7 +24,9 @@ A ação também fica disponível sobre uma pasta e no espaço vazio dentro dela
 Quando existe um único YDD diretamente na pasta, ele vem selecionado; se houver
 vários ou estiverem em subpastas, use o seletor de peça para escolher o arquivo.
 A ação existe no menu moderno do Windows 11 e no clássico. Abre uma janela
-compacta, sem login, consulta de versão ou navegação do app completo. O YDD vem
+compacta, sem consulta de versão nem navegação do app completo. Sem sessão
+conectada, a janela mostra primeiro o login integrado e depois retoma a peça. O
+menu só é exibido quando o cache local de acesso indica licença Pro válida. O YDD vem
 selecionado, com destino inicial na mesma pasta; nenhum arquivo é escrito antes
 da confirmação. Pode-se escolher outro destino.
 

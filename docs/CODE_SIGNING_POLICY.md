@@ -22,7 +22,7 @@ O caminho `Build-UnsignedBinaries.ps1` compila os binarios proprios a partir de 
 identificada, com ferramentas e dependencias fixadas, verificacoes e testes pertinentes.
 Produto, versao, empresa e nomes originais dos binarios sao gerados e conferidos juntos.
 O manifesto de origem e o SBOM acompanham os binarios sem assinatura.
-Arquivos de terceiros, como o Node.js, manterao suas licencas e assinaturas originais;
+Arquivos de terceiros, como o Node.js e o runtime Electron, manterao suas licencas e assinaturas originais;
 nao serao assinados como se fossem codigo proprio do RPForge.
 O workflow preparado e manual, usa runners GitHub e actions fixadas por SHA, exige
 opt-in, configuracao aprovada e ambiente com revisao humana para pedir assinatura.
@@ -30,8 +30,9 @@ Ele nao publica releases e nao produz instaladores.
 
 ## Privacidade e alteracoes do sistema
 
-Consulte [PRIVACY.md](PRIVACY.md). O conversor atual processa os arquivos localmente,
-sem telemetria ou envio de assets. A instalacao registra o comando do Explorer e o
+Consulte [PRIVACY.md](PRIVACY.md). O aplicativo processa os arquivos localmente,
+sem telemetria ou envio de assets. Somente as ferramentas Pro usam a API da conta
+para login e licenca. A instalacao registra o comando do Explorer e o
 desinstalador. A distribuicao final devera informar essas alteracoes e permitir remocao.
 A confianca manual no certificado de teste foi uma etapa autorizada de desenvolvimento;
 ela nao deve fazer parte da distribuicao publica.

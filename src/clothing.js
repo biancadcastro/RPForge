@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {publication,recoverPublications} from './publication.js';
+import { isRsc7 } from './rsc7.js';
 
 const execute = promisify(execFile);
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -53,7 +54,7 @@ export async function inputFile(file, extension, version) {
   const info = await lstat(file);
   if (!info.isFile() || info.isSymbolicLink() || info.size > 128 * 1024 * 1024) throw Error('Arquivo inválido, link ou acima de 128 MiB.');
   const bytes = await readFile(file);
-  if (bytes.length < 16 || bytes.toString('ascii', 0, 4) !== 'RSC7' || bytes.readUInt32LE(4) !== version) throw Error('Somente recursos GTA V Legacy RSC7 são suportados nesta etapa.');
+  if (!isRsc7(bytes, version)) throw Error('Somente recursos GTA V Legacy RSC7 são suportados nesta etapa.');
   return { file, name: path.basename(file), sha256: digest(bytes) };
 }
 

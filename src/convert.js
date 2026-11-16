@@ -19,7 +19,8 @@ export function resourceName(input) {
 
 export async function prepareArchive(archive, options = {}) {
   const stat = await lstat(archive);
-  if (!stat.isFile() || stat.isSymbolicLink() || stat.size > LIMITS.archiveBytes) throw new Error('RPF inválido, link ou maior que 512 MiB.');
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('Selecione um arquivo RPF regular.');
+  if (stat.size > LIMITS.archiveBytes) throw new Error(`RPF de ${(stat.size / 1048576).toFixed(1)} MiB acima do limite de ${LIMITS.archiveBytes / 1048576} MiB.`);
   let files = new Map();
   const metas = [];
   const skipped = [];

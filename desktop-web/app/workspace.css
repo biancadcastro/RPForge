@@ -1513,3 +1513,12 @@ body{
 .desktop .footer-actions{
   flex-wrap: wrap;
 }}
+
+/* Acesso por ferramenta: texto + borda, não só cor. A licença no shell continua sendo a autoridade. */
+.home-access{padding:3px 8px;border:1px solid currentColor;border-radius:999px;font:700 12px var(--font-body);white-space:nowrap}
+.home-access--free{color:#7fd49b}
+.home-access--pro{color:var(--yellow)}
+.home-transition{max-width:1150px;margin-top:8px;padding:14px 16px;border:1px dashed var(--line);border-radius:var(--control-radius)}
+.home-transition h2{font:700 14px var(--font-body);margin:0 0 6px;color:var(--text)}
+.home-transition p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}
+@media(min-width:1550px){.home-transition{max-width:none}}

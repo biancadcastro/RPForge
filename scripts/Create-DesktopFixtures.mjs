@@ -9,6 +9,8 @@ const raw = Buffer.alloc(512); raw.writeFloatLE(2, 44);
 for (const at of [48, 52, 56]) raw.writeFloatLE(-1, at);
 for (const at of [64, 68, 72]) raw.writeFloatLE(1, at);
 const header = Buffer.alloc(16); header.write('RSC7'); header.writeUInt32LE(165, 4);
+// One 512-byte system page with Legacy drawable version nibbles, as real headers declare (see tests/ytyp.test.js).
+header.writeUInt32LE(0xa8000000, 8); header.writeUInt32LE(0x50000000, 12);
 await mkdir(path.join(root, 'props')); await writeFile(path.join(root, 'props/sample.ydr'), Buffer.concat([header, deflateRawSync(raw)]));
 const entry = (name, text = name) => ({ name, data: Buffer.from(text) });
 await mkdir(path.join(root, 'map-test'));
